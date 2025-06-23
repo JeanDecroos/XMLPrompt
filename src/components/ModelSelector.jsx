@@ -43,7 +43,7 @@ const ModelSelector = ({ selectedModel, onModelChange }) => {
       </div>
       
       {/* Current Selection Display */}
-      <div className="relative">
+      <div className="relative" style={{ zIndex: 1001 }}>
         <div 
           onClick={() => setIsOpen(!isOpen)}
           className="relative w-full bg-white border border-gray-200 rounded-lg px-4 py-3 cursor-pointer hover:border-primary-300 hover:shadow-sm transition-all duration-200"
@@ -69,7 +69,8 @@ const ModelSelector = ({ selectedModel, onModelChange }) => {
 
         {/* Simplified Dropdown */}
         {isOpen && (
-          <div className="absolute dropdown-content w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl max-h-80 overflow-hidden">
+          <div className="absolute dropdown-content w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-2xl max-h-80 overflow-visible" 
+               style={{ zIndex: 9999 }}>
             {/* Simple Provider Filter */}
             <div className="p-3 bg-gray-50 border-b border-gray-100">
               <div className="flex flex-wrap gap-2">

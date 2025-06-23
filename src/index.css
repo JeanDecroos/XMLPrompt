@@ -413,33 +413,66 @@
   
   /* Z-Index Management for Layering */
   .dropdown-content {
-    z-index: 1000;
+    z-index: 9999 !important;
+    position: absolute !important;
   }
   
   .modal-overlay {
-    z-index: 2000;
+    z-index: 10000;
   }
   
   .tooltip {
     z-index: 1500;
   }
   
-  /* Ensure ModelSelector dropdowns appear above other content */
+  /* Ensure ModelSelector dropdowns appear above ALL content */
   .model-selector {
     position: relative;
-    z-index: 100;
+    z-index: 1000;
   }
   
-  .model-selector .card:hover,
-  .model-selector .card:focus-within {
-    z-index: 200;
-    position: relative;
+  .model-selector .relative {
+    z-index: 1001;
   }
   
-  /* Ensure expanded model details appear above prompt form */
-  .model-card-expanded {
-    z-index: 150;
-    position: relative;
+  /* Force dropdown to appear above everything */
+  .model-selector .dropdown-content {
+    z-index: 9999 !important;
+    position: absolute !important;
+    isolation: isolate;
+    /* Ensure dropdown doesn't get clipped by parent containers */
+    max-height: 80vh;
+    top: 100%;
+    left: 0;
+    right: 0;
+  }
+  
+  /* Prevent parent containers from clipping dropdown */
+  .model-selector,
+  .model-selector * {
+    overflow: visible !important;
+  }
+  
+  /* Override any overflow constraints on grid containers */
+  .grid {
+    overflow: visible;
+  }
+  
+  /* Ensure cards don't clip dropdowns */
+  .card {
+    overflow: visible;
+  }
+  
+  /* Prevent transform contexts from interfering with dropdown positioning */
+  .model-selector .card {
+    transform: none !important;
+    will-change: auto !important;
+  }
+  
+  /* Ensure dropdown is positioned correctly even with transforms */
+  .model-selector .dropdown-content {
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 }
 
