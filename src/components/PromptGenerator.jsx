@@ -185,45 +185,41 @@ const PromptGenerator = () => {
   }
 
   return (
-    <section id="features" className="py-16">
+    <section id="features" className="py-16 bg-gradient-to-br from-gray-50 to-blue-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4 text-balance">
+        <div className="text-center mb-16">
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
             Universal AI Prompt Engineering
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto text-balance">
-            Generate optimized prompts for any AI model with intelligent format adaptation. 
-            From Claude to GPT, Gemini to Llama - we've got you covered.
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            Create optimized prompts for any AI model with intelligent format adaptation. 
+            Professional prompt engineering made simple.
           </p>
-          <div className="flex items-center justify-center space-x-6 mt-8">
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>Live Status</span>
+          <div className="flex items-center justify-center space-x-8 text-sm text-gray-500">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>7 AI Models Supported</span>
             </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span>Smart Format Detection</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
               <span>{isAuthEnabled ? 'Authentication Active' : 'Demo Mode'}</span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              <span>7 AI Models</span>
             </div>
           </div>
         </div>
 
         {/* Main Interface */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Form Section */}
+          {/* Left Column - Configuration */}
           <div className="xl:col-span-1 space-y-6">
             <ModelSelector
               selectedModel={selectedModel}
               onModelChange={handleModelChange}
-              estimatedTokens={promptMetadata?.estimatedTokens || 0}
+              estimatedTokens={promptMetadata?.estimatedTokens}
             />
             
             <PromptForm
@@ -232,81 +228,9 @@ const PromptGenerator = () => {
               onReset={handleReset}
               validation={validation}
             />
-            
-            {validation.isValid && !isAuthenticated && (
-              <EnrichmentOptions
-                enrichmentData={enrichmentData}
-                onChange={handleEnrichmentChange}
-                isEnriching={isEnriching}
-              />
-            )}
-
-            {/* Enhanced Stats for Authenticated Users */}
-            {validation.isValid && enrichmentResult && (
-              <div className="card p-4">
-                <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                  Enhancement Stats
-                </h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary-600">
-                      {enrichmentResult.qualityScore || 7}
-                    </div>
-                    <div className="text-xs text-gray-500">Quality Score</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600">
-                      {enrichmentResult.tokensUsed || 0}
-                    </div>
-                    <div className="text-xs text-gray-500">Tokens Used</div>
-                  </div>
-                </div>
-                {enrichmentResult.processingTime && (
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <div className="text-center">
-                      <div className="text-sm font-medium text-green-600">
-                        Processed in {enrichmentResult.processingTime}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Legacy Stats for Non-authenticated Users */}
-            {validation.isValid && !enrichmentResult && (
-              <div className="card p-4">
-                <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                  Enhancement Stats
-                </h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary-600">
-                      {rawPrompt ? rawPrompt.length : 0}
-                    </div>
-                    <div className="text-xs text-gray-500">Original Length</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600">
-                      {enrichedPrompt ? enrichedPrompt.length : rawPrompt.length}
-                    </div>
-                    <div className="text-xs text-gray-500">Enhanced Length</div>
-                  </div>
-                </div>
-                {hasEnrichment && (
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <div className="text-center">
-                      <div className="text-sm font-medium text-green-600">
-                        +{Math.round(((enrichedPrompt?.length || 0) - rawPrompt.length) / rawPrompt.length * 100)}% Enhancement
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
 
-          {/* Preview Section */}
+          {/* Right Column - Results */}
           <div className="xl:col-span-2">
             <EnhancedPromptPreview
               rawPrompt={rawPrompt}
@@ -314,10 +238,10 @@ const PromptGenerator = () => {
               enrichmentResult={enrichmentResult}
               promptMetadata={promptMetadata}
               selectedModel={selectedModel}
+              validation={validation}
               isEnriching={isEnriching}
               hasEnrichment={hasEnrichment}
               onEnrichNow={handleEnrichNow}
-              validation={validation}
               enrichmentError={enrichmentError}
               isAuthenticated={isAuthenticated}
               isPro={isPro}
