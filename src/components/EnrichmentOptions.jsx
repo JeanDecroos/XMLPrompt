@@ -27,14 +27,23 @@ const EnrichmentOptions = ({ enrichmentData, onChange, isEnriching }) => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl border-2 border-purple-200 p-6">
-      <div className="flex items-center mb-6">
-        <div className="flex items-center justify-center w-8 h-8 bg-purple-600 rounded-lg mr-3">
-          <Sparkles className="w-4 h-4 text-white" />
+    <div className="card-premium p-6 slide-up">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl mr-3 shadow-lg">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <div className="flex items-center space-x-2">
+              <h3 className="text-lg font-semibold text-gray-900">AI Enhancement</h3>
+              <span className="badge badge-premium text-xs">Premium</span>
+            </div>
+            <p className="text-sm text-gray-600">Transform prompts with intelligent optimization</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">Prompt Enrichment</h3>
-          <p className="text-sm text-gray-600">Enhance your prompt with AI-powered optimization</p>
+        <div className="text-right">
+          <div className="text-xs text-gray-500 mb-1">Powered by</div>
+          <div className="text-sm font-semibold text-gradient">Claude AI</div>
         </div>
       </div>
 

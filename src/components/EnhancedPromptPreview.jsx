@@ -88,48 +88,64 @@ const EnhancedPromptPreview = ({
   )
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-semibold text-gray-900 flex items-center">
-          <Eye className="w-5 h-5 mr-2" />
-          Generated Prompts
-        </h3>
+    <div className="card p-6 scale-in">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h3 className="text-xl font-semibold text-gray-900 flex items-center">
+            <Eye className="w-5 h-5 mr-2 text-primary-600" />
+            Generated Prompts
+          </h3>
+          <p className="text-sm text-gray-500 mt-1">
+            {hasEnrichment ? 'AI-enhanced results ready' : 'Basic prompt generated'}
+          </p>
+        </div>
         
         {isValid && (hasEnrichment || enrichedPrompt) && (
-          <div className="flex rounded-lg bg-gray-100 p-1">
-            <button
-              onClick={() => setViewMode('comparison')}
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                viewMode === 'comparison'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <ArrowRight className="w-4 h-4 mr-1 inline" />
-              Compare
-            </button>
-            <button
-              onClick={() => setViewMode('enriched')}
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                viewMode === 'enriched'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <Sparkles className="w-4 h-4 mr-1 inline" />
-              Enriched
-            </button>
-            <button
-              onClick={() => setViewMode('raw')}
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                viewMode === 'raw'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <Code className="w-4 h-4 mr-1 inline" />
-              Original
-            </button>
+          <div className="flex items-center space-x-3">
+            {/* Quality Indicator */}
+            <div className="flex items-center space-x-2 px-3 py-1 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-green-700">
+                {hasEnrichment ? 'Enhanced' : 'Basic'}
+              </span>
+            </div>
+            
+            {/* View Mode Selector */}
+            <div className="flex rounded-lg bg-gray-100 p-1 shadow-sm">
+              <button
+                onClick={() => setViewMode('comparison')}
+                className={`px-3 py-1.5 text-sm rounded-md transition-all duration-200 ${
+                  viewMode === 'comparison'
+                    ? 'bg-white text-gray-900 shadow-sm transform scale-105'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <ArrowRight className="w-4 h-4 mr-1 inline" />
+                Compare
+              </button>
+              <button
+                onClick={() => setViewMode('enriched')}
+                className={`px-3 py-1.5 text-sm rounded-md transition-all duration-200 ${
+                  viewMode === 'enriched'
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md transform scale-105'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <Sparkles className="w-4 h-4 mr-1 inline" />
+                Enhanced
+              </button>
+              <button
+                onClick={() => setViewMode('raw')}
+                className={`px-3 py-1.5 text-sm rounded-md transition-all duration-200 ${
+                  viewMode === 'raw'
+                    ? 'bg-white text-gray-900 shadow-sm transform scale-105'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <Code className="w-4 h-4 mr-1 inline" />
+                Original
+              </button>
+            </div>
           </div>
         )}
       </div>
