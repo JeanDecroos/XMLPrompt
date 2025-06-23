@@ -277,14 +277,14 @@ const PromptGenerator = () => {
 
           {/* Right Column - Model Selection & Results */}
           <div className="xl:col-span-2 space-y-8">
-            <div className="slide-up stagger-2 relative z-[2000]">
+            <div>
               <ModelSelector
                 selectedModel={selectedModel}
                 onModelChange={handleModelChange}
               />
             </div>
             
-            <div className="slide-up stagger-3 relative z-[1000]">
+            <div>
               <EnhancedPromptPreview
                 rawPrompt={rawPrompt}
                 enrichedPrompt={enrichedPrompt}
