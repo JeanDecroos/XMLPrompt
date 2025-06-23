@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { X, Mail, Lock, User, Eye, EyeOff, Github, Sparkles } from 'lucide-react'
+import { X, Mail, Lock, Eye, EyeOff, Sparkles } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 
@@ -31,18 +31,6 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
       return () => document.removeEventListener('keydown', handleEscape)
     }
   }, [isOpen, onClose])
-
-  const handleOAuthSignIn = async (provider) => {
-    setLoading(true)
-    setError(null)
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({ provider })
-      if (error) throw error
-    } catch (err) {
-      setError(err.message || 'Failed to sign in with OAuth provider.')
-      setLoading(false)
-    }
-  }
   
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -202,27 +190,6 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
             </div>
           )}
         </form>
-
-        <div className="relative my-6 text-center">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="bg-white px-2 text-gray-500">Or continue with</span>
-          </div>
-        </div>
-
-        <div>
-          <button 
-            type="button" 
-            onClick={() => handleOAuthSignIn('github')}
-            disabled={loading}
-            className="w-full btn btn-secondary"
-          >
-            <Github className="w-5 h-5 mr-3" />
-            GitHub
-          </button>
-        </div>
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
