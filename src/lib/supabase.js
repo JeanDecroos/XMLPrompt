@@ -1,21 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = 'https://xihttgwgcvzexxqkqtkn.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpaHR0Z3dnY3Z6ZXh4cWtxdGtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2OTYwMDEsImV4cCI6MjA2NjI3MjAwMX0.CcNLyIcXbc9LuApU2N2H3hWkR1IoqOo2yNOfy6620mk';
 
-// Check if Supabase is properly configured
-const isSupabaseConfigured = supabaseUrl && supabaseAnonKey
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Create Supabase client only if environment variables are available
-export const supabase = isSupabaseConfigured 
-  ? createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true
-      }
-    })
-  : null
+export const isAuthEnabled = true;
 
 // Mock auth object for when Supabase is not configured
 const mockAuth = {
@@ -67,7 +57,7 @@ const mockAuth = {
 // Auth helper functions with fallback to mock when Supabase is not configured
 export const auth = {
   signUp: async (email, password, options = {}) => {
-    if (!isSupabaseConfigured) {
+    if (!isAuthEnabled) {
       console.warn('Supabase not configured - using mock auth')
       return mockAuth.signUp()
     }
@@ -81,7 +71,7 @@ export const auth = {
   },
 
   signIn: async (email, password) => {
-    if (!isSupabaseConfigured) {
+    if (!isAuthEnabled) {
       console.warn('Supabase not configured - using mock auth')
       return mockAuth.signInWithPassword()
     }
@@ -94,7 +84,7 @@ export const auth = {
   },
 
   signInWithOAuth: async (provider) => {
-    if (!isSupabaseConfigured) {
+    if (!isAuthEnabled) {
       console.warn('Supabase not configured - using mock auth')
       return mockAuth.signInWithOAuth()
     }
@@ -109,7 +99,7 @@ export const auth = {
   },
 
   signOut: async () => {
-    if (!isSupabaseConfigured) {
+    if (!isAuthEnabled) {
       return mockAuth.signOut()
     }
     
@@ -118,7 +108,7 @@ export const auth = {
   },
 
   resetPassword: async (email) => {
-    if (!isSupabaseConfigured) {
+    if (!isAuthEnabled) {
       console.warn('Supabase not configured - using mock auth')
       return mockAuth.resetPasswordForEmail()
     }
@@ -130,7 +120,7 @@ export const auth = {
   },
 
   updatePassword: async (password) => {
-    if (!isSupabaseConfigured) {
+    if (!isAuthEnabled) {
       console.warn('Supabase not configured - using mock auth')
       return mockAuth.updateUser()
     }
@@ -142,7 +132,7 @@ export const auth = {
   },
 
   getSession: async () => {
-    if (!isSupabaseConfigured) {
+    if (!isAuthEnabled) {
       return mockAuth.getSession()
     }
     
@@ -151,7 +141,7 @@ export const auth = {
   },
 
   getUser: async () => {
-    if (!isSupabaseConfigured) {
+    if (!isAuthEnabled) {
       return mockAuth.getUser()
     }
     
@@ -160,7 +150,7 @@ export const auth = {
   },
 
   onAuthStateChange: (callback) => {
-    if (!isSupabaseConfigured) {
+    if (!isAuthEnabled) {
       return mockAuth.onAuthStateChange(callback)
     }
     
@@ -168,12 +158,9 @@ export const auth = {
   }
 }
 
-// Export configuration status for components to check
-export const isAuthEnabled = isSupabaseConfigured
-
 // Log configuration status for debugging
 if (import.meta.env.DEV) {
-  if (isSupabaseConfigured) {
+  if (isAuthEnabled) {
     console.log('✅ Supabase configured and ready')
   } else {
     console.warn('⚠️ Supabase not configured - using mock authentication. To enable real auth, set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.')
