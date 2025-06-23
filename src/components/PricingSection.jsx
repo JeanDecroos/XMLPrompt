@@ -4,24 +4,18 @@ import { Check, Crown, Zap, Star, ArrowRight, Sparkles } from 'lucide-react'
 const PricingSection = () => {
   const features = {
     free: [
-      'Basic XML prompt generation',
-      'Role-based templates',
-      'Simple task descriptions',
-      'Standard context input',
-      'Copy to clipboard',
-      'Basic export options'
+      'Universal prompt generation',
+      'Multi-model format support',
+      'Basic templates and examples',
+      'Copy & export functionality'
     ],
     premium: [
-      'AI-enhanced prompt optimization',
-      'Advanced requirement analysis',
-      'Smart style suggestions',
-      'Custom output formatting',
-      'Tone & voice optimization',
-      'Multi-model compatibility',
-      'Priority support',
-      'Advanced analytics',
-      'Team collaboration',
-      'Custom integrations'
+      'AI-powered prompt enhancement',
+      'Advanced optimization suggestions',
+      'Priority model recommendations',
+      'Prompt history & library',
+      'Performance analytics',
+      'Priority support'
     ]
   }
 
@@ -31,15 +25,15 @@ const PricingSection = () => {
         {/* Section Header */}
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Choose Your Plan
+            Simple, Transparent Pricing
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto text-balance">
-            Start free and upgrade when you need advanced AI-powered features
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Start free and upgrade when you need AI-powered enhancements
           </p>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Free Plan */}
           <div className="card p-8 relative">
             <div className="flex items-center justify-between mb-6">
@@ -53,7 +47,7 @@ const PricingSection = () => {
               </div>
             </div>
 
-            <div className="space-y-4 mb-8">
+            <div className="space-y-3 mb-8">
               {features.free.map((feature, index) => (
                 <div key={index} className="flex items-center space-x-3">
                   <div className="flex-shrink-0 w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
@@ -85,7 +79,7 @@ const PricingSection = () => {
                   <h3 className="text-2xl font-bold text-gray-900">Premium</h3>
                   <Crown className="w-6 h-6 text-purple-600" />
                 </div>
-                <p className="text-gray-600 mt-1">AI-powered prompt engineering</p>
+                <p className="text-gray-600 mt-1">AI-powered optimization</p>
               </div>
               <div className="text-right">
                 <div className="flex items-baseline space-x-1">
@@ -93,11 +87,11 @@ const PricingSection = () => {
                   <div className="text-3xl font-bold text-gray-900">$19</div>
                 </div>
                 <div className="text-sm text-gray-500">per month</div>
-                <div className="text-xs text-purple-600 font-medium">33% off launch price</div>
+                <div className="text-xs text-purple-600 font-medium">Launch pricing</div>
               </div>
             </div>
 
-            <div className="space-y-4 mb-8">
+            <div className="space-y-3 mb-8">
               {features.premium.map((feature, index) => (
                 <div key={index} className="flex items-center space-x-3">
                   <div className="flex-shrink-0 w-5 h-5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
@@ -115,83 +109,39 @@ const PricingSection = () => {
             </button>
 
             <p className="text-center text-sm text-gray-500 mt-3">
-              7-day free trial • No credit card required
+              7-day free trial • Cancel anytime
             </p>
           </div>
         </div>
 
-        {/* Feature Comparison */}
-        <div className="mt-16">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">
-              Why Upgrade to Premium?
-            </h3>
-            <p className="text-gray-600">
-              See the difference AI enhancement makes
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Free Example */}
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2 mb-3">
-                <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                <h4 className="font-semibold text-gray-900">Free Plan Output</h4>
-              </div>
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm">
-                <div className="text-gray-600 font-mono leading-relaxed">
-                  &lt;prompt&gt;<br/>
-                  &nbsp;&nbsp;&lt;role&gt;Developer&lt;/role&gt;<br/>
-                  &nbsp;&nbsp;&lt;task&gt;Write a function&lt;/task&gt;<br/>
-                  &lt;/prompt&gt;
-                </div>
-              </div>
-              <p className="text-sm text-gray-500">
-                Basic XML structure with minimal optimization
-              </p>
-            </div>
-
-            {/* Premium Example */}
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2 mb-3">
-                <div className="w-3 h-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full"></div>
-                <h4 className="font-semibold text-gray-900 flex items-center">
-                  Premium Plan Output
-                  <Sparkles className="w-4 h-4 ml-1 text-purple-600" />
-                </h4>
-              </div>
-              <div className="bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg p-4 text-sm">
-                <div className="text-gray-700 font-mono leading-relaxed">
-                  &lt;prompt&gt;<br/>
-                  &nbsp;&nbsp;&lt;role&gt;Senior Full-Stack Developer&lt;/role&gt;<br/>
-                  &nbsp;&nbsp;&lt;task&gt;Create an optimized, well-documented function with error handling&lt;/task&gt;<br/>
-                  &nbsp;&nbsp;&lt;context&gt;Modern JavaScript ES6+ environment&lt;/context&gt;<br/>
-                  &nbsp;&nbsp;&lt;requirements&gt;Include TypeScript types, unit tests&lt;/requirements&gt;<br/>
-                  &nbsp;&nbsp;&lt;style&gt;Clean, maintainable code with JSDoc&lt;/style&gt;<br/>
-                  &lt;/prompt&gt;
-                </div>
-              </div>
-              <p className="text-sm text-purple-700 font-medium">
-                AI-enhanced with context, requirements, and optimization
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Trust Indicators */}
+        {/* Simplified Comparison */}
         <div className="mt-16 text-center">
-          <div className="flex items-center justify-center space-x-8 text-gray-400">
-            <div className="flex items-center space-x-2">
-              <Zap className="w-5 h-5" />
-              <span className="text-sm">Instant Setup</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Check className="w-5 h-5" />
-              <span className="text-sm">Cancel Anytime</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Crown className="w-5 h-5" />
-              <span className="text-sm">Premium Support</span>
+          <div className="max-w-2xl mx-auto">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              See the Difference
+            </h3>
+            <p className="text-gray-600 mb-8">
+              AI enhancement transforms basic prompts into optimized, professional instructions
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Free Example */}
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-left">
+                <div className="text-sm text-gray-500 mb-2">Free Plan</div>
+                <div className="text-sm font-mono text-gray-700">
+                  Write a product description
+                </div>
+              </div>
+
+              {/* Premium Example */}
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg p-4 text-left">
+                <div className="text-sm text-purple-600 font-medium mb-2 flex items-center">
+                  Premium Plan <Sparkles className="w-3 h-3 ml-1" />
+                </div>
+                <div className="text-sm font-mono text-gray-700">
+                  Write a compelling, SEO-optimized product description that highlights key benefits, addresses customer pain points, and includes a clear call-to-action
+                </div>
+              </div>
             </div>
           </div>
         </div>

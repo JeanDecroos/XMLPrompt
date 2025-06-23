@@ -228,8 +228,8 @@ const PromptGenerator = () => {
   return (
     <section className="py-16 bg-gradient-to-br from-slate-50 via-blue-50/40 to-purple-50/30 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
+        {/* Streamlined Hero Section */}
+        <div className="text-center mb-12">
           <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full text-sm font-medium text-blue-800 mb-6">
             <Sparkles className="w-4 h-4 mr-2" />
             AI-Powered Prompt Engineering
@@ -242,25 +242,9 @@ const PromptGenerator = () => {
             </span>
           </h1>
           
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            Generate optimized prompts with intelligent format adaptation, model-specific guidelines, 
-            and AI-powered enhancement. Save your creations and build a library of effective prompts.
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+            Generate optimized prompts with intelligent format adaptation and AI-powered enhancement.
           </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 text-sm text-gray-500">
-            <div className="flex items-center">
-              <Target className="w-4 h-4 mr-2 text-green-500" />
-              Universal Format Support
-            </div>
-            <div className="flex items-center">
-              <Zap className="w-4 h-4 mr-2 text-blue-500" />
-              AI Enhancement
-            </div>
-            <div className="flex items-center">
-              <Wand2 className="w-4 h-4 mr-2 text-purple-500" />
-              Smart Model Selection
-            </div>
-          </div>
         </div>
 
         {/* Main Content Grid */}
