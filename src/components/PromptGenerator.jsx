@@ -262,7 +262,7 @@ const PromptGenerator = () => {
         </div>
 
         {/* Enhanced Main Interface */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 scale-in">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Left Column - Prompt Configuration */}
           <div className="xl:col-span-1 space-y-8">
             <div className="slide-up stagger-1">
@@ -277,14 +277,14 @@ const PromptGenerator = () => {
 
           {/* Right Column - Model Selection & Results */}
           <div className="xl:col-span-2 space-y-8">
-            <div className="slide-up stagger-2">
+            <div className="slide-up stagger-2 relative z-[2000]">
               <ModelSelector
                 selectedModel={selectedModel}
                 onModelChange={handleModelChange}
               />
             </div>
             
-            <div className="slide-up stagger-3">
+            <div className="slide-up stagger-3 relative z-[1000]">
               <EnhancedPromptPreview
                 rawPrompt={rawPrompt}
                 enrichedPrompt={enrichedPrompt}
