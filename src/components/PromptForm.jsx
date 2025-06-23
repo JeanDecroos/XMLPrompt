@@ -1,11 +1,20 @@
 import React from 'react'
 import { RotateCcw, User, Target, FileText, CheckSquare, Palette, Download, Lock, Crown, Sparkles } from 'lucide-react'
 import { roles } from '../data/roles'
+import { useAuth } from '../contexts/AuthContext'
+import { isAuthEnabled } from '../lib/supabase'
 
 const PromptForm = ({ formData, onChange, onReset, validation }) => {
+  const { isAuthenticated, isPro } = useAuth()
+  
   const handleChange = (field) => (e) => {
     onChange(field, e.target.value)
   }
+
+  // Determine if Pro features should be enabled
+  const isProFeatureEnabled = isAuthEnabled && isAuthenticated && isPro
+  // In demo mode, show all features as enabled
+  const showProFeatures = !isAuthEnabled || isProFeatureEnabled
 
   return (
     <div className="card p-6 fade-in">
@@ -15,7 +24,10 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
             <FileText className="w-5 h-5 mr-2 text-primary-600" />
             Prompt Configuration
           </h3>
-          <p className="text-sm text-gray-500 mt-1">Build your AI prompt step by step</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Build your AI prompt step by step
+            {!isAuthEnabled && <span className="text-amber-600 ml-2">(Demo Mode)</span>}
+          </p>
         </div>
         <button
           onClick={onReset}
@@ -97,69 +109,124 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
           />
         </div>
 
-        {/* Requirements (Pro Feature) */}
+        {/* Requirements */}
         <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-700 flex items-center">
             <CheckSquare className="w-4 h-4 mr-2 text-primary-600" />
             Requirements
             <span className="text-gray-400 ml-1 text-xs">(Optional)</span>
-            <span className="badge badge-premium ml-2 text-xs">Pro</span>
+            {isAuthEnabled ? (
+              <span className="badge badge-premium ml-2 text-xs">Pro</span>
+            ) : (
+              <span className="badge badge-free ml-2 text-xs">Demo</span>
+            )}
           </label>
           <textarea
             value={formData.requirements}
             onChange={handleChange('requirements')}
             placeholder="List specific requirements, constraints, or criteria that must be met. Use bullet points or numbered lists for clarity."
-            className="textarea-field"
+            className={`textarea-field ${!showProFeatures ? 'bg-gray-50 border-gray-200' : ''}`}
             rows={3}
+            disabled={!showProFeatures}
           />
-          <div className="text-xs text-gray-500 flex items-center">
-            <Sparkles className="w-3 h-3 mr-1 text-blue-500" />
-            <span>Enhanced with AI optimization in Pro version</span>
-          </div>
+          {!isAuthEnabled ? (
+            <div className="text-xs text-gray-500 flex items-center">
+              <Sparkles className="w-3 h-3 mr-1 text-amber-500" />
+              <span>All features available in demo mode</span>
+            </div>
+          ) : !isProFeatureEnabled ? (
+            <div className="text-xs text-gray-500 flex items-center">
+              <Lock className="w-3 h-3 mr-1 text-gray-400" />
+              <span>Enhanced with AI optimization in Pro version</span>
+            </div>
+          ) : (
+            <div className="text-xs text-gray-500 flex items-center">
+              <Sparkles className="w-3 h-3 mr-1 text-blue-500" />
+              <span>Enhanced with AI optimization</span>
+            </div>
+          )}
         </div>
 
-        {/* Style Guidelines (Pro Feature) */}
+        {/* Style Guidelines */}
         <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-700 flex items-center">
             <Palette className="w-4 h-4 mr-2 text-primary-600" />
             Style Guidelines
             <span className="text-gray-400 ml-1 text-xs">(Optional)</span>
-            <span className="badge badge-premium ml-2 text-xs">Pro</span>
+            {isAuthEnabled ? (
+              <span className="badge badge-premium ml-2 text-xs">Pro</span>
+            ) : (
+              <span className="badge badge-free ml-2 text-xs">Demo</span>
+            )}
           </label>
           <textarea
             value={formData.style}
             onChange={handleChange('style')}
-            placeholder="Specify tone, writing style, format preferences, or presentation guidelines. (Pro feature for advanced styling)"
-            className="textarea-field bg-gray-50 border-gray-200"
+            placeholder={showProFeatures 
+              ? "Specify tone, writing style, format preferences, or presentation guidelines."
+              : "Specify tone, writing style, format preferences, or presentation guidelines. (Pro feature for advanced styling)"
+            }
+            className={`textarea-field ${!showProFeatures ? 'bg-gray-50 border-gray-200' : ''}`}
             rows={2}
-            disabled
+            disabled={!showProFeatures}
           />
-          <div className="text-xs text-gray-500 flex items-center">
-            <Lock className="w-3 h-3 mr-1 text-gray-400" />
-            <span>Advanced styling controls available with Pro</span>
-          </div>
+          {!isAuthEnabled ? (
+            <div className="text-xs text-gray-500 flex items-center">
+              <Sparkles className="w-3 h-3 mr-1 text-amber-500" />
+              <span>All styling controls available in demo mode</span>
+            </div>
+          ) : !isProFeatureEnabled ? (
+            <div className="text-xs text-gray-500 flex items-center">
+              <Lock className="w-3 h-3 mr-1 text-gray-400" />
+              <span>Advanced styling controls available with Pro</span>
+            </div>
+          ) : (
+            <div className="text-xs text-gray-500 flex items-center">
+              <Sparkles className="w-3 h-3 mr-1 text-blue-500" />
+              <span>Advanced styling controls enabled</span>
+            </div>
+          )}
         </div>
 
-        {/* Output Format (Pro Feature) */}
+        {/* Output Format */}
         <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-700 flex items-center">
             <Download className="w-4 h-4 mr-2 text-primary-600" />
             Output Format
             <span className="text-gray-400 ml-1 text-xs">(Optional)</span>
-            <span className="badge badge-premium ml-2 text-xs">Pro</span>
+            {isAuthEnabled ? (
+              <span className="badge badge-premium ml-2 text-xs">Pro</span>
+            ) : (
+              <span className="badge badge-free ml-2 text-xs">Demo</span>
+            )}
           </label>
           <textarea
             value={formData.output}
             onChange={handleChange('output')}
-            placeholder="Describe the desired output format, structure, or delivery method. (Pro feature for custom formatting)"
-            className="textarea-field bg-gray-50 border-gray-200"
+            placeholder={showProFeatures
+              ? "Describe the desired output format, structure, or delivery method."
+              : "Describe the desired output format, structure, or delivery method. (Pro feature for custom formatting)"
+            }
+            className={`textarea-field ${!showProFeatures ? 'bg-gray-50 border-gray-200' : ''}`}
             rows={2}
-            disabled
+            disabled={!showProFeatures}
           />
-          <div className="text-xs text-gray-500 flex items-center">
-            <Lock className="w-3 h-3 mr-1 text-gray-400" />
-            <span>Custom output formatting available with Pro</span>
-          </div>
+          {!isAuthEnabled ? (
+            <div className="text-xs text-gray-500 flex items-center">
+              <Sparkles className="w-3 h-3 mr-1 text-amber-500" />
+              <span>All output formatting available in demo mode</span>
+            </div>
+          ) : !isProFeatureEnabled ? (
+            <div className="text-xs text-gray-500 flex items-center">
+              <Lock className="w-3 h-3 mr-1 text-gray-400" />
+              <span>Custom output formatting available with Pro</span>
+            </div>
+          ) : (
+            <div className="text-xs text-gray-500 flex items-center">
+              <Sparkles className="w-3 h-3 mr-1 text-blue-500" />
+              <span>Custom output formatting enabled</span>
+            </div>
+          )}
         </div>
 
         {/* Validation Errors */}

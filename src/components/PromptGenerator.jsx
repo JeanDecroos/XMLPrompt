@@ -9,6 +9,7 @@ import { promptEnrichmentService } from '../services/promptEnrichment'
 import { UniversalPromptGenerator } from '../utils/universalPromptGenerator'
 import { DEFAULT_MODEL, getModelById } from '../data/aiModels'
 import { useAuth } from '../contexts/AuthContext'
+import { isAuthEnabled } from '../lib/supabase'
 
 const PromptGenerator = () => {
   const { user, session, isAuthenticated, isPro } = useAuth()
@@ -64,9 +65,9 @@ const PromptGenerator = () => {
     }
   }, [formData, selectedModel])
 
-  // Auto-enrich for authenticated users when form data changes
+  // Auto-enrich for authenticated users when form data changes (only if auth is enabled)
   useEffect(() => {
-    if (validation.isValid && isAuthenticated && formData.task) {
+    if (validation.isValid && isAuthEnabled && isAuthenticated && formData.task) {
       const debounceTimer = setTimeout(() => {
         performGPTEnrichment()
       }, 1000) // Debounce to avoid too many API calls
@@ -175,7 +176,7 @@ const PromptGenerator = () => {
 
   const handleEnrichNow = () => {
     if (validation.isValid) {
-      if (isAuthenticated) {
+      if (isAuthEnabled && isAuthenticated) {
         performGPTEnrichment()
       } else {
         performLegacyEnrichment()
@@ -198,15 +199,19 @@ const PromptGenerator = () => {
           <div className="flex items-center justify-center space-x-6 mt-8">
             <div className="flex items-center space-x-2 text-sm text-gray-500">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>{isAuthenticated ? 'GPT Enhancement' : 'Live Enhancement'}</span>
+              <span>Live Status</span>
             </div>
             <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span>Multi-Model Support</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{isAuthEnabled ? 'Authentication Active' : 'Demo Mode'}</span>
             </div>
             <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-              <span>Smart Format Adaptation</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>7 AI Models</span>
             </div>
           </div>
         </div>

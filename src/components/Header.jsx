@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { FileText, Sparkles, Crown, Menu, X, Zap, Star, User, LogIn, LogOut, ChevronDown } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { isAuthEnabled } from '../lib/supabase'
 import AuthModal from './AuthModal'
 
 const Header = () => {
@@ -58,27 +59,16 @@ const Header = () => {
 
           {/* CTA & User Actions */}
           <div className="flex items-center space-x-3">
-            {!isAuthenticated ? (
-              <>
-                {/* Authentication Buttons */}
-                <button 
-                  onClick={() => openAuthModal('signin')}
-                  className="btn btn-ghost btn-sm hidden sm:flex items-center"
-                >
-                  <LogIn className="w-4 h-4 mr-1.5" />
-                  <span>Sign In</span>
-                </button>
-
-                {/* Subtle Upgrade CTA */}
-                <button 
-                  onClick={() => openAuthModal('signup')}
-                  className="btn btn-primary btn-sm hidden sm:flex items-center"
-                >
-                  <Crown className="w-4 h-4 mr-1.5" />
-                  <span>Try Pro</span>
-                </button>
-              </>
-            ) : (
+            {!isAuthEnabled ? (
+              <div className="flex items-center space-x-2">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Demo Mode
+                </span>
+              </div>
+            ) : isAuthenticated ? (
               <>
                 {/* Pro Status Badge */}
                 {isPro && (
@@ -138,6 +128,28 @@ const Header = () => {
                   )}
                 </div>
               </>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => openAuthModal('signin')}
+                  className="text-gray-600 hover:text-primary-600 transition-colors"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => openAuthModal('signup')}
+                  className="btn-primary"
+                >
+                  Get Started
+                </button>
+              </div>
+            )}
+
+            {/* Upgrade CTA for non-pro users */}
+            {isAuthEnabled && isAuthenticated && !isPro && (
+              <button className="btn-secondary bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 hover:from-purple-600 hover:to-pink-600 shimmer">
+                Upgrade to Pro
+              </button>
             )}
 
             {/* Mobile Menu Toggle */}

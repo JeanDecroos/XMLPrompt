@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { X, Mail, Lock, User, Eye, EyeOff, Github, Chrome, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { isAuthEnabled } from '../lib/supabase'
 
 const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
   const [mode, setMode] = useState(initialMode)
@@ -83,6 +84,13 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    // If auth is disabled, show appropriate message
+    if (!isAuthEnabled) {
+      setErrors({ general: 'Authentication is currently disabled. The app is running in demo mode.' })
+      return
+    }
+
     if (!validateForm()) return
 
     setIsLoading(true)
@@ -130,6 +138,12 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
   }
 
   const handleOAuthSignIn = async (provider) => {
+    // If auth is disabled, show appropriate message
+    if (!isAuthEnabled) {
+      setErrors({ general: 'Authentication is currently disabled. The app is running in demo mode.' })
+      return
+    }
+
     setIsLoading(true)
     try {
       const { error } = await signInWithOAuth(provider)
@@ -182,9 +196,10 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
           {/* Header */}
           <div className="px-6 pt-6 pb-4">
             <h2 id="modal-title" className="text-2xl font-bold text-gray-900 text-center">
-              {mode === 'signin' && 'Welcome Back'}
-              {mode === 'signup' && 'Create Account'}
-              {mode === 'reset' && 'Reset Password'}
+              {!isAuthEnabled ? 'Demo Mode' : 
+               mode === 'signin' ? 'Sign In' :
+               mode === 'signup' ? 'Create Account' :
+               'Reset Password'}
             </h2>
             <p className="text-gray-600 text-center mt-2">
               {mode === 'signin' && 'Sign in to your account to continue'}
@@ -193,22 +208,46 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
             </p>
           </div>
 
+          {/* Auth Disabled Message */}
+          {!isAuthEnabled && (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Demo Mode Active</h3>
+              <p className="text-gray-600 mb-4">
+                Authentication is currently disabled. You can explore all features in demo mode.
+              </p>
+              <p className="text-sm text-gray-500 mb-6">
+                To enable user accounts and premium features, configure the Supabase environment variables.
+              </p>
+              <button
+                onClick={onClose}
+                className="btn-primary w-full"
+              >
+                Continue in Demo Mode
+              </button>
+            </div>
+          )}
+
+          {/* General Error/Success Message */}
+          {(errors.general || message) && (
+            <div className={`mb-4 p-3 rounded-lg flex items-center space-x-2 ${
+              message ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+            }`}>
+              {message ? (
+                <CheckCircle className="w-4 h-4 flex-shrink-0" />
+              ) : (
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              )}
+              <span className="text-sm">{message || errors.general}</span>
+            </div>
+          )}
+
           {/* Form */}
           <form onSubmit={handleSubmit} className="px-6 pb-6">
-            {/* General Error/Success Message */}
-            {(errors.general || message) && (
-              <div className={`mb-4 p-3 rounded-lg flex items-center space-x-2 ${
-                message ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-              }`}>
-                {message ? (
-                  <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                ) : (
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                )}
-                <span className="text-sm">{message || errors.general}</span>
-              </div>
-            )}
-
             {/* Name Field (Sign Up Only) */}
             {mode === 'signup' && (
               <div className="mb-4">
