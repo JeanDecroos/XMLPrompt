@@ -247,6 +247,21 @@
     min-height: 120px;
   }
   
+  /* Text Utilities */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
   /* Enhanced Badge System */
   .badge {
     @apply inline-flex items-center px-3 py-1.5 text-xs font-semibold;

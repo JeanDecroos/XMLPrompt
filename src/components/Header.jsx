@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { Wand2, Menu, X, User, LogIn, UserPlus, Crown, ChevronDown, LogOut, Sparkles } from 'lucide-react'
+import { Wand2, Menu, X, User, LogIn, UserPlus, Crown, ChevronDown, LogOut, Sparkles, Settings } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import AuthModal from './AuthModal'
+import SubscriptionStatus from './SubscriptionStatus'
 import { isAuthEnabled } from '../lib/supabase'
 
 const Header = () => {
@@ -10,6 +11,7 @@ const Header = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authModalMode, setAuthModalMode] = useState('signin')
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [showSubscriptionStatus, setShowSubscriptionStatus] = useState(false)
 
   const handleSignOut = async () => {
     await signOut()
@@ -76,6 +78,9 @@ const Header = () => {
                         <div className="px-4 py-3 border-b border-gray-100/60">
                           <p className="text-sm font-semibold text-gray-900">{user?.email}</p>
                         </div>
+                        <button onClick={() => setShowSubscriptionStatus(!showSubscriptionStatus)} className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50/80 flex items-center transition-all duration-200 hover-lift">
+                          <Settings className="w-4 h-4 mr-3" />Subscription Status
+                        </button>
                         <a href="#" className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50/80 flex items-center transition-all duration-200 hover-lift">
                           <User className="w-4 h-4 mr-3" />Account Settings
                         </a>
@@ -126,6 +131,26 @@ const Header = () => {
       </header>
       {isAuthEnabled && (
         <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} initialMode={authModalMode} />
+      )}
+      
+      {/* Subscription Status Modal */}
+      {showSubscriptionStatus && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900">Subscription Status</h2>
+                <button
+                  onClick={() => setShowSubscriptionStatus(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <SubscriptionStatus showDetails={true} />
+            </div>
+          </div>
+        </div>
       )}
     </>
   )

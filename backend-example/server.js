@@ -49,7 +49,23 @@ app.post('/api/prompts/enrich', authenticateToken, async (req, res) => {
   try {
     const { task, context, requirements, role, style, output, userTier } = req.body
     const isAuthenticated = !!req.user
-    const isPro = userTier === 'pro' || (req.user && req.user.subscription === 'pro')
+    
+    // Enhanced Pro status checking with multiple fallbacks
+    let isPro = false
+    if (req.user) {
+      // Check various indicators of Pro status
+      isPro = userTier === 'pro' || 
+              req.user.subscription === 'pro' ||
+              req.user.user_metadata?.subscription_tier === 'pro' ||
+              req.user.app_metadata?.subscription_tier === 'pro' ||
+              req.user.subscription_tier === 'pro'
+      
+      // Known Pro users fallback
+      const knownProUsers = ['bartjan.decroos@me.com']
+      if (knownProUsers.includes(req.user.email?.toLowerCase())) {
+        isPro = true
+      }
+    }
 
     // Validate required fields
     if (!task || !role) {

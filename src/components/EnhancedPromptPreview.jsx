@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { Copy, Check, Eye, Code, AlertCircle, ArrowRight, Sparkles, FileText, Settings, Zap } from 'lucide-react'
+import { Copy, Check, Eye, Code, AlertCircle, ArrowRight, Sparkles, FileText, Settings, Zap, Save, Clock } from 'lucide-react'
 import { getModelById, PROMPT_FORMATS } from '../data/aiModels'
+import { PromptService } from '../services/promptService'
 
 const EnhancedPromptPreview = ({ 
   rawPrompt, 
@@ -14,10 +15,15 @@ const EnhancedPromptPreview = ({
   onEnrichNow,
   enrichmentError,
   isAuthenticated,
-  isPro
+  isPro,
+  formData,
+  onOpenHistory
 }) => {
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState(hasEnrichment ? 'enriched' : 'raw')
+  const [saving, setSaving] = useState(false)
+  const [saveMessage, setSaveMessage] = useState(null)
+  const [saveError, setSaveError] = useState(null)
   
   const currentModel = getModelById(selectedModel)
   
@@ -30,6 +36,44 @@ const EnhancedPromptPreview = ({
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
       console.error('Failed to copy:', err)
+    }
+  }
+
+  const handleSave = async () => {
+    if (!validation.isValid) {
+      setSaveError('Please complete the required fields before saving')
+      setTimeout(() => setSaveError(null), 3000)
+      return
+    }
+
+    setSaving(true)
+    setSaveError(null)
+    setSaveMessage(null)
+
+    try {
+      const promptData = PromptService.formatPromptForSaving(
+        formData,
+        rawPrompt,
+        enrichedPrompt,
+        selectedModel,
+        promptMetadata,
+        enrichmentResult
+      )
+
+      const result = await PromptService.savePrompt(promptData)
+      
+      if (result.success) {
+        setSaveMessage(result.message)
+        setTimeout(() => setSaveMessage(null), 3000)
+      } else {
+        setSaveError(result.message || 'Failed to save prompt')
+        setTimeout(() => setSaveError(null), 3000)
+      }
+    } catch (error) {
+      setSaveError('An unexpected error occurred while saving')
+      setTimeout(() => setSaveError(null), 3000)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -56,33 +100,48 @@ const EnhancedPromptPreview = ({
         </div>
         
         {prompt && (
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            <div className="flex items-center space-x-4">
-              <span>{prompt.split('\n').length} lines</span>
-              <span>{prompt.length} characters</span>
-              {promptMetadata?.estimatedTokens && (
-                <span className="flex items-center">
-                  <Zap className="w-3 h-3 mr-1" />
-                  ~{promptMetadata.estimatedTokens} tokens
-                </span>
-              )}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handleCopy(prompt)}
+                className="btn btn-secondary btn-sm"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4 mr-1" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 mr-1" />
+                    Copy
+                  </>
+                )}
+              </button>
+              
+              <button
+                onClick={handleSave}
+                disabled={saving || !validation.isValid}
+                className="btn btn-primary btn-sm"
+                title={!validation.isValid ? 'Complete required fields to save' : 'Save this prompt'}
+              >
+                {saving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-1" />
+                    Save
+                  </>
+                )}
+              </button>
             </div>
-            <button
-              onClick={() => handleCopy(prompt)}
-              className="flex items-center space-x-1 px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-            >
-              {copied ? (
-                <>
-                  <Check className="w-3 h-3" />
-                  <span>Copied!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3 h-3" />
-                  <span>Copy</span>
-                </>
-              )}
-            </button>
+            
+            <div className="text-sm text-gray-500">
+              {prompt.split('\n').length} lines • {prompt.length} characters
+            </div>
           </div>
         )}
       </div>
@@ -103,26 +162,57 @@ const EnhancedPromptPreview = ({
           </p>
         </div>
         
-        {validation.isValid && !isEnriching && (
-          <div className="flex items-center space-x-2">
-            {hasEnrichment && (
-              <span className="inline-flex items-center px-3 py-1 bg-green-50 text-green-700 text-sm rounded-full border border-green-200">
-                <Sparkles className="w-3 h-3 mr-1" />
-                Enhanced
-              </span>
-            )}
-            {!hasEnrichment && onEnrichNow && (
-              <button
-                onClick={onEnrichNow}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm"
-              >
-                <Sparkles className="w-4 h-4 mr-1 inline" />
-                Enhance Prompt
-              </button>
-            )}
-          </div>
-        )}
+        <div className="flex items-center space-x-2">
+          {onOpenHistory && (
+            <button
+              onClick={onOpenHistory}
+              className="btn btn-secondary btn-sm"
+            >
+              <Clock className="w-4 h-4 mr-1" />
+              History
+            </button>
+          )}
+          
+          {validation.isValid && !isEnriching && (
+            <div className="flex items-center space-x-2">
+              {hasEnrichment && (
+                <span className="inline-flex items-center px-3 py-1 bg-green-50 text-green-700 text-sm rounded-full border border-green-200">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  Enhanced
+                </span>
+              )}
+              {!hasEnrichment && onEnrichNow && (
+                <button
+                  onClick={onEnrichNow}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm"
+                >
+                  <Sparkles className="w-4 h-4 mr-1 inline" />
+                  Enhance Prompt
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Save/Error Messages */}
+      {saveMessage && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center">
+            <Check className="w-4 h-4 text-green-600 mr-2" />
+            <span className="text-sm text-green-700">{saveMessage}</span>
+          </div>
+        </div>
+      )}
+
+      {saveError && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center">
+            <AlertCircle className="w-4 h-4 text-red-600 mr-2" />
+            <span className="text-sm text-red-700">{saveError}</span>
+          </div>
+        </div>
+      )}
 
       {/* Error Message */}
       {enrichmentError && (
@@ -170,49 +260,67 @@ const EnhancedPromptPreview = ({
 
       {/* Enhancement Results */}
       {hasEnrichment && enrichmentResult && activeTab === 'enriched' && (
-        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <h4 className="text-sm font-medium text-blue-900 mb-2">Enhancement Summary</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h4 className="font-medium text-blue-900 mb-2 flex items-center">
+            <Sparkles className="w-4 h-4 mr-1" />
+            Enhancement Details
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             {enrichmentResult.qualityScore && (
-              <div className="text-center">
-                <div className="text-lg font-bold text-blue-600">
-                  {enrichmentResult.qualityScore}/10
-                </div>
-                <div className="text-xs text-blue-700">Quality Score</div>
+              <div>
+                <span className="text-blue-700 font-medium">Quality Score:</span>
+                <p className="text-blue-800">{enrichmentResult.qualityScore}/10</p>
               </div>
             )}
             {enrichmentResult.improvements && (
-              <div className="text-center">
-                <div className="text-lg font-bold text-blue-600">
-                  {enrichmentResult.improvements.length}
-                </div>
-                <div className="text-xs text-blue-700">Improvements</div>
+              <div>
+                <span className="text-blue-700 font-medium">Improvements:</span>
+                <p className="text-blue-800">{enrichmentResult.improvements.length} applied</p>
               </div>
             )}
-            {enrichmentResult.processingTime && (
-              <div className="text-center">
-                <div className="text-lg font-bold text-blue-600">
-                  {enrichmentResult.processingTime}
-                </div>
-                <div className="text-xs text-blue-700">Processing Time</div>
+            {enrichmentResult.estimatedTokens && (
+              <div>
+                <span className="text-blue-700 font-medium">Est. Tokens:</span>
+                <p className="text-blue-800">{enrichmentResult.estimatedTokens}</p>
               </div>
             )}
           </div>
+          {enrichmentResult.improvements && enrichmentResult.improvements.length > 0 && (
+            <div className="mt-3">
+              <span className="text-blue-700 font-medium text-sm">Applied Improvements:</span>
+              <ul className="mt-1 text-sm text-blue-800 space-y-1">
+                {enrichmentResult.improvements.slice(0, 3).map((improvement, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="text-blue-600 mr-2">•</span>
+                    {improvement}
+                  </li>
+                ))}
+                {enrichmentResult.improvements.length > 3 && (
+                  <li className="text-blue-600 text-xs">
+                    +{enrichmentResult.improvements.length - 3} more improvements
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Validation Errors */}
-      {!validation.isValid && validation.errors.length > 0 && (
-        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <h4 className="text-sm font-medium text-red-800 mb-2">Please fix the following:</h4>
-          <ul className="text-sm text-red-700 space-y-1">
-            {validation.errors.map((error, index) => (
-              <li key={index} className="flex items-center">
-                <span className="w-1 h-1 bg-red-400 rounded-full mr-2"></span>
-                {error}
-              </li>
-            ))}
-          </ul>
+      {/* Empty State */}
+      {!validation.isValid && (
+        <div className="flex flex-col items-center justify-center h-64 text-center">
+          <AlertCircle className="w-12 h-12 text-gray-400 mb-4" />
+          <h4 className="text-lg font-medium text-gray-700 mb-2">
+            Complete the form to generate a prompt
+          </h4>
+          <p className="text-gray-500 max-w-md">
+            Fill in the required fields (Role and Task Description) to see your generated prompt here.
+          </p>
+          {validation.errors.length > 0 && (
+            <div className="mt-4 text-sm text-red-600">
+              Missing: {validation.errors.join(', ')}
+            </div>
+          )}
         </div>
       )}
     </div>

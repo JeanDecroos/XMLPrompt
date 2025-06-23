@@ -4,6 +4,7 @@ import PromptForm from './PromptForm'
 import EnrichmentOptions from './EnrichmentOptions'
 import EnhancedPromptPreview from './EnhancedPromptPreview'
 import ModelSelector from './ModelSelector'
+import PromptHistory from './PromptHistory'
 import { generateClaudePrompt, validatePromptConfig } from '../utils/promptGenerator'
 import { enrichPrompt } from '../utils/promptEnricher'
 import { promptEnrichmentService } from '../services/promptEnrichment'
@@ -44,6 +45,9 @@ const PromptGenerator = () => {
   const [isEnriching, setIsEnriching] = useState(false)
   const [hasEnrichment, setHasEnrichment] = useState(false)
   const [enrichmentError, setEnrichmentError] = useState(null)
+  
+  // History modal state
+  const [showHistory, setShowHistory] = useState(false)
 
   // Generate raw prompt whenever form data or model changes
   useEffect(() => {
@@ -203,83 +207,63 @@ const PromptGenerator = () => {
     }
   }
 
+  const handleLoadPrompt = (promptData) => {
+    // Load form data
+    setFormData(promptData.formData)
+    
+    // Load model selection
+    if (promptData.selectedModel) {
+      setSelectedModel(promptData.selectedModel)
+      setUserHasOverridden(true)
+    }
+    
+    // Load prompts and metadata
+    setRawPrompt(promptData.rawPrompt || '')
+    setEnrichedPrompt(promptData.enrichedPrompt || '')
+    setPromptMetadata(promptData.promptMetadata || null)
+    setEnrichmentResult(promptData.enrichmentResult || null)
+    setHasEnrichment(!!promptData.enrichedPrompt)
+  }
+
   return (
-    <section id="features" className="py-20 hero-gradient">
+    <section className="py-16 bg-gradient-to-br from-slate-50 via-blue-50/40 to-purple-50/30 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Enhanced Hero Section */}
-        <div className="text-center mb-20 fade-in">
-          <div className="inline-flex items-center justify-center p-2 bg-white/80 backdrop-blur-sm rounded-full border border-purple-200/60 mb-6 hover-lift">
-            <Wand2 className="w-6 h-6 text-purple-600 mr-2" />
-            <span className="text-sm font-semibold text-purple-600 px-3">
-              Professional AI Prompt Engineering
-            </span>
+        {/* Hero Section */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full text-sm font-medium text-blue-800 mb-6">
+            <Sparkles className="w-4 h-4 mr-2" />
+            AI-Powered Prompt Engineering
           </div>
           
-          <h1 className="text-5xl lg:text-6xl font-bold mb-6 text-shimmer">
-            Craft Perfect Prompts
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            Create Perfect Prompts for
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+              Any AI Model
+            </span>
           </h1>
-          <h2 className="text-2xl lg:text-3xl font-light text-gray-600 mb-8">
-            For Any AI Model, Every Time
-          </h2>
           
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-12 leading-relaxed">
-            Transform your ideas into optimized prompts with intelligent format adaptation. 
-            Professional-grade prompt engineering made accessible to everyone.
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            Generate optimized prompts with intelligent format adaptation, model-specific guidelines, 
+            and AI-powered enhancement. Save your creations and build a library of effective prompts.
           </p>
           
-          {/* Enhanced Status Indicators */}
-          <div className="flex flex-wrap items-center justify-center gap-6 mb-8">
-            <div className="status-indicator stagger-1">
-              <div className="status-dot bg-green-500"></div>
-              <span className="font-medium">7 AI Models</span>
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 text-sm text-gray-500">
+            <div className="flex items-center">
+              <Target className="w-4 h-4 mr-2 text-green-500" />
+              Universal Format Support
             </div>
-            <div className="status-indicator stagger-2">
-              <div className="status-dot bg-blue-500"></div>
-              <span className="font-medium">Smart Formatting</span>
+            <div className="flex items-center">
+              <Zap className="w-4 h-4 mr-2 text-blue-500" />
+              AI Enhancement
             </div>
-            <div className="status-indicator stagger-3">
-              <div className="status-dot bg-purple-500"></div>
-              <span className="font-medium">
-                {isAuthEnabled ? 'Enhanced Mode' : 'Demo Mode'}
-              </span>
-            </div>
-          </div>
-
-          {/* Feature Highlights */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16">
-            <div className="card hover-lift p-6 text-center slide-up stagger-1">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl mb-4">
-                <Target className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Precision Targeting</h3>
-              <p className="text-gray-600 text-sm">
-                Optimized for each AI model's unique capabilities and requirements
-              </p>
-            </div>
-            
-            <div className="card hover-lift p-6 text-center slide-up stagger-2">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl mb-4">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">AI Enhancement</h3>
-              <p className="text-gray-600 text-sm">
-                Intelligent prompt enrichment for better results and clarity
-              </p>
-            </div>
-            
-            <div className="card hover-lift p-6 text-center slide-up stagger-3">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl mb-4">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Instant Generation</h3>
-              <p className="text-gray-600 text-sm">
-                Real-time prompt creation with immediate preview and validation
-              </p>
+            <div className="flex items-center">
+              <Wand2 className="w-4 h-4 mr-2 text-purple-500" />
+              Smart Model Selection
             </div>
           </div>
         </div>
 
-        {/* Enhanced Main Interface */}
+        {/* Main Content Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Left Column - Prompt Configuration */}
           <div className="xl:col-span-1 space-y-8 relative z-20">
@@ -317,11 +301,20 @@ const PromptGenerator = () => {
                 enrichmentError={enrichmentError}
                 isAuthenticated={isAuthenticated}
                 isPro={isPro}
+                formData={formData}
+                onOpenHistory={() => setShowHistory(true)}
               />
             </div>
           </div>
         </div>
       </div>
+      
+      {/* Prompt History Modal */}
+      <PromptHistory
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
+        onLoadPrompt={handleLoadPrompt}
+      />
     </section>
   )
 }

@@ -3,7 +3,7 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 export class PromptEnrichmentService {
-  static async enrichPrompt(promptData, userToken = null) {
+  static async enrichPrompt(promptData, userToken = null, userTier = 'free') {
     try {
       const response = await fetch(`${API_BASE_URL}/api/prompts/enrich`, {
         method: 'POST',
@@ -18,7 +18,7 @@ export class PromptEnrichmentService {
           role: promptData.role,
           style: promptData.style,
           output: promptData.output,
-          userTier: userToken ? 'pro' : 'free'
+          userTier: userTier
         })
       })
 
