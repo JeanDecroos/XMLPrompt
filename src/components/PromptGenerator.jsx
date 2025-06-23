@@ -2,10 +2,18 @@ import React, { useState, useEffect } from 'react'
 import PromptForm from './PromptForm'
 import EnrichmentOptions from './EnrichmentOptions'
 import EnhancedPromptPreview from './EnhancedPromptPreview'
+import ModelSelector from './ModelSelector'
 import { generateClaudePrompt, validatePromptConfig } from '../utils/promptGenerator'
 import { enrichPrompt } from '../utils/promptEnricher'
+import { promptEnrichmentService } from '../services/promptEnrichment'
+import { UniversalPromptGenerator } from '../utils/universalPromptGenerator'
+import { DEFAULT_MODEL, getModelById } from '../data/aiModels'
+import { useAuth } from '../contexts/AuthContext'
 
 const PromptGenerator = () => {
+  const { user, session, isAuthenticated, isPro } = useAuth()
+  
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
   const [formData, setFormData] = useState({
     role: '',
     task: '',
@@ -24,33 +32,48 @@ const PromptGenerator = () => {
   
   const [rawPrompt, setRawPrompt] = useState('')
   const [enrichedPrompt, setEnrichedPrompt] = useState('')
+  const [promptMetadata, setPromptMetadata] = useState(null)
+  const [enrichmentResult, setEnrichmentResult] = useState(null)
   const [validation, setValidation] = useState({ isValid: false, errors: [] })
   const [isEnriching, setIsEnriching] = useState(false)
   const [hasEnrichment, setHasEnrichment] = useState(false)
+  const [enrichmentError, setEnrichmentError] = useState(null)
 
-  // Generate raw prompt whenever form data changes
+  // Generate raw prompt whenever form data or model changes
   useEffect(() => {
-    const validation = validatePromptConfig(formData)
+    const validation = UniversalPromptGenerator.validatePrompt(formData, selectedModel)
     setValidation(validation)
     
     if (validation.isValid) {
-      const prompt = generateClaudePrompt(formData)
-      setRawPrompt(prompt)
+      try {
+        const result = UniversalPromptGenerator.generatePrompt(formData, selectedModel)
+        setRawPrompt(result.prompt)
+        setPromptMetadata(result.metadata)
+      } catch (error) {
+        console.error('Prompt generation failed:', error)
+        // Fallback to Claude format for compatibility
+        const prompt = generateClaudePrompt(formData)
+        setRawPrompt(prompt)
+        setPromptMetadata({ format: 'xml', estimatedTokens: Math.ceil(prompt.length / 4) })
+      }
     } else {
       setRawPrompt('')
       setEnrichedPrompt('')
+      setEnrichmentResult(null)
+      setPromptMetadata(null)
     }
-  }, [formData])
+  }, [formData, selectedModel])
 
-  // Trigger enrichment when form data or enrichment options change
+  // Auto-enrich for authenticated users when form data changes
   useEffect(() => {
-    if (validation.isValid && shouldEnrich()) {
-      performEnrichment()
-    } else if (!validation.isValid) {
-      setEnrichedPrompt('')
-      setHasEnrichment(false)
+    if (validation.isValid && isAuthenticated && formData.task) {
+      const debounceTimer = setTimeout(() => {
+        performGPTEnrichment()
+      }, 1000) // Debounce to avoid too many API calls
+      
+      return () => clearTimeout(debounceTimer)
     }
-  }, [formData, enrichmentData, validation.isValid])
+  }, [formData, validation.isValid, isAuthenticated])
 
   const shouldEnrich = () => {
     return (
@@ -61,7 +84,7 @@ const PromptGenerator = () => {
     )
   }
 
-  const performEnrichment = async () => {
+  const performLegacyEnrichment = async () => {
     if (!validation.isValid) return
 
     setIsEnriching(true)
@@ -72,9 +95,39 @@ const PromptGenerator = () => {
       const enrichedXMLPrompt = generateClaudePrompt(enrichedData)
       setEnrichedPrompt(enrichedXMLPrompt)
     } catch (error) {
-      console.error('Enrichment failed:', error)
-      // Fallback to raw prompt if enrichment fails
+      console.error('Legacy enrichment failed:', error)
       setEnrichedPrompt(rawPrompt)
+      setHasEnrichment(false)
+    } finally {
+      setIsEnriching(false)
+    }
+  }
+
+  const performGPTEnrichment = async () => {
+    if (!validation.isValid) return
+
+    setIsEnriching(true)
+    setEnrichmentError(null)
+
+    try {
+      const userToken = session?.access_token
+      const result = await promptEnrichmentService.enrichPrompt(formData, userToken)
+      
+      if (result.success) {
+        setEnrichedPrompt(result.data.enrichedPrompt)
+        setEnrichmentResult(result.data)
+        setHasEnrichment(true)
+      } else {
+        // Use fallback if enrichment fails
+        setEnrichedPrompt(result.fallback?.enrichedPrompt || rawPrompt)
+        setEnrichmentResult(result.fallback)
+        setEnrichmentError(result.error)
+        setHasEnrichment(false)
+      }
+    } catch (error) {
+      console.error('GPT enrichment failed:', error)
+      setEnrichedPrompt(rawPrompt)
+      setEnrichmentError('Failed to enhance prompt')
       setHasEnrichment(false)
     } finally {
       setIsEnriching(false)
@@ -111,11 +164,22 @@ const PromptGenerator = () => {
       constraints: []
     })
     setHasEnrichment(false)
+    setEnrichmentResult(null)
+    setEnrichmentError(null)
+    setPromptMetadata(null)
+  }
+
+  const handleModelChange = (modelId) => {
+    setSelectedModel(modelId)
   }
 
   const handleEnrichNow = () => {
     if (validation.isValid) {
-      performEnrichment()
+      if (isAuthenticated) {
+        performGPTEnrichment()
+      } else {
+        performLegacyEnrichment()
+      }
     }
   }
 
@@ -125,24 +189,24 @@ const PromptGenerator = () => {
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4 text-balance">
-            Professional AI Prompt Engineering
+            Universal AI Prompt Engineering
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto text-balance">
-            Transform basic prompts into powerful, optimized instructions with our AI-enhanced platform. 
-            Built for professionals who demand precision and results.
+            Generate optimized prompts for any AI model with intelligent format adaptation. 
+            From Claude to GPT, Gemini to Llama - we've got you covered.
           </p>
           <div className="flex items-center justify-center space-x-6 mt-8">
             <div className="flex items-center space-x-2 text-sm text-gray-500">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>Live Enhancement</span>
+              <span>{isAuthenticated ? 'GPT Enhancement' : 'Live Enhancement'}</span>
             </div>
             <div className="flex items-center space-x-2 text-sm text-gray-500">
               <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span>Claude Optimized</span>
+              <span>Multi-Model Support</span>
             </div>
             <div className="flex items-center space-x-2 text-sm text-gray-500">
               <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-              <span>Professional Grade</span>
+              <span>Smart Format Adaptation</span>
             </div>
           </div>
         </div>
@@ -151,6 +215,12 @@ const PromptGenerator = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Form Section */}
           <div className="xl:col-span-1 space-y-6">
+            <ModelSelector
+              selectedModel={selectedModel}
+              onModelChange={handleModelChange}
+              estimatedTokens={promptMetadata?.estimatedTokens || 0}
+            />
+            
             <PromptForm
               formData={formData}
               onChange={handleFormChange}
@@ -158,7 +228,7 @@ const PromptGenerator = () => {
               validation={validation}
             />
             
-            {validation.isValid && (
+            {validation.isValid && !isAuthenticated && (
               <EnrichmentOptions
                 enrichmentData={enrichmentData}
                 onChange={handleEnrichmentChange}
@@ -166,8 +236,40 @@ const PromptGenerator = () => {
               />
             )}
 
-            {/* Quick Stats */}
-            {validation.isValid && (
+            {/* Enhanced Stats for Authenticated Users */}
+            {validation.isValid && enrichmentResult && (
+              <div className="card p-4">
+                <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">
+                  Enhancement Stats
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary-600">
+                      {enrichmentResult.qualityScore || 7}
+                    </div>
+                    <div className="text-xs text-gray-500">Quality Score</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600">
+                      {enrichmentResult.tokensUsed || 0}
+                    </div>
+                    <div className="text-xs text-gray-500">Tokens Used</div>
+                  </div>
+                </div>
+                {enrichmentResult.processingTime && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-green-600">
+                        Processed in {enrichmentResult.processingTime}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Legacy Stats for Non-authenticated Users */}
+            {validation.isValid && !enrichmentResult && (
               <div className="card p-4">
                 <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">
                   Enhancement Stats
@@ -200,14 +302,20 @@ const PromptGenerator = () => {
           </div>
 
           {/* Preview Section */}
-          <div className="xl:col-span-2 space-y-6">
+          <div className="xl:col-span-2">
             <EnhancedPromptPreview
               rawPrompt={rawPrompt}
-              enrichedPrompt={enrichedPrompt || rawPrompt}
-              isValid={validation.isValid}
-              errors={validation.errors}
+              enrichedPrompt={enrichedPrompt}
+              enrichmentResult={enrichmentResult}
+              promptMetadata={promptMetadata}
+              selectedModel={selectedModel}
               isEnriching={isEnriching}
               hasEnrichment={hasEnrichment}
+              onEnrichNow={handleEnrichNow}
+              validation={validation}
+              enrichmentError={enrichmentError}
+              isAuthenticated={isAuthenticated}
+              isPro={isPro}
             />
           </div>
         </div>

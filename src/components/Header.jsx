@@ -1,10 +1,28 @@
 import React, { useState } from 'react'
-import { FileText, Sparkles, Crown, Menu, X, Zap, Star } from 'lucide-react'
+import { FileText, Sparkles, Crown, Menu, X, Zap, Star, User, LogIn, LogOut, ChevronDown } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import AuthModal from './AuthModal'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [authModalMode, setAuthModalMode] = useState('signin')
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  
+  const { user, isAuthenticated, isPro, signOut } = useAuth()
+
+  const handleSignOut = async () => {
+    await signOut()
+    setIsUserMenuOpen(false)
+  }
+
+  const openAuthModal = (mode = 'signin') => {
+    setAuthModalMode(mode)
+    setIsAuthModalOpen(true)
+  }
 
   return (
+    <>
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/60 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
@@ -40,18 +58,87 @@ const Header = () => {
 
           {/* CTA & User Actions */}
           <div className="flex items-center space-x-3">
-            {/* Free/Premium Status */}
-            <div className="hidden sm:flex items-center space-x-2 px-3 py-1 bg-gray-50 rounded-lg">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-gray-600 font-medium">Free Plan</span>
-            </div>
+            {!isAuthenticated ? (
+              <>
+                {/* Authentication Buttons */}
+                <button 
+                  onClick={() => openAuthModal('signin')}
+                  className="btn btn-ghost btn-sm hidden sm:flex items-center"
+                >
+                  <LogIn className="w-4 h-4 mr-1.5" />
+                  <span>Sign In</span>
+                </button>
 
-            {/* Upgrade CTA */}
-            <button className="btn btn-premium btn-sm group relative overflow-hidden">
-              <Crown className="w-4 h-4 mr-1.5" />
-              <span>Upgrade</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 transform translate-x-full group-hover:translate-x-[-200%] transition-transform duration-700"></div>
-            </button>
+                {/* Subtle Upgrade CTA */}
+                <button 
+                  onClick={() => openAuthModal('signup')}
+                  className="btn btn-primary btn-sm hidden sm:flex items-center"
+                >
+                  <Crown className="w-4 h-4 mr-1.5" />
+                  <span>Try Pro</span>
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Pro Status Badge */}
+                {isPro && (
+                  <div className="hidden sm:flex items-center space-x-2 px-3 py-1 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+                    <Crown className="w-3 h-3 text-purple-600" />
+                    <span className="text-sm text-purple-700 font-medium">Pro</span>
+                  </div>
+                )}
+
+                {/* User Menu */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="btn btn-ghost btn-sm flex items-center space-x-2"
+                  >
+                    <div className="w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                      <span className="text-xs text-white font-medium">
+                        {user?.user_metadata?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                      </span>
+                    </div>
+                    <span className="hidden sm:inline text-sm">
+                      {user?.user_metadata?.name || 'Account'}
+                    </span>
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+
+                  {/* User Dropdown */}
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900">
+                          {user?.user_metadata?.name || 'User'}
+                        </p>
+                        <p className="text-xs text-gray-500">{user?.email}</p>
+                      </div>
+                      
+                      {!isPro && (
+                        <button className="w-full text-left px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 flex items-center">
+                          <Crown className="w-4 h-4 mr-2" />
+                          Upgrade to Pro
+                        </button>
+                      )}
+                      
+                      <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center">
+                        <User className="w-4 h-4 mr-2" />
+                        Account Settings
+                      </button>
+                      
+                      <button 
+                        onClick={handleSignOut}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
 
             {/* Mobile Menu Toggle */}
             <button 
@@ -86,19 +173,25 @@ const Header = () => {
         )}
       </div>
 
-      {/* Premium Feature Banner */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-2 px-4 text-center text-sm font-medium no-print">
-        <div className="flex items-center justify-center space-x-2">
-          <Sparkles className="w-4 h-4" />
-          <span>Try AI-Enhanced Prompts</span>
-          <Star className="w-4 h-4 text-yellow-300" />
-          <span className="hidden sm:inline">• 3x Better Results • Premium Features</span>
-          <button className="ml-2 underline hover:no-underline font-semibold">
-            Start Free Trial
+      {/* Subtle Feature Highlight */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b border-blue-100 py-2 px-4 text-center text-sm no-print">
+        <div className="flex items-center justify-center space-x-2 text-gray-700">
+          <Sparkles className="w-4 h-4 text-blue-500" />
+          <span>Enhanced prompts available with Pro features</span>
+          <button className="ml-2 text-blue-600 hover:text-blue-700 font-medium transition-colors">
+            Learn more
           </button>
         </div>
       </div>
     </header>
+
+    {/* Auth Modal */}
+    <AuthModal
+      isOpen={isAuthModalOpen}
+      onClose={() => setIsAuthModalOpen(false)}
+      initialMode={authModalMode}
+    />
+    </>
   )
 }
 

@@ -97,89 +97,68 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
           />
         </div>
 
-        {/* Requirements (Premium Feature Highlight) */}
+        {/* Requirements (Pro Feature) */}
         <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-700 flex items-center">
             <CheckSquare className="w-4 h-4 mr-2 text-primary-600" />
             Requirements
             <span className="text-gray-400 ml-1 text-xs">(Optional)</span>
-            <span className="badge badge-premium ml-2">Premium</span>
+            <span className="badge badge-premium ml-2 text-xs">Pro</span>
           </label>
-          <div className="relative">
-            <textarea
-              value={formData.requirements}
-              onChange={handleChange('requirements')}
-              placeholder="List specific requirements, constraints, or criteria that must be met. Use bullet points or numbered lists for clarity."
-              className="textarea-field"
-              rows={3}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-50/50 to-blue-50/50 rounded-lg pointer-events-none opacity-30"></div>
-          </div>
-          <div className="upgrade-cta">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-900">Enhanced Requirements</p>
-                <p className="text-xs text-gray-600">AI-powered requirement optimization</p>
-              </div>
-              <button className="btn btn-premium btn-sm">
-                <Crown className="w-3 h-3 mr-1" />
-                Upgrade
-              </button>
-            </div>
+          <textarea
+            value={formData.requirements}
+            onChange={handleChange('requirements')}
+            placeholder="List specific requirements, constraints, or criteria that must be met. Use bullet points or numbered lists for clarity."
+            className="textarea-field"
+            rows={3}
+          />
+          <div className="text-xs text-gray-500 flex items-center">
+            <Sparkles className="w-3 h-3 mr-1 text-blue-500" />
+            <span>Enhanced with AI optimization in Pro version</span>
           </div>
         </div>
 
-        {/* Style Guidelines (Premium Feature) */}
+        {/* Style Guidelines (Pro Feature) */}
         <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-700 flex items-center">
             <Palette className="w-4 h-4 mr-2 text-primary-600" />
             Style Guidelines
             <span className="text-gray-400 ml-1 text-xs">(Optional)</span>
-            <span className="badge badge-premium ml-2">Premium</span>
+            <span className="badge badge-premium ml-2 text-xs">Pro</span>
           </label>
-          <div className="relative">
-            <textarea
-              value={formData.style}
-              onChange={handleChange('style')}
-              placeholder="Specify tone, writing style, format preferences, or presentation guidelines."
-              className="textarea-field opacity-60"
-              rows={2}
-              disabled
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-lg">
-              <div className="text-center">
-                <Lock className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm font-medium text-gray-700">Premium Feature</p>
-                <p className="text-xs text-gray-500">Unlock advanced styling controls</p>
-              </div>
-            </div>
+          <textarea
+            value={formData.style}
+            onChange={handleChange('style')}
+            placeholder="Specify tone, writing style, format preferences, or presentation guidelines. (Pro feature for advanced styling)"
+            className="textarea-field bg-gray-50 border-gray-200"
+            rows={2}
+            disabled
+          />
+          <div className="text-xs text-gray-500 flex items-center">
+            <Lock className="w-3 h-3 mr-1 text-gray-400" />
+            <span>Advanced styling controls available with Pro</span>
           </div>
         </div>
 
-        {/* Output Format (Premium Feature) */}
+        {/* Output Format (Pro Feature) */}
         <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-700 flex items-center">
             <Download className="w-4 h-4 mr-2 text-primary-600" />
             Output Format
             <span className="text-gray-400 ml-1 text-xs">(Optional)</span>
-            <span className="badge badge-premium ml-2">Premium</span>
+            <span className="badge badge-premium ml-2 text-xs">Pro</span>
           </label>
-          <div className="relative">
-            <textarea
-              value={formData.output}
-              onChange={handleChange('output')}
-              placeholder="Describe the desired output format, structure, or delivery method."
-              className="textarea-field opacity-60"
-              rows={2}
-              disabled
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-lg">
-              <div className="text-center">
-                <Lock className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm font-medium text-gray-700">Premium Feature</p>
-                <p className="text-xs text-gray-500">Custom output formatting</p>
-              </div>
-            </div>
+          <textarea
+            value={formData.output}
+            onChange={handleChange('output')}
+            placeholder="Describe the desired output format, structure, or delivery method. (Pro feature for custom formatting)"
+            className="textarea-field bg-gray-50 border-gray-200"
+            rows={2}
+            disabled
+          />
+          <div className="text-xs text-gray-500 flex items-center">
+            <Lock className="w-3 h-3 mr-1 text-gray-400" />
+            <span>Custom output formatting available with Pro</span>
           </div>
         </div>
 
