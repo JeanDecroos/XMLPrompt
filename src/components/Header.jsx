@@ -26,10 +26,10 @@ const Header = () => {
     <>
       <header className="sticky top-0 z-50 glass-effect border-b border-white/20 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-18">
+          <div className="flex justify-between items-center h-20">
             
             {/* Enhanced Logo & Brand */}
-            <a href="#" className="flex items-center space-x-3 hover-lift py-2">
+            <a href="#" className="flex items-center space-x-3 hover-lift py-3">
               <div className="relative">
                 <div className="flex items-center justify-center w-11 h-11 bg-gradient-to-br from-blue-600 via-purple-600 to-purple-700 rounded-xl shadow-lg hover:shadow-glow transition-all duration-300">
                   <Wand2 className="w-6 h-6 text-white" />
