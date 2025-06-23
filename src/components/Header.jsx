@@ -24,95 +24,105 @@ const Header = () => {
 
   return (
     <>
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+    <header className="sticky top-0 z-50 glass-effect border-b border-white/20 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo & Brand */}
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg shadow-sm">
-              <Wand2 className="w-5 h-5 text-white" />
+        <div className="flex justify-between items-center h-18">
+          {/* Enhanced Logo & Brand */}
+          <div className="flex items-center space-x-4 hover-lift">
+            <div className="relative">
+              <div className="flex items-center justify-center w-11 h-11 bg-gradient-to-br from-blue-600 via-purple-600 to-purple-700 rounded-xl shadow-lg hover:shadow-glow transition-all duration-300">
+                <Wand2 className="w-6 h-6 text-white" />
+              </div>
+              <div className="absolute -inset-1 bg-gradient-to-br from-blue-400 to-purple-600 rounded-xl opacity-30 blur-sm -z-10"></div>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">PromptCraft AI</h1>
-              <p className="text-sm text-gray-600 hidden sm:block">Universal AI Prompt Optimizer</p>
+              <h1 className="text-xl font-bold text-gradient">PromptCraft AI</h1>
+              <p className="text-sm text-gray-600 hidden sm:block font-medium">Universal AI Prompt Optimizer</p>
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+          {/* Enhanced Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-2">
+            <a href="#features" className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-lg hover:bg-white/60 hover-lift">
               Features
             </a>
-            <a href="#pricing" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+            <a href="#pricing" className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-lg hover:bg-white/60 hover-lift">
               Pricing
             </a>
-            <a href="#roadmap" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+            <a href="#roadmap" className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-lg hover:bg-white/60 hover-lift">
               Roadmap
             </a>
           </nav>
 
-          {/* User Actions */}
-          <div className="flex items-center space-x-3">
+          {/* Enhanced User Actions */}
+          <div className="flex items-center space-x-4">
             {!isAuthEnabled ? (
               <div className="flex items-center space-x-2">
-                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                  Demo Mode
-                </span>
+                <div className="relative">
+                  <div className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200/60 shadow-sm">
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Demo Mode
+                  </div>
+                  <div className="absolute -inset-1 bg-gradient-to-r from-amber-300 to-orange-300 rounded-full opacity-20 blur-sm -z-10"></div>
+                </div>
               </div>
             ) : isAuthenticated ? (
               <>
-                {/* Pro Badge */}
+                {/* Enhanced Pro Badge */}
                 {isPro && (
-                  <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-purple-50 to-blue-50 rounded-full border border-purple-200">
-                    <Crown className="w-3 h-3 text-purple-600" />
-                    <span className="text-sm text-purple-700 font-medium">Pro</span>
+                  <div className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full border border-purple-200/60 shadow-sm hover-lift">
+                    <Crown className="w-4 h-4 text-purple-600" />
+                    <span className="text-sm text-purple-700 font-semibold">Pro</span>
                   </div>
                 )}
 
-                {/* User Menu */}
+                {/* Enhanced User Menu */}
                 <div className="relative">
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-center space-x-3 px-4 py-2 rounded-xl hover:bg-white/60 transition-all duration-200 hover-lift"
                   >
-                    <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                      <span className="text-sm text-white font-medium">
-                        {user?.user_metadata?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
-                      </span>
+                    <div className="relative">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-md">
+                        <span className="text-sm text-white font-semibold">
+                          {user?.user_metadata?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                        </span>
+                      </div>
+                      <div className="absolute -inset-1 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full opacity-30 blur-sm -z-10"></div>
                     </div>
-                    <span className="hidden sm:inline text-sm font-medium text-gray-700">
+                    <span className="hidden sm:inline text-sm font-semibold text-gray-700">
                       {user?.user_metadata?.name || 'Account'}
                     </span>
-                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                    <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                   </button>
 
-                  {/* User Dropdown */}
+                  {/* Enhanced User Dropdown */}
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                      <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">
+                    <div className="absolute right-0 mt-3 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/60 py-2 z-50 scale-in">
+                      <div className="px-4 py-3 border-b border-gray-100/60">
+                        <p className="text-sm font-semibold text-gray-900">
                           {user?.user_metadata?.name || 'User'}
                         </p>
-                        <p className="text-xs text-gray-500">{user?.email}</p>
+                        <p className="text-xs text-gray-500 mt-1">{user?.email}</p>
                       </div>
                       
                       {!isPro && (
-                        <button className="w-full text-left px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 flex items-center transition-colors">
-                          <Crown className="w-4 h-4 mr-2" />
+                        <button className="w-full text-left px-4 py-3 text-sm text-purple-600 hover:bg-purple-50/80 flex items-center transition-all duration-200 hover-lift">
+                          <Crown className="w-4 h-4 mr-3" />
                           Upgrade to Pro
                         </button>
                       )}
                       
-                      <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center transition-colors">
-                        <User className="w-4 h-4 mr-2" />
+                      <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50/80 flex items-center transition-all duration-200 hover-lift">
+                        <User className="w-4 h-4 mr-3" />
                         Account Settings
                       </button>
                       
                       <button 
                         onClick={handleSignOut}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center transition-colors"
+                        className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 flex items-center transition-all duration-200 hover-lift"
                       >
-                        <LogOut className="w-4 h-4 mr-2" />
+                        <LogOut className="w-4 h-4 mr-3" />
                         Sign Out
                       </button>
                     </div>
@@ -120,26 +130,26 @@ const Header = () => {
                 </div>
               </>
             ) : (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-4">
                 <button
                   onClick={() => openAuthModal('signin')}
-                  className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                  className="px-4 py-2 text-gray-600 hover:text-gray-900 font-semibold transition-all duration-200 rounded-lg hover:bg-white/60 hover-lift"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={() => openAuthModal('signup')}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm"
+                  className="btn btn-premium btn-md relative overflow-hidden"
                 >
-                  Get Started
+                  <span className="relative z-10">Get Started</span>
                 </button>
               </div>
             )}
 
-            {/* Mobile Menu Toggle */}
+            {/* Enhanced Mobile Menu Toggle */}
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-50 transition-colors"
+              className="md:hidden p-2 rounded-xl hover:bg-white/60 transition-all duration-200 hover-lift"
               aria-label="Toggle menu"
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -147,24 +157,25 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Enhanced Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4 space-y-2">
-            <a href="#features" className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+          <div className="md:hidden border-t border-white/20 py-4 space-y-2 slide-up">
+            <a href="#features" className="block px-4 py-3 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-xl transition-all duration-200 font-medium">
               Features
             </a>
-            <a href="#pricing" className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+            <a href="#pricing" className="block px-4 py-3 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-xl transition-all duration-200 font-medium">
               Pricing
             </a>
-            <a href="#roadmap" className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+            <a href="#roadmap" className="block px-4 py-3 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-xl transition-all duration-200 font-medium">
               Roadmap
             </a>
             {!isAuthEnabled && (
-              <div className="px-4 pt-2 border-t border-gray-200">
+              <div className="px-4 pt-3 border-t border-white/20">
                 <div className="flex items-center justify-center">
-                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                  <div className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200/60 shadow-sm">
+                    <Sparkles className="w-4 h-4 mr-2" />
                     Demo Mode Active
-                  </span>
+                  </div>
                 </div>
               </div>
             )}

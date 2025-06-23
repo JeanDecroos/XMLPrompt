@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Sparkles, Zap, Target, Wand2 } from 'lucide-react'
 import PromptForm from './PromptForm'
 import EnrichmentOptions from './EnrichmentOptions'
 import EnhancedPromptPreview from './EnhancedPromptPreview'
@@ -185,53 +186,105 @@ const PromptGenerator = () => {
   }
 
   return (
-    <section id="features" className="py-16 bg-gradient-to-br from-gray-50 to-blue-50">
+    <section id="features" className="py-20 hero-gradient">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-            Universal AI Prompt Engineering
+        {/* Enhanced Hero Section */}
+        <div className="text-center mb-20 fade-in">
+          <div className="inline-flex items-center justify-center p-2 bg-white/80 backdrop-blur-sm rounded-full border border-purple-200/60 mb-6 hover-lift">
+            <Wand2 className="w-6 h-6 text-purple-600 mr-2" />
+            <span className="text-sm font-semibold text-purple-600 px-3">
+              Professional AI Prompt Engineering
+            </span>
+          </div>
+          
+          <h1 className="text-5xl lg:text-6xl font-bold mb-6 text-shimmer">
+            Craft Perfect Prompts
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            Create optimized prompts for any AI model with intelligent format adaptation. 
-            Professional prompt engineering made simple.
+          <h2 className="text-2xl lg:text-3xl font-light text-gray-600 mb-8">
+            For Any AI Model, Every Time
+          </h2>
+          
+          <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-12 leading-relaxed">
+            Transform your ideas into optimized prompts with intelligent format adaptation. 
+            Professional-grade prompt engineering made accessible to everyone.
           </p>
-          <div className="flex items-center justify-center space-x-8 text-sm text-gray-500">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span>7 AI Models Supported</span>
+          
+          {/* Enhanced Status Indicators */}
+          <div className="flex flex-wrap items-center justify-center gap-6 mb-8">
+            <div className="status-indicator stagger-1">
+              <div className="status-dot bg-green-500"></div>
+              <span className="font-medium">7 AI Models</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span>Smart Format Detection</span>
+            <div className="status-indicator stagger-2">
+              <div className="status-dot bg-blue-500"></div>
+              <span className="font-medium">Smart Formatting</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              <span>{isAuthEnabled ? 'Authentication Active' : 'Demo Mode'}</span>
+            <div className="status-indicator stagger-3">
+              <div className="status-dot bg-purple-500"></div>
+              <span className="font-medium">
+                {isAuthEnabled ? 'Enhanced Mode' : 'Demo Mode'}
+              </span>
+            </div>
+          </div>
+
+          {/* Feature Highlights */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16">
+            <div className="card hover-lift p-6 text-center slide-up stagger-1">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl mb-4">
+                <Target className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Precision Targeting</h3>
+              <p className="text-gray-600 text-sm">
+                Optimized for each AI model's unique capabilities and requirements
+              </p>
+            </div>
+            
+            <div className="card hover-lift p-6 text-center slide-up stagger-2">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl mb-4">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">AI Enhancement</h3>
+              <p className="text-gray-600 text-sm">
+                Intelligent prompt enrichment for better results and clarity
+              </p>
+            </div>
+            
+            <div className="card hover-lift p-6 text-center slide-up stagger-3">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl mb-4">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Instant Generation</h3>
+              <p className="text-gray-600 text-sm">
+                Real-time prompt creation with immediate preview and validation
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Main Interface */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        {/* Enhanced Main Interface */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 scale-in">
           {/* Left Column - Configuration */}
-          <div className="xl:col-span-1 space-y-6">
-            <ModelSelector
-              selectedModel={selectedModel}
-              onModelChange={handleModelChange}
-              estimatedTokens={promptMetadata?.estimatedTokens}
-            />
+          <div className="xl:col-span-1 space-y-8">
+            <div className="slide-up stagger-1">
+              <ModelSelector
+                selectedModel={selectedModel}
+                onModelChange={handleModelChange}
+                estimatedTokens={promptMetadata?.estimatedTokens}
+              />
+            </div>
             
-            <PromptForm
-              formData={formData}
-              onChange={handleFormChange}
-              onReset={handleReset}
-              validation={validation}
-            />
+            <div className="slide-up stagger-2">
+              <PromptForm
+                formData={formData}
+                onChange={handleFormChange}
+                onReset={handleReset}
+                validation={validation}
+              />
+            </div>
           </div>
 
           {/* Right Column - Results */}
-          <div className="xl:col-span-2">
+          <div className="xl:col-span-2 slide-up stagger-3">
             <EnhancedPromptPreview
               rawPrompt={rawPrompt}
               enrichedPrompt={enrichedPrompt}
