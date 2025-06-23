@@ -284,6 +284,8 @@ const PromptGenerator = () => {
               />
             </div>
             
+            {/* Temporary removal of EnhancedPromptPreview for debugging layering issue */}
+            {/*
             <div>
               <EnhancedPromptPreview
                 rawPrompt={rawPrompt}
@@ -300,6 +302,7 @@ const PromptGenerator = () => {
                 isPro={isPro}
               />
             </div>
+            */}
           </div>
         </div>
       </div>
