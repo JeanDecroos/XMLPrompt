@@ -263,17 +263,9 @@ const PromptGenerator = () => {
 
         {/* Enhanced Main Interface */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 scale-in">
-          {/* Left Column - Configuration */}
+          {/* Left Column - Prompt Configuration */}
           <div className="xl:col-span-1 space-y-8">
             <div className="slide-up stagger-1">
-              <ModelSelector
-                selectedModel={selectedModel}
-                onModelChange={handleModelChange}
-                estimatedTokens={promptMetadata?.estimatedTokens}
-              />
-            </div>
-            
-            <div className="slide-up stagger-2">
               <PromptForm
                 formData={formData}
                 onChange={handleFormChange}
@@ -283,22 +275,31 @@ const PromptGenerator = () => {
             </div>
           </div>
 
-          {/* Right Column - Results */}
-          <div className="xl:col-span-2 slide-up stagger-3">
-            <EnhancedPromptPreview
-              rawPrompt={rawPrompt}
-              enrichedPrompt={enrichedPrompt}
-              enrichmentResult={enrichmentResult}
-              promptMetadata={promptMetadata}
-              selectedModel={selectedModel}
-              validation={validation}
-              isEnriching={isEnriching}
-              hasEnrichment={hasEnrichment}
-              onEnrichNow={handleEnrichNow}
-              enrichmentError={enrichmentError}
-              isAuthenticated={isAuthenticated}
-              isPro={isPro}
-            />
+          {/* Right Column - Model Selection & Results */}
+          <div className="xl:col-span-2 space-y-8">
+            <div className="slide-up stagger-2">
+              <ModelSelector
+                selectedModel={selectedModel}
+                onModelChange={handleModelChange}
+              />
+            </div>
+            
+            <div className="slide-up stagger-3">
+              <EnhancedPromptPreview
+                rawPrompt={rawPrompt}
+                enrichedPrompt={enrichedPrompt}
+                enrichmentResult={enrichmentResult}
+                promptMetadata={promptMetadata}
+                selectedModel={selectedModel}
+                validation={validation}
+                isEnriching={isEnriching}
+                hasEnrichment={hasEnrichment}
+                onEnrichNow={handleEnrichNow}
+                enrichmentError={enrichmentError}
+                isAuthenticated={isAuthenticated}
+                isPro={isPro}
+              />
+            </div>
           </div>
         </div>
       </div>

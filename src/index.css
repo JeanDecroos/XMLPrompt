@@ -410,6 +410,37 @@
   .hover-lift:hover {
     transform: translateY(-2px);
   }
+  
+  /* Z-Index Management for Layering */
+  .dropdown-content {
+    z-index: 1000;
+  }
+  
+  .modal-overlay {
+    z-index: 2000;
+  }
+  
+  .tooltip {
+    z-index: 1500;
+  }
+  
+  /* Ensure ModelSelector dropdowns appear above other content */
+  .model-selector {
+    position: relative;
+    z-index: 100;
+  }
+  
+  .model-selector .card:hover,
+  .model-selector .card:focus-within {
+    z-index: 200;
+    position: relative;
+  }
+  
+  /* Ensure expanded model details appear above prompt form */
+  .model-card-expanded {
+    z-index: 150;
+    position: relative;
+  }
 }
 
 /* Dark mode support */
