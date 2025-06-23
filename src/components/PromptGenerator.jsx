@@ -264,8 +264,8 @@ const PromptGenerator = () => {
         {/* Enhanced Main Interface */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Left Column - Prompt Configuration */}
-          <div className="xl:col-span-1 space-y-8">
-            <div className="slide-up stagger-1">
+          <div className="xl:col-span-1 space-y-8 relative z-20">
+            <div>
               <PromptForm
                 formData={formData}
                 onChange={handleFormChange}
@@ -276,7 +276,7 @@ const PromptGenerator = () => {
           </div>
 
           {/* Right Column - Model Selection & Results */}
-          <div className="xl:col-span-2 space-y-8">
+          <div className="xl:col-span-2 space-y-8 relative z-30">
             <div>
               <ModelSelector
                 selectedModel={selectedModel}
@@ -284,8 +284,6 @@ const PromptGenerator = () => {
               />
             </div>
             
-            {/* Temporary removal of EnhancedPromptPreview for debugging layering issue */}
-            {/*
             <div>
               <EnhancedPromptPreview
                 rawPrompt={rawPrompt}
@@ -302,7 +300,6 @@ const PromptGenerator = () => {
                 isPro={isPro}
               />
             </div>
-            */}
           </div>
         </div>
       </div>
