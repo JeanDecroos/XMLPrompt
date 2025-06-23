@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Sparkles, Zap, Target, Wand2 } from 'lucide-react'
 import PromptForm from './PromptForm'
 import EnrichmentOptions from './EnrichmentOptions'
@@ -8,6 +8,7 @@ import { generateClaudePrompt, validatePromptConfig } from '../utils/promptGener
 import { enrichPrompt } from '../utils/promptEnricher'
 import { promptEnrichmentService } from '../services/promptEnrichment'
 import { UniversalPromptGenerator } from '../utils/universalPromptGenerator'
+import { suggestModelForPrompt } from '../utils/modelInferenceEngine'
 import { DEFAULT_MODEL, getModelById } from '../data/aiModels'
 import { useAuth } from '../contexts/AuthContext'
 import { isAuthEnabled } from '../lib/supabase'
@@ -16,6 +17,9 @@ const PromptGenerator = () => {
   const { user, session, isAuthenticated, isPro } = useAuth()
   
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
+  const [suggestedModelId, setSuggestedModelId] = useState(null)
+  const [userHasOverridden, setUserHasOverridden] = useState(false)
+
   const [formData, setFormData] = useState({
     role: '',
     task: '',
@@ -65,6 +69,19 @@ const PromptGenerator = () => {
       setPromptMetadata(null)
     }
   }, [formData, selectedModel])
+
+  // New: Infer model based on prompt configuration
+  useEffect(() => {
+    const suggested = suggestModelForPrompt(formData, enrichmentData);
+    setSuggestedModelId(suggested);
+  }, [formData, enrichmentData]);
+
+  // New: Update selected model to suggestion if user hasn't overridden
+  useEffect(() => {
+    if (suggestedModelId && !userHasOverridden) {
+      setSelectedModel(suggestedModelId);
+    }
+  }, [suggestedModelId, userHasOverridden]);
 
   // Auto-enrich for authenticated users when form data changes (only if auth is enabled)
   useEffect(() => {
@@ -171,9 +188,10 @@ const PromptGenerator = () => {
     setPromptMetadata(null)
   }
 
-  const handleModelChange = (modelId) => {
-    setSelectedModel(modelId)
-  }
+  const handleModelChange = useCallback((modelId) => {
+    setUserHasOverridden(true);
+    setSelectedModel(modelId);
+  }, []);
 
   const handleEnrichNow = () => {
     if (validation.isValid) {
@@ -280,6 +298,7 @@ const PromptGenerator = () => {
             <div>
               <ModelSelector
                 selectedModel={selectedModel}
+                suggestedModelId={suggestedModelId}
                 onModelChange={handleModelChange}
               />
             </div>

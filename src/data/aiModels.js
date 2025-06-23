@@ -185,6 +185,37 @@ export const AI_MODELS = {
       ]
     }
   },
+  'gemini-1.5-flash': {
+    id: 'gemini-1.5-flash',
+    name: 'Gemini 1.5 Flash',
+    provider: 'Google',
+    category: AI_MODEL_CATEGORIES.GOOGLE,
+    description: 'Google\'s fastest and most cost-effective multimodal model',
+    preferredFormat: PROMPT_FORMATS.MARKDOWN,
+    alternativeFormats: [PROMPT_FORMATS.STRUCTURED, PROMPT_FORMATS.JSON],
+    maxTokens: 1000000,
+    contextWindow: 1000000,
+    capabilities: {
+      reasoning: 'good',
+      coding: 'good',
+      analysis: 'good',
+      creative: 'good',
+      multimodal: true
+    },
+    pricing: { input: 0.35, output: 1.05 },
+    features: ['function_calling', 'vision', 'audio', 'video'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: false,
+      maxComplexity: 'medium',
+      bestPractices: [
+        'Focus on clear, concise instructions',
+        'Optimized for speed and high-volume tasks',
+        'Good for multi-modal input processing'
+      ]
+    }
+  },
 
   // Mistral Models
   'mistral-large': {
@@ -219,6 +250,37 @@ export const AI_MODELS = {
       ]
     }
   },
+  'mistral-7b-instruct': {
+    id: 'mistral-7b-instruct',
+    name: 'Mistral 7B Instruct',
+    provider: 'Mistral AI',
+    category: AI_MODEL_CATEGORIES.MISTRAL,
+    description: 'An efficient and powerful open-source model from Mistral AI, great for quick instruction following.',
+    preferredFormat: PROMPT_FORMATS.MARKDOWN,
+    alternativeFormats: [PROMPT_FORMATS.PLAIN],
+    maxTokens: 32768,
+    contextWindow: 32768,
+    capabilities: {
+      reasoning: 'good',
+      coding: 'good',
+      analysis: 'good',
+      creative: 'good',
+      multimodal: false
+    },
+    pricing: { input: 0.10, output: 0.30 },
+    features: [],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: false,
+      maxComplexity: 'medium',
+      bestPractices: [
+        'Provide direct and concise instructions',
+        'Suitable for simpler, straightforward tasks',
+        'Avoid overly complex context'
+      ]
+    }
+  },
 
   // Meta Models  
   'llama-3.1-405b': {
@@ -250,6 +312,132 @@ export const AI_MODELS = {
         'Be direct and specific',
         'Avoid overly complex formatting',
         'Focus on clear task description'
+      ]
+    }
+  },
+  'llama-3-8b-instruct': {
+    id: 'llama-3-8b-instruct',
+    name: 'Llama 3 8B Instruct',
+    provider: 'Meta',
+    category: AI_MODEL_CATEGORIES.META,
+    description: 'Meta\'s efficient open-source model, tuned for instruction following.',
+    preferredFormat: PROMPT_FORMATS.PLAIN,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN],
+    maxTokens: 8192,
+    contextWindow: 8192,
+    capabilities: {
+      reasoning: 'good',
+      coding: 'good',
+      analysis: 'good',
+      creative: 'good',
+      multimodal: false
+    },
+    pricing: { input: 0.10, output: 0.30 },
+    features: [],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: false,
+      maxComplexity: 'medium',
+      bestPractices: [
+        'Keep prompts concise and focused',
+        'Suitable for quick, general-purpose tasks',
+        'Prefer direct questions'
+      ]
+    }
+  },
+  'llama-3-70b-instruct': {
+    id: 'llama-3-70b-instruct',
+    name: 'Llama 3 70B Instruct',
+    provider: 'Meta',
+    category: AI_MODEL_CATEGORIES.META,
+    description: 'Meta\'s larger open-source model, offering strong performance for complex tasks.',
+    preferredFormat: PROMPT_FORMATS.PLAIN,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.STRUCTURED],
+    maxTokens: 8192,
+    contextWindow: 8192,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'excellent',
+      multimodal: false
+    },
+    pricing: { input: 0.50, output: 1.50 },
+    features: [],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: false,
+      maxComplexity: 'high',
+      bestPractices: [
+        'Provide detailed instructions for complex tasks',
+        'Effective for in-depth analysis and content generation',
+        'Leverage few-shot examples when possible'
+      ]
+    }
+  },
+
+  // Cohere Models
+  'command-r-plus': {
+    id: 'command-r-plus',
+    name: 'Command R+',
+    provider: 'Cohere',
+    category: AI_MODEL_CATEGORIES.COHERE,
+    description: 'Cohere\'s most powerful model, optimized for RAG and complex enterprise workloads.',
+    preferredFormat: PROMPT_FORMATS.STRUCTURED,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.PLAIN],
+    maxTokens: 128000,
+    contextWindow: 128000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'good',
+      multimodal: false
+    },
+    pricing: { input: 3.00, output: 15.00 },
+    features: ['RAG_optimized', 'tool_use'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: true,
+      supportsThinking: false,
+      maxComplexity: 'high',
+      bestPractices: [
+        'Use clear instructions for RAG queries',
+        'Provide relevant context for retrieval',
+        'Clearly define tool usage for complex actions'
+      ]
+    }
+  },
+  'command-r': {
+    id: 'command-r',
+    name: 'Command R',
+    provider: 'Cohere',
+    category: AI_MODEL_CATEGORIES.COHERE,
+    description: 'A scalable and efficient Cohere model, well-suited for RAG and general purpose tasks.',
+    preferredFormat: PROMPT_FORMATS.STRUCTURED,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.PLAIN],
+    maxTokens: 128000,
+    contextWindow: 128000,
+    capabilities: {
+      reasoning: 'good',
+      coding: 'good',
+      analysis: 'good',
+      creative: 'good',
+      multimodal: false
+    },
+    pricing: { input: 0.50, output: 1.50 },
+    features: ['RAG_optimized', 'tool_use'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: true,
+      supportsThinking: false,
+      maxComplexity: 'medium',
+      bestPractices: [
+        'Concise instructions for RAG tasks',
+        'Focus on relevant information for retrieval',
+        'Simpler tool use definitions'
       ]
     }
   }

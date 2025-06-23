@@ -1,12 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { ChevronDown, ChevronUp, Cpu, Zap, Eye } from 'lucide-react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
+import { ChevronDown, ChevronUp, Cpu, Zap, Eye, Star } from 'lucide-react'
 import { 
   AI_MODELS, 
   getAllProviders, 
   getModelsByProvider
 } from '../data/aiModels'
 
-const ModelSelector = ({ selectedModel, onModelChange }) => {
+const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedProvider, setSelectedProvider] = useState('all')
   const triggerRef = useRef(null)
@@ -15,9 +15,20 @@ const ModelSelector = ({ selectedModel, onModelChange }) => {
   const providers = getAllProviders()
   const currentModel = AI_MODELS[selectedModel]
 
-  const filteredModels = selectedProvider === 'all' 
-    ? Object.values(AI_MODELS)
-    : getModelsByProvider(selectedProvider)
+  const filteredModels = useMemo(() => {
+    let models = selectedProvider === 'all' 
+      ? Object.values(AI_MODELS)
+      : getModelsByProvider(selectedProvider);
+
+    if (suggestedModelId && models.some(m => m.id === suggestedModelId)) {
+      models = models.sort((a, b) => {
+        if (a.id === suggestedModelId) return -1;
+        if (b.id === suggestedModelId) return 1;
+        return 0;
+      });
+    }
+    return models;
+  }, [selectedProvider, suggestedModelId]);
 
   const getProviderColor = (provider) => {
     const colors = {
@@ -86,7 +97,12 @@ const ModelSelector = ({ selectedModel, onModelChange }) => {
                 {currentModel?.provider}
               </div>
               <div>
-                <div className="font-medium text-gray-900">{currentModel?.name}</div>
+                <div className="font-medium text-gray-900 flex items-center">
+                  {currentModel?.name}
+                  {currentModel?.id === suggestedModelId && !isOpen && (
+                    <Star className="w-4 h-4 text-yellow-500 fill-current ml-2" />
+                  )}
+                </div>
                 <div className="text-sm text-gray-500">
                   {currentModel?.contextWindow?.toLocaleString()} tokens • {currentModel?.preferredFormat?.toUpperCase()} format
                 </div>
@@ -139,6 +155,7 @@ const ModelSelector = ({ selectedModel, onModelChange }) => {
             <div className="max-h-64 overflow-y-auto">
               {filteredModels.map(model => {
                 const isSelected = model.id === selectedModel
+                const isSuggested = model.id === suggestedModelId
                 
                 return (
                   <div 
@@ -149,7 +166,7 @@ const ModelSelector = ({ selectedModel, onModelChange }) => {
                     }}
                     className={`p-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
                       isSelected ? 'bg-blue-50' : ''
-                    }`}
+                    } ${isSuggested ? 'bg-yellow-50/50 border-l-4 border-yellow-400' : ''}`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
@@ -158,6 +175,12 @@ const ModelSelector = ({ selectedModel, onModelChange }) => {
                             {model.provider}
                           </div>
                           <span className="font-medium text-gray-900">{model.name}</span>
+                          {isSuggested && (
+                            <div className="flex items-center text-xs text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded-full">
+                              <Star className="w-3 h-3 mr-1"/>
+                              Recommended
+                            </div>
+                          )}
                         </div>
                         <p className="text-sm text-gray-600 mb-2">{model.description}</p>
                         <div className="flex items-center space-x-4 text-xs text-gray-500">
