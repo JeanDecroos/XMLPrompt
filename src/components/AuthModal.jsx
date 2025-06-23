@@ -1,484 +1,236 @@
-import React, { useState, useEffect } from 'react'
-import { X, Mail, Lock, User, Eye, EyeOff, Github, Chrome, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { X, Mail, Lock, User, Eye, EyeOff, Github, Sparkles } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { isAuthEnabled } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 
 const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
-  const [mode, setMode] = useState(initialMode)
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    name: ''
-  })
+  const [mode, setMode] = useState(initialMode) // 'signin' or 'signup' or 'reset_password'
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [errors, setErrors] = useState({})
-  const [message, setMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [message, setMessage] = useState(null)
+  
+  const modalRef = useRef(null)
+  const { signIn, signUp, resetPassword } = useAuth()
 
-  const { signIn, signUp, signInWithOAuth, resetPassword, loading } = useAuth()
-
-  // Reset form when modal opens/closes or mode changes
   useEffect(() => {
+    setMode(initialMode)
+    setError(null)
+    setMessage(null)
+  }, [initialMode, isOpen])
+
+  // Handle escape key to close
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') onClose()
+    }
     if (isOpen) {
-      setFormData({ email: '', password: '', confirmPassword: '', name: '' })
-      setErrors({})
-      setMessage('')
-      setMode(initialMode)
+      document.addEventListener('keydown', handleEscape)
+      return () => document.removeEventListener('keydown', handleEscape)
     }
-  }, [isOpen, initialMode])
-
-  // Handle escape key
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose()
-      }
-    }
-    document.addEventListener('keydown', handleEscape)
-    return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen, onClose])
 
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
+  const handleOAuthSignIn = async (provider) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({ provider })
+      if (error) throw error
+    } catch (err) {
+      setError(err.message || 'Failed to sign in with OAuth provider.')
+      setLoading(false)
     }
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen])
-
-  const validateForm = () => {
-    const newErrors = {}
-
-    if (!formData.email) {
-      newErrors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email'
-    }
-
-    if (mode !== 'reset') {
-      if (!formData.password) {
-        newErrors.password = 'Password is required'
-      } else if (formData.password.length < 6) {
-        newErrors.password = 'Password must be at least 6 characters'
-      }
-
-      if (mode === 'signup') {
-        if (!formData.name) {
-          newErrors.name = 'Name is required'
-        }
-        if (formData.password !== formData.confirmPassword) {
-          newErrors.confirmPassword = 'Passwords do not match'
-        }
-      }
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
   }
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
-    // If auth is disabled, show appropriate message
-    if (!isAuthEnabled) {
-      setErrors({ general: 'Authentication is currently disabled. The app is running in demo mode.' })
-      return
-    }
-
-    if (!validateForm()) return
-
-    setIsLoading(true)
-    setMessage('')
+    setLoading(true)
+    setError(null)
+    setMessage(null)
 
     try {
-      if (mode === 'signin') {
-        const { error } = await signIn(formData.email, formData.password)
-        if (error) {
-          setErrors({ general: error.message })
-        } else {
-          setMessage('Signed in successfully!')
-          setTimeout(() => onClose(), 1500)
+      let response
+      if (mode === 'signup') {
+        response = await signUp(email, password)
+        if (!response.error) {
+          setMessage('Check your email for the confirmation link!')
         }
-      } else if (mode === 'signup') {
-        const { error } = await signUp(formData.email, formData.password, {
-          data: { name: formData.name }
-        })
-        if (error) {
-          setErrors({ general: error.message })
-        } else {
-          setMessage('Account created! Please check your email to verify your account.')
-          setTimeout(() => {
-            setMode('signin')
-            setMessage('')
-          }, 3000)
+      } else if (mode === 'signin') {
+        response = await signIn(email, password)
+        if (!response.error) {
+          onClose() // Close modal on successful sign in
         }
-      } else if (mode === 'reset') {
-        const { error } = await resetPassword(formData.email)
-        if (error) {
-          setErrors({ general: error.message })
-        } else {
-          setMessage('Password reset email sent! Check your inbox.')
-          setTimeout(() => {
-            setMode('signin')
-            setMessage('')
-          }, 3000)
+      } else if (mode === 'reset_password') {
+        response = await resetPassword(email)
+        if (!response.error) {
+          setMessage('Check your email for password reset instructions.')
         }
       }
-    } catch (error) {
-      setErrors({ general: 'An unexpected error occurred. Please try again.' })
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
-  const handleOAuthSignIn = async (provider) => {
-    // If auth is disabled, show appropriate message
-    if (!isAuthEnabled) {
-      setErrors({ general: 'Authentication is currently disabled. The app is running in demo mode.' })
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      const { error } = await signInWithOAuth(provider)
-      if (error) {
-        setErrors({ general: error.message })
+      if (response.error) {
+        throw response.error
       }
-    } catch (error) {
-      setErrors({ general: 'OAuth sign in failed. Please try again.' })
+    } catch (err) {
+      setError(err.message || `Failed to ${mode}.`)
     } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleInputChange = (field) => (e) => {
-    setFormData(prev => ({ ...prev, [field]: e.target.value }))
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }))
+      setLoading(false)
     }
   }
 
   if (!isOpen) return null
 
+  const renderContent = () => {
+    switch (mode) {
+      case 'signup':
+        return {
+          title: 'Create an Account',
+          description: 'Unlock advanced features and save your prompts.',
+          buttonText: 'Create Account',
+          fields: ['email', 'password'],
+          footerLink: 'signin',
+          footerText: 'Already have an account?',
+          footerAction: 'Sign In'
+        }
+      case 'reset_password':
+        return {
+          title: 'Reset Password',
+          description: 'Enter your email to receive reset instructions.',
+          buttonText: 'Send Instructions',
+          fields: ['email'],
+          footerLink: 'signin',
+          footerText: 'Remembered your password?',
+          footerAction: 'Sign In'
+        }
+      case 'signin':
+      default:
+        return {
+          title: 'Welcome Back',
+          description: 'Sign in to access your saved prompts and settings.',
+          buttonText: 'Sign In',
+          fields: ['email', 'password'],
+          footerLink: 'signup',
+          footerText: "Don't have an account?",
+          footerAction: 'Sign Up'
+        }
+    }
+  }
+
+  const { title, description, buttonText, fields, footerLink, footerText, footerAction } = renderContent()
+  
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Backdrop */}
+    <div 
+      className="fixed inset-0 z-[2000] flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
+      onClick={onClose}
+    >
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      
-      {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div 
-          className="relative bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modal-title"
+        ref={modalRef}
+        className="relative w-full max-w-md m-4 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl p-8 transform transition-all duration-300 ease-in-out scale-95 opacity-0 animate-scale-in"
+        onClick={e => e.stopPropagation()}
+      >
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
         >
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label="Close modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
-
-          {/* Header */}
-          <div className="px-6 pt-6 pb-4">
-            <h2 id="modal-title" className="text-2xl font-bold text-gray-900 text-center">
-              {!isAuthEnabled ? 'Demo Mode' : 
-               mode === 'signin' ? 'Sign In' :
-               mode === 'signup' ? 'Create Account' :
-               'Reset Password'}
-            </h2>
-            <p className="text-gray-600 text-center mt-2">
-              {mode === 'signin' && 'Sign in to your account to continue'}
-              {mode === 'signup' && 'Join thousands of users creating better prompts'}
-              {mode === 'reset' && 'Enter your email to receive a reset link'}
-            </p>
+          <X className="w-5 h-5" />
+        </button>
+        
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-primary-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
+            <Sparkles className="w-8 h-8 text-white" />
           </div>
+          <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+          <p className="text-gray-500 mt-2">{description}</p>
+        </div>
 
-          {/* Auth Disabled Message */}
-          {!isAuthEnabled && (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Demo Mode Active</h3>
-              <p className="text-gray-600 mb-4">
-                Authentication is currently disabled. You can explore all features in demo mode.
-              </p>
-              <p className="text-sm text-gray-500 mb-6">
-                To enable user accounts and premium features, configure the Supabase environment variables.
-              </p>
+        {error && <p className="mb-4 text-center text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>}
+        {message && <p className="mb-4 text-center text-sm text-green-600 bg-green-50 p-3 rounded-lg">{message}</p>}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {fields.includes('email') && (
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input 
+                type="email"
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="input-field pl-12"
+              />
+            </div>
+          )}
+          {fields.includes('password') && (
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input 
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="input-field pl-12 pr-12"
+              />
               <button
-                onClick={onClose}
-                className="btn-primary w-full"
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                Continue in Demo Mode
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
           )}
+          
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full btn btn-primary btn-lg"
+          >
+            {loading ? 'Processing...' : buttonText}
+          </button>
 
-          {/* General Error/Success Message */}
-          {(errors.general || message) && (
-            <div className={`mb-4 p-3 rounded-lg flex items-center space-x-2 ${
-              message ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-            }`}>
-              {message ? (
-                <CheckCircle className="w-4 h-4 flex-shrink-0" />
-              ) : (
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              )}
-              <span className="text-sm">{message || errors.general}</span>
+          {mode === 'signin' && (
+            <div className="text-right">
+              <button 
+                type="button" 
+                onClick={() => setMode('reset_password')}
+                className="text-sm text-primary-600 hover:underline"
+              >
+                Forgot password?
+              </button>
             </div>
           )}
+        </form>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="px-6 pb-6">
-            {/* Name Field (Sign Up Only) */}
-            {mode === 'signup' && (
-              <div className="mb-4">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    id="name"
-                    type="text"
-                    value={formData.name}
-                    onChange={handleInputChange('name')}
-                    className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${
-                      errors.name ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter your full name"
-                    disabled={isLoading}
-                  />
-                </div>
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-                )}
-              </div>
-            )}
+        <div className="relative my-6 text-center">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="bg-white px-2 text-gray-500">Or continue with</span>
+          </div>
+        </div>
 
-            {/* Email Field */}
-            <div className="mb-4">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange('email')}
-                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="Enter your email"
-                  disabled={isLoading}
-                  autoComplete="email"
-                />
-              </div>
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-              )}
-            </div>
+        <div>
+          <button 
+            type="button" 
+            onClick={() => handleOAuthSignIn('github')}
+            disabled={loading}
+            className="w-full btn btn-secondary"
+          >
+            <Github className="w-5 h-5 mr-3" />
+            GitHub
+          </button>
+        </div>
 
-            {/* Password Fields */}
-            {mode !== 'reset' && (
-              <>
-                <div className="mb-4">
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      value={formData.password}
-                      onChange={handleInputChange('password')}
-                      className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${
-                        errors.password ? 'border-red-300' : 'border-gray-300'
-                      }`}
-                      placeholder="Enter your password"
-                      disabled={isLoading}
-                      autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                  )}
-                </div>
-
-                {/* Confirm Password (Sign Up Only) */}
-                {mode === 'signup' && (
-                  <div className="mb-4">
-                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                      Confirm Password
-                    </label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <input
-                        id="confirmPassword"
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange('confirmPassword')}
-                        className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${
-                          errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                        }`}
-                        placeholder="Confirm your password"
-                        disabled={isLoading}
-                        autoComplete="new-password"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {errors.confirmPassword && (
-                      <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading || loading}
-              className="w-full btn btn-primary flex items-center justify-center space-x-2 mb-4"
-            >
-              {isLoading || loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>
-                    {mode === 'signin' && 'Signing In...'}
-                    {mode === 'signup' && 'Creating Account...'}
-                    {mode === 'reset' && 'Sending Reset Email...'}
-                  </span>
-                </>
-              ) : (
-                <span>
-                  {mode === 'signin' && 'Sign In'}
-                  {mode === 'signup' && 'Create Account'}
-                  {mode === 'reset' && 'Send Reset Email'}
-                </span>
-              )}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            {footerText}{' '}
+            <button onClick={() => setMode(footerLink)} className="font-medium text-primary-600 hover:underline">
+              {footerAction}
             </button>
-
-            {/* OAuth Buttons (Sign In/Up Only) */}
-            {mode !== 'reset' && (
-              <>
-                <div className="relative mb-4">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300" />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <button
-                    type="button"
-                    onClick={() => handleOAuthSignIn('google')}
-                    disabled={isLoading}
-                    className="btn btn-ghost flex items-center justify-center space-x-2"
-                  >
-                    <Chrome className="w-4 h-4" />
-                    <span>Google</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleOAuthSignIn('github')}
-                    disabled={isLoading}
-                    className="btn btn-ghost flex items-center justify-center space-x-2"
-                  >
-                    <Github className="w-4 h-4" />
-                    <span>GitHub</span>
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Mode Switch Links */}
-            <div className="text-center text-sm text-gray-600">
-              {mode === 'signin' && (
-                <>
-                  <p>
-                    Don't have an account?{' '}
-                    <button
-                      type="button"
-                      onClick={() => setMode('signup')}
-                      className="text-primary-600 hover:text-primary-700 font-medium"
-                    >
-                      Sign up
-                    </button>
-                  </p>
-                  <p className="mt-2">
-                    <button
-                      type="button"
-                      onClick={() => setMode('reset')}
-                      className="text-primary-600 hover:text-primary-700 font-medium"
-                    >
-                      Forgot your password?
-                    </button>
-                  </p>
-                </>
-              )}
-              {mode === 'signup' && (
-                <p>
-                  Already have an account?{' '}
-                  <button
-                    type="button"
-                    onClick={() => setMode('signin')}
-                    className="text-primary-600 hover:text-primary-700 font-medium"
-                  >
-                    Sign in
-                  </button>
-                </p>
-              )}
-              {mode === 'reset' && (
-                <p>
-                  Remember your password?{' '}
-                  <button
-                    type="button"
-                    onClick={() => setMode('signin')}
-                    className="text-primary-600 hover:text-primary-700 font-medium"
-                  >
-                    Sign in
-                  </button>
-                </p>
-              )}
-            </div>
-          </form>
+          </p>
         </div>
       </div>
     </div>
