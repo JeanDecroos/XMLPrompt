@@ -490,4 +490,250 @@ export const estimateTokenCost = (modelId, inputTokens, outputTokens) => {
 }
 
 // Default model selection
-export const DEFAULT_MODEL = 'claude-3-5-sonnet' 
+export const DEFAULT_MODEL = 'claude-3-5-sonnet'
+
+// Enhanced Model Recommendation System
+export const MODEL_RECOMMENDATIONS = {
+  // Task-based recommendations with performance scores (1-10)
+  TASK_RECOMMENDATIONS: {
+    coding: {
+      primary: 'claude-3-5-sonnet',
+      alternatives: ['gpt-4o', 'llama-3.1-405b', 'gemini-1.5-pro'],
+      reasoning: 'Excellent at code generation, debugging, and complex programming tasks'
+    },
+    reasoning: {
+      primary: 'llama-3.1-405b',
+      alternatives: ['claude-3-5-sonnet', 'gpt-4o', 'mistral-large'],
+      reasoning: 'Superior performance on complex logical reasoning and mathematical problems'
+    },
+    writing: {
+      primary: 'claude-3-5-sonnet',
+      alternatives: ['gpt-4o', 'gemini-1.5-pro', 'command-r-plus'],
+      reasoning: 'Excellent prose quality, creativity, and nuanced understanding'
+    },
+    analysis: {
+      primary: 'gpt-4o',
+      alternatives: ['claude-3-5-sonnet', 'gemini-1.5-pro', 'llama-3.1-405b'],
+      reasoning: 'Strong analytical capabilities and structured thinking'
+    },
+    conversation: {
+      primary: 'gpt-4o',
+      alternatives: ['claude-3-5-sonnet', 'gemini-1.5-pro', 'command-r-plus'],
+      reasoning: 'Natural conversational flow and contextual understanding'
+    },
+    'cost-effective': {
+      primary: 'gpt-4o-mini',
+      alternatives: ['gemini-1.5-flash', 'claude-3-haiku', 'mistral-7b-instruct'],
+      reasoning: 'Best balance of performance and cost for most tasks'
+    },
+    speed: {
+      primary: 'command-r-plus',
+      alternatives: ['gemini-1.5-flash', 'claude-3-haiku', 'gpt-4o-mini'],
+      reasoning: 'Fastest inference times while maintaining quality'
+    },
+    'long-context': {
+      primary: 'gemini-1.5-pro',
+      alternatives: ['claude-3-5-sonnet', 'llama-3.1-405b', 'command-r-plus'],
+      reasoning: 'Excellent handling of long documents and extended conversations'
+    }
+  },
+
+  // Performance tiers based on benchmark scores and real-world usage
+  PERFORMANCE_TIERS: {
+    flagship: {
+      models: ['claude-3-5-sonnet', 'gpt-4o', 'gemini-1.5-pro', 'llama-3.1-405b'],
+      description: 'Top-tier models for demanding tasks requiring highest quality',
+      useCase: 'Complex reasoning, advanced coding, research, professional writing'
+    },
+    balanced: {
+      models: ['gpt-4o-mini', 'gemini-1.5-flash', 'mistral-large', 'command-r-plus'],
+      description: 'High-quality models with good performance-to-cost ratio',
+      useCase: 'General tasks, business applications, content creation'
+    },
+    efficient: {
+      models: ['claude-3-haiku', 'mistral-7b-instruct', 'llama-3-8b-instruct'],
+      description: 'Fast and cost-effective for simpler tasks',
+      useCase: 'Simple queries, chatbots, basic content generation'
+    },
+    specialized: {
+      models: ['command-r', 'llama-3-70b-instruct'],
+      description: 'Models optimized for specific use cases',
+      useCase: 'RAG applications, domain-specific tasks'
+    }
+  },
+
+  // Model strengths and weaknesses
+  MODEL_PROFILES: {
+    'claude-3-5-sonnet': {
+      strengths: ['Coding', 'Reasoning', 'Writing', 'Analysis'],
+      weaknesses: ['Cost', 'Speed'],
+      bestFor: 'Complex technical tasks requiring high accuracy',
+      score: 9.5
+    },
+    'gpt-4o': {
+      strengths: ['Versatility', 'Conversation', 'Analysis', 'Multimodal'],
+      weaknesses: ['Cost', 'Reasoning complexity'],
+      bestFor: 'General-purpose applications with multimodal needs',
+      score: 9.2
+    },
+    'gemini-1.5-pro': {
+      strengths: ['Long context', 'Multimodal', 'Speed', 'Analysis'],
+      weaknesses: ['Reasoning', 'Code generation'],
+      bestFor: 'Document analysis and multimodal tasks',
+      score: 8.8
+    },
+    'llama-3.1-405b': {
+      strengths: ['Reasoning', 'Math', 'Open source', 'Coding'],
+      weaknesses: ['Speed', 'Cost', 'Conversation'],
+      bestFor: 'Complex reasoning and mathematical problems',
+      score: 9.0
+    },
+    'gpt-4o-mini': {
+      strengths: ['Cost-effective', 'Speed', 'Versatility'],
+      weaknesses: ['Complex reasoning', 'Advanced coding'],
+      bestFor: 'General tasks requiring good performance at low cost',
+      score: 8.2
+    },
+    'mistral-large': {
+      strengths: ['Reasoning', 'Cost-effective', 'Multilingual'],
+      weaknesses: ['Conversation', 'Creative writing'],
+      bestFor: 'Analytical tasks and multilingual applications',
+      score: 8.0
+    },
+    'command-r-plus': {
+      strengths: ['Speed', 'RAG', 'Cost-effective', 'Long context'],
+      weaknesses: ['Complex reasoning', 'Creative tasks'],
+      bestFor: 'RAG applications and fast inference needs',
+      score: 7.8
+    },
+    'gemini-1.5-flash': {
+      strengths: ['Speed', 'Cost-effective', 'Multimodal'],
+      weaknesses: ['Complex reasoning', 'Advanced coding'],
+      bestFor: 'Fast multimodal applications',
+      score: 7.5
+    },
+    'claude-3-haiku': {
+      strengths: ['Speed', 'Cost-effective', 'Conversation'],
+      weaknesses: ['Complex reasoning', 'Advanced analysis'],
+      bestFor: 'Simple conversational applications',
+      score: 7.2
+    },
+    'mistral-7b-instruct': {
+      strengths: ['Cost-effective', 'Open source', 'Efficiency'],
+      weaknesses: ['Complex tasks', 'Reasoning', 'Context length'],
+      bestFor: 'Simple tasks requiring minimal resources',
+      score: 6.8
+    }
+  }
+};
+
+// Smart recommendation function
+export function getModelRecommendation(criteria = {}) {
+  const {
+    task = 'general',
+    priority = 'balanced', // 'quality', 'speed', 'cost', 'balanced'
+    complexity = 'medium', // 'simple', 'medium', 'complex'
+    budget = 'medium' // 'low', 'medium', 'high'
+  } = criteria;
+
+  // Task-based recommendations
+  if (MODEL_RECOMMENDATIONS.TASK_RECOMMENDATIONS[task]) {
+    const taskRec = MODEL_RECOMMENDATIONS.TASK_RECOMMENDATIONS[task];
+    
+    // Adjust based on priority and budget
+    if (priority === 'cost' || budget === 'low') {
+      return {
+        recommended: taskRec.alternatives[taskRec.alternatives.length - 1],
+        alternatives: taskRec.alternatives.slice(0, -1),
+        reasoning: `Cost-optimized choice for ${task}: ${taskRec.reasoning}`
+      };
+    }
+    
+    if (priority === 'speed') {
+      const speedModels = ['command-r-plus', 'gemini-1.5-flash', 'claude-3-haiku'];
+      const speedChoice = speedModels.find(model => 
+        [taskRec.primary, ...taskRec.alternatives].includes(model)
+      ) || taskRec.alternatives[1];
+      
+      return {
+        recommended: speedChoice,
+        alternatives: [taskRec.primary, ...taskRec.alternatives.filter(m => m !== speedChoice)],
+        reasoning: `Speed-optimized choice for ${task}`
+      };
+    }
+    
+    return {
+      recommended: taskRec.primary,
+      alternatives: taskRec.alternatives,
+      reasoning: taskRec.reasoning
+    };
+  }
+
+  // Fallback to tier-based recommendations
+  const tier = complexity === 'complex' ? 'flagship' : 
+               complexity === 'simple' ? 'efficient' : 'balanced';
+  
+  const tierModels = MODEL_RECOMMENDATIONS.PERFORMANCE_TIERS[tier];
+  
+  return {
+    recommended: tierModels.models[0],
+    alternatives: tierModels.models.slice(1),
+    reasoning: tierModels.description
+  };
+}
+
+// Get model comparison
+export function compareModels(modelIds) {
+  return modelIds.map(id => {
+    const model = AI_MODELS[id];
+    const profile = MODEL_RECOMMENDATIONS.MODEL_PROFILES[id];
+    
+    return {
+      id,
+      name: model?.name || id,
+      score: profile?.score || 0,
+      strengths: profile?.strengths || [],
+      weaknesses: profile?.weaknesses || [],
+      bestFor: profile?.bestFor || 'General use',
+      pricing: model?.pricing || 'Unknown'
+    };
+  }).sort((a, b) => b.score - a.score);
+}
+
+// Get best model for specific requirements
+export function getBestModelFor(requirements) {
+  const {
+    maxCost = Infinity,
+    minSpeed = 0,
+    requiredCapabilities = [],
+    excludeModels = []
+  } = requirements;
+
+  const availableModels = Object.entries(MODEL_RECOMMENDATIONS.MODEL_PROFILES)
+    .filter(([id]) => !excludeModels.includes(id))
+    .map(([id, profile]) => ({
+      id,
+      ...profile,
+      model: AI_MODELS[id]
+    }))
+    .filter(model => {
+      // Filter by cost if specified
+      if (maxCost < Infinity && model.model?.pricing?.inputCost > maxCost) {
+        return false;
+      }
+      
+      // Filter by required capabilities
+      if (requiredCapabilities.length > 0) {
+        return requiredCapabilities.some(cap => 
+          model.strengths.some(strength => 
+            strength.toLowerCase().includes(cap.toLowerCase())
+          )
+        );
+      }
+      
+      return true;
+    })
+    .sort((a, b) => b.score - a.score);
+
+  return availableModels.length > 0 ? availableModels[0] : null;
+} 
