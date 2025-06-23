@@ -58,7 +58,7 @@ const ModelSelector = ({ selectedModel, onModelChange }) => {
   }, [isOpen])
 
   return (
-    <div className="card p-6 fade-in relative" style={{ zIndex: 1000 }} ref={containerRef}>
+    <div className="card p-6 fade-in relative" ref={containerRef}>
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -186,7 +186,7 @@ const ModelSelector = ({ selectedModel, onModelChange }) => {
             <strong className="text-gray-900">{currentModel.name}</strong> supports up to{' '}
             <strong className="text-gray-900">{currentModel.contextWindow?.toLocaleString()}</strong> tokens
             {currentModel.features?.multimodal && (
-              <span className="text-blue-600"> • Supports images and text</span>
+              <span className="text-blue-600">• Supports images and text</span>
             )}
           </div>
         </div>
