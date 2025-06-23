@@ -276,7 +276,7 @@ const PromptGenerator = () => {
           </div>
 
           {/* Right Column - Model Selection & Results */}
-          <div className="xl:col-span-2 space-y-8">
+          <div className="xl:col-span-2 space-y-8 relative z-50">
             <div className="slide-up stagger-2">
               <ModelSelector
                 selectedModel={selectedModel}
