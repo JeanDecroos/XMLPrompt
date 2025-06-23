@@ -3,7 +3,6 @@ import { AuthProvider } from './contexts/AuthContext'
 import Header from './components/Header'
 import PromptGenerator from './components/PromptGenerator'
 import PricingSection from './components/PricingSection'
-import FutureRoadmap from './components/FutureRoadmap'
 import Footer from './components/Footer'
 
 function App() {
@@ -14,7 +13,6 @@ function App() {
         <main className="flex-1">
           <PromptGenerator />
           <PricingSection />
-          <FutureRoadmap />
         </main>
         <Footer />
       </div>
