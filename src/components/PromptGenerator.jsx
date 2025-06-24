@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { Sparkles, Zap, Target, Wand2 } from 'lucide-react'
 import PromptForm from './PromptForm'
 import EnrichmentOptions from './EnrichmentOptions'
@@ -6,6 +6,7 @@ import EnhancedPromptPreview from './EnhancedPromptPreview'
 import ModelSelector from './ModelSelector'
 import PromptHistory from './PromptHistory'
 import RotatingPromptExamples from './RotatingPromptExamples'
+import SessionHistoryControls from './SessionHistoryControls'
 import { generateClaudePrompt, validatePromptConfig } from '../utils/promptGenerator'
 import { enrichPrompt } from '../utils/promptEnricher'
 import { promptEnrichmentService } from '../services/promptEnrichment'
@@ -14,6 +15,7 @@ import { routeToOptimalModel } from '../services/ModelRoutingEngine'
 import { DEFAULT_MODEL, getModelById } from '../data/aiModels'
 import { useAuth } from '../contexts/AuthContext'
 import { isAuthEnabled } from '../lib/supabase'
+import { useSessionHistory } from '../hooks/useSessionHistory'
 
 const PromptGenerator = () => {
   const { user, session, isAuthenticated, isPro } = useAuth()
@@ -23,21 +25,43 @@ const PromptGenerator = () => {
   const [modelRecommendation, setModelRecommendation] = useState(null)
   const [userHasOverridden, setUserHasOverridden] = useState(false)
 
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     role: '',
     task: '',
     context: '',
     requirements: '',
     style: '',
     output: ''
-  })
-  
-  const [enrichmentData, setEnrichmentData] = useState({
+  }
+
+  const initialEnrichmentData = {
     tone: '',
     goals: '',
     examples: '',
     constraints: []
-  })
+  }
+
+  // Initialize session history with initial state
+  const initialSessionState = useMemo(() => ({
+    formData: initialFormData,
+    enrichmentData: initialEnrichmentData,
+    selectedModel: DEFAULT_MODEL,
+    userHasOverridden: false,
+    timestamp: Date.now()
+  }), [])
+
+  const {
+    pushState: pushSessionState,
+    undo: undoSessionState,
+    redo: redoSessionState,
+    clearHistory: clearSessionHistory,
+    canUndo,
+    canRedo,
+    getHistoryStats
+  } = useSessionHistory(initialSessionState)
+
+  const [formData, setFormData] = useState(initialFormData)
+  const [enrichmentData, setEnrichmentData] = useState(initialEnrichmentData)
   
   const [rawPrompt, setRawPrompt] = useState('')
   const [enrichedPrompt, setEnrichedPrompt] = useState('')
@@ -50,6 +74,54 @@ const PromptGenerator = () => {
   
   // History modal state
   const [showHistory, setShowHistory] = useState(false)
+
+  // Debounce timer for session state tracking
+  const debounceTimerRef = React.useRef(null)
+
+  // Track significant state changes for session history
+  const trackStateChange = useCallback(() => {
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+
+    // Set new timer to debounce rapid changes
+    debounceTimerRef.current = setTimeout(() => {
+      const currentState = {
+        formData,
+        enrichmentData,
+        selectedModel,
+        userHasOverridden,
+        timestamp: Date.now()
+      }
+      pushSessionState(currentState)
+    }, 1000) // 1 second debounce
+  }, [formData, enrichmentData, selectedModel, userHasOverridden, pushSessionState])
+
+  // Handle session history navigation
+  const handleUndo = useCallback(() => {
+    const previousState = undoSessionState()
+    if (previousState) {
+      setFormData(previousState.formData)
+      setEnrichmentData(previousState.enrichmentData)
+      setSelectedModel(previousState.selectedModel)
+      setUserHasOverridden(previousState.userHasOverridden)
+    }
+  }, [undoSessionState])
+
+  const handleRedo = useCallback(() => {
+    const nextState = redoSessionState()
+    if (nextState) {
+      setFormData(nextState.formData)
+      setEnrichmentData(nextState.enrichmentData)
+      setSelectedModel(nextState.selectedModel)
+      setUserHasOverridden(nextState.userHasOverridden)
+    }
+  }, [redoSessionState])
+
+  const handleClearSessionHistory = useCallback(() => {
+    clearSessionHistory()
+  }, [clearSessionHistory])
 
   // Generate raw prompt whenever form data or model changes
   useEffect(() => {
@@ -197,6 +269,8 @@ const PromptGenerator = () => {
       ...prev,
       [field]: value
     }))
+    // Track state change for session history
+    trackStateChange()
   }
 
   const handleEnrichmentChange = (field, value) => {
@@ -204,33 +278,30 @@ const PromptGenerator = () => {
       ...prev,
       [field]: value
     }))
+    // Track state change for session history
+    trackStateChange()
   }
 
   const handleReset = () => {
-    setFormData({
-      role: '',
-      task: '',
-      context: '',
-      requirements: '',
-      style: '',
-      output: ''
-    })
-    setEnrichmentData({
-      tone: '',
-      goals: '',
-      examples: '',
-      constraints: []
-    })
+    setFormData(initialFormData)
+    setEnrichmentData(initialEnrichmentData)
+    setSelectedModel(DEFAULT_MODEL)
+    setUserHasOverridden(false)
     setHasEnrichment(false)
     setEnrichmentResult(null)
     setEnrichmentError(null)
     setPromptMetadata(null)
+    
+    // Clear session history on reset
+    clearSessionHistory()
   }
 
   const handleModelChange = useCallback((modelId) => {
     setUserHasOverridden(true);
     setSelectedModel(modelId);
-  }, []);
+    // Track state change for session history
+    trackStateChange()
+  }, [trackStateChange]);
 
   const handleEnrichNow = () => {
     if (validation.isValid) {
@@ -258,7 +329,45 @@ const PromptGenerator = () => {
     setPromptMetadata(promptData.promptMetadata || null)
     setEnrichmentResult(promptData.enrichmentResult || null)
     setHasEnrichment(!!promptData.enrichedPrompt)
+
+    // Clear session history when loading a prompt
+    clearSessionHistory()
   }
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+    }
+  }, [])
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Check if user is typing in an input/textarea
+      const isTyping = ['INPUT', 'TEXTAREA'].includes(e.target.tagName) || 
+                      e.target.contentEditable === 'true'
+      
+      if (!isTyping && (e.ctrlKey || e.metaKey)) {
+        if (e.key === 'z' && !e.shiftKey) {
+          e.preventDefault()
+          if (canUndo) {
+            handleUndo()
+          }
+        } else if ((e.key === 'y') || (e.key === 'z' && e.shiftKey)) {
+          e.preventDefault()
+          if (canRedo) {
+            handleRedo()
+          }
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [canUndo, canRedo, handleUndo, handleRedo])
 
   return (
     <section className="py-16 bg-gradient-to-br from-slate-50 via-blue-50/40 to-purple-50/30 min-h-screen">
@@ -292,6 +401,32 @@ const PromptGenerator = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Left Column - Prompt Configuration */}
           <div className="xl:col-span-1 space-y-8 relative z-20">
+            {/* Session History Controls */}
+            <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-gray-700 flex items-center">
+                  <Zap className="w-4 h-4 mr-2 text-blue-600" />
+                  Session History
+                </h3>
+                <div className="text-xs text-gray-500 hidden sm:block">
+                  Ctrl+Z / Ctrl+Y
+                </div>
+              </div>
+              <SessionHistoryControls
+                canUndo={canUndo}
+                canRedo={canRedo}
+                onUndo={handleUndo}
+                onRedo={handleRedo}
+                onClear={handleClearSessionHistory}
+                historyStats={getHistoryStats()}
+              />
+              {getHistoryStats().total > 1 && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Navigate through your prompt variations without losing work
+                </p>
+              )}
+            </div>
+
             <div>
               <PromptForm
                 formData={formData}
