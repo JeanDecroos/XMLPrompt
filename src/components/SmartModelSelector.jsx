@@ -59,6 +59,50 @@ const SAMPLE_TASKS = {
   ]
 };
 
+const demoScenarios = [
+  {
+    role: 'Software Developer',
+    task: 'Build a complex React component with TypeScript interfaces and comprehensive error handling',
+    description: 'Complex coding task requiring sustained performance'
+  },
+  {
+    role: 'Designer',
+    task: 'Create a professional logo image with clear text rendering for a tech startup',
+    description: 'Image generation with text rendering capabilities'
+  },
+  {
+    role: 'Content Creator',
+    task: 'Generate a high-quality promotional video with synchronized audio for social media marketing',
+    description: 'Video creation with cinematic quality and audio sync'
+  },
+  {
+    role: 'Content Creator',
+    task: 'Compose instrumental background music for a meditation app with calming tones',
+    description: 'Music generation for specialized audio content'
+  },
+  {
+    role: 'Data Scientist',
+    task: 'Analyze large dataset with statistical modeling and generate comprehensive insights report',
+    description: 'Data analysis requiring mathematical capabilities'
+  },
+  {
+    role: 'Researcher',
+    task: 'Conduct deep analysis of 50 academic papers on quantum computing and synthesize findings',
+    description: 'Research task requiring large context and reasoning'
+  },
+  {
+    role: 'Business Analyst',
+    task: 'Quick market analysis for startup pitch deck with budget constraints',
+    description: 'Fast analysis with cost optimization',
+    constraints: { maxCost: true, prioritizeSpeed: true }
+  },
+  {
+    role: 'Marketing Manager',
+    task: 'Write compelling ad copy for social media campaigns across multiple platforms',
+    description: 'Creative writing with versatility requirements'
+  }
+]
+
 const SmartModelSelector = () => {
   const [selectedRole, setSelectedRole] = useState('Software Developer');
   const [taskInput, setTaskInput] = useState('');
@@ -390,6 +434,31 @@ const SmartModelSelector = () => {
               Ranks models by match score and confidence, providing explainable recommendations
             </p>
           </div>
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold mb-4">Try Different Scenarios</h3>
+        <div className="grid gap-3 mb-4">
+          {demoScenarios.map((scenario, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setSelectedRole(scenario.role);
+                                 setTaskDescription(scenario.task);
+                if (scenario.constraints) {
+                  setConstraints(scenario.constraints);
+                } else {
+                  setConstraints({});
+                }
+              }}
+              className="p-3 text-left bg-gray-50 hover:bg-blue-50 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors"
+            >
+              <div className="font-medium text-gray-900">{scenario.role}</div>
+              <div className="text-sm text-gray-600 mt-1">{scenario.description}</div>
+              <div className="text-xs text-gray-500 mt-1 truncate">{scenario.task}</div>
+            </button>
+          ))}
         </div>
       </div>
     </div>

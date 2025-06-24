@@ -6,7 +6,7 @@ import {
   getModelsByProvider
 } from '../data/aiModels'
 
-const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId }) => {
+const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRecommendation }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedProvider, setSelectedProvider] = useState('all')
   const triggerRef = useRef(null)
@@ -83,6 +83,46 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId }) => {
           </p>
         </div>
       </div>
+      
+      {/* Semantic Routing Recommendation Display */}
+      {modelRecommendation && (
+        <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center mb-2">
+                <Star className="w-4 h-4 text-yellow-500 fill-current mr-2" />
+                <span className="text-sm font-medium text-blue-900">Smart Recommendation</span>
+                <span className={`ml-2 px-2 py-0.5 text-xs rounded-full ${
+                  modelRecommendation.primary.confidence >= 0.8 
+                    ? 'bg-green-100 text-green-700' 
+                    : modelRecommendation.primary.confidence >= 0.6
+                    ? 'bg-yellow-100 text-yellow-700'
+                    : 'bg-orange-100 text-orange-700'
+                }`}>
+                  {(modelRecommendation.primary.confidence * 100).toFixed(0)}% confidence
+                </span>
+              </div>
+              <p className="text-sm text-blue-800 mb-2">
+                <strong>{modelRecommendation.primary.model.name}</strong> - {modelRecommendation.primary.reasoning}
+              </p>
+              {modelRecommendation.alternatives.length > 0 && (
+                <details className="text-xs text-blue-700">
+                  <summary className="cursor-pointer hover:text-blue-800">
+                    View {modelRecommendation.alternatives.length} alternatives
+                  </summary>
+                  <div className="mt-2 space-y-1 pl-4 border-l-2 border-blue-200">
+                    {modelRecommendation.alternatives.slice(0, 2).map((alt, index) => (
+                      <div key={index}>
+                        <strong>{alt.model.name}</strong> ({(alt.score * 100).toFixed(0)}% match) - {alt.reasoning}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Current Selection Display */}
       <div className="relative">

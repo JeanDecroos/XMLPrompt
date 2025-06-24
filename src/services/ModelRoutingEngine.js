@@ -59,20 +59,25 @@ const MODEL_CAPABILITY_VECTORS = {
   },
 
   // Specialized Creative Models
+  'dall-e-3': {
+    reasoning: 0.2, coding: 0.0, analysis: 0.2, creative: 1.0,
+    multimodal: 1.0, speed: 0.8, cost: 0.8, context: 0.3,
+    image_generation: 1.0, text_in_images: 1.0
+  },
   'gpt-image-1': {
     reasoning: 0.2, coding: 0.0, analysis: 0.2, creative: 1.0,
     multimodal: 1.0, speed: 0.8, cost: 0.9, context: 0.3,
-    image_generation: 1.0, text_in_images: 1.0
+    image_generation: 1.0, text_in_images: 1.0, conversational_editing: 1.0
   },
   'veo-3': {
     reasoning: 0.2, coding: 0.0, analysis: 0.2, creative: 1.0,
     multimodal: 1.0, speed: 0.4, cost: 0.7, context: 0.3,
-    video_generation: 1.0, cinematic: 1.0
+    video_generation: 1.0, cinematic: 1.0, synchronized_audio: 1.0
   },
   'lyria-2': {
     reasoning: 0.1, coding: 0.0, analysis: 0.1, creative: 1.0,
     multimodal: 0.8, speed: 0.8, cost: 0.9, context: 0.2,
-    music_generation: 1.0, audio_quality: 1.0
+    music_generation: 1.0, audio_quality: 1.0, instrumental: 1.0
   },
 
   // Legacy but solid performers
@@ -149,8 +154,8 @@ const TASK_SEMANTIC_PATTERNS = {
   // Creative tasks
   content_creation: { creative: 1.0, analysis: 0.5, reasoning: 0.5 },
   image_generation: { creative: 1.0, image_generation: 1.0, multimodal: 1.0 },
-  video_creation: { creative: 1.0, video_generation: 1.0, multimodal: 1.0 },
-  music_creation: { creative: 1.0, music_generation: 1.0, audio_quality: 1.0 },
+  video_creation: { creative: 1.0, video_generation: 1.0, multimodal: 1.0, cinematic: 0.9, synchronized_audio: 0.8 },
+  music_creation: { creative: 1.0, music_generation: 1.0, audio_quality: 1.0, instrumental: 0.8 },
   
   // Reasoning tasks
   problem_solving: { reasoning: 1.0, analysis: 0.8, step_by_step: 0.7 },
@@ -270,19 +275,19 @@ class SemanticModelRouter {
    */
   calculatePatternMatch(taskText, patternName) {
     const keywords = {
-      code_generation: ['generate', 'create', 'write', 'build', 'code', 'function', 'class', 'script'],
+      code_generation: ['generate', 'create', 'write', 'build', 'code', 'function', 'class', 'script', 'component', 'typescript', 'javascript', 'python'],
       code_review: ['review', 'check', 'analyze', 'audit', 'examine', 'code', 'quality'],
       debugging: ['debug', 'fix', 'error', 'bug', 'issue', 'problem', 'troubleshoot'],
       refactoring: ['refactor', 'improve', 'optimize', 'restructure', 'clean'],
       
-      data_analysis: ['analyze', 'data', 'statistics', 'trends', 'insights', 'patterns'],
+      data_analysis: ['analyze', 'data', 'statistics', 'trends', 'insights', 'patterns', 'statistical', 'mathematical'],
       document_analysis: ['document', 'text', 'analyze', 'summarize', 'extract'],
       research: ['research', 'investigate', 'study', 'explore', 'findings'],
       
       content_creation: ['create', 'write', 'content', 'article', 'blog', 'copy'],
-      image_generation: ['image', 'picture', 'visual', 'generate', 'create', 'draw'],
-      video_creation: ['video', 'film', 'movie', 'animation', 'create'],
-      music_creation: ['music', 'song', 'audio', 'sound', 'compose'],
+      image_generation: ['image', 'picture', 'visual', 'generate', 'create', 'draw', 'logo', 'design', 'graphic', 'illustration', 'photo'],
+      video_creation: ['video', 'film', 'movie', 'animation', 'create', 'promotional', 'cinematic'],
+      music_creation: ['music', 'song', 'audio', 'sound', 'compose', 'instrumental', 'background'],
       
       problem_solving: ['solve', 'problem', 'solution', 'resolve', 'figure'],
       strategic_planning: ['strategy', 'plan', 'roadmap', 'vision', 'goals'],
@@ -295,7 +300,7 @@ class SemanticModelRouter {
       image_analysis: ['analyze', 'image', 'photo', 'visual', 'picture'],
       document_processing: ['process', 'document', 'file', 'pdf', 'text'],
       
-      real_time: ['real-time', 'live', 'instant', 'immediate', 'fast'],
+      real_time: ['real-time', 'live', 'instant', 'immediate', 'fast', 'quick'],
       batch_processing: ['batch', 'bulk', 'multiple', 'many', 'process'],
       
       multi_step: ['step', 'steps', 'process', 'workflow', 'sequence'],
@@ -309,6 +314,17 @@ class SemanticModelRouter {
       if (taskText.includes(keyword)) {
         matchScore += 1;
       }
+    }
+    
+    // Boost score for exact matches of key terms
+    if (patternName === 'image_generation' && (taskText.includes('logo') || taskText.includes('image') || taskText.includes('visual'))) {
+      matchScore += 3;
+    }
+    if (patternName === 'video_creation' && (taskText.includes('video') || taskText.includes('promotional'))) {
+      matchScore += 3;
+    }
+    if (patternName === 'music_creation' && (taskText.includes('music') || taskText.includes('audio'))) {
+      matchScore += 3;
     }
     
     // Normalize by keyword count and add base relevance

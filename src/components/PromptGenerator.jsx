@@ -9,7 +9,7 @@ import { generateClaudePrompt, validatePromptConfig } from '../utils/promptGener
 import { enrichPrompt } from '../utils/promptEnricher'
 import { promptEnrichmentService } from '../services/promptEnrichment'
 import { UniversalPromptGenerator } from '../utils/universalPromptGenerator'
-import { suggestModelForPrompt } from '../utils/modelInferenceEngine'
+import { routeToOptimalModel } from '../services/ModelRoutingEngine'
 import { DEFAULT_MODEL, getModelById } from '../data/aiModels'
 import { useAuth } from '../contexts/AuthContext'
 import { isAuthEnabled } from '../lib/supabase'
@@ -19,6 +19,7 @@ const PromptGenerator = () => {
   
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
   const [suggestedModelId, setSuggestedModelId] = useState(null)
+  const [modelRecommendation, setModelRecommendation] = useState(null)
   const [userHasOverridden, setUserHasOverridden] = useState(false)
 
   const [formData, setFormData] = useState({
@@ -76,8 +77,41 @@ const PromptGenerator = () => {
 
   // New: Infer model based on prompt configuration
   useEffect(() => {
-    const suggested = suggestModelForPrompt(formData, enrichmentData);
-    setSuggestedModelId(suggested);
+    // Only suggest models when we have meaningful input
+    if (formData.task && formData.task.length > 10) {
+      try {
+        // Use semantic routing engine with role and task context
+        const role = formData.role || 'General User';
+        const task = `${formData.task} ${formData.context} ${formData.requirements}`.trim();
+        
+        // Build constraints from enrichment data
+        const constraints = {};
+        if (enrichmentData.constraints?.includes('budget-friendly')) {
+          constraints.maxCost = true;
+        }
+        if (enrichmentData.constraints?.includes('fast-response')) {
+          constraints.prioritizeSpeed = true;
+        }
+        if (formData.task.toLowerCase().includes('image') || 
+            formData.task.toLowerCase().includes('visual') ||
+            formData.task.toLowerCase().includes('video') ||
+            formData.task.toLowerCase().includes('audio')) {
+          constraints.requireMultimodal = true;
+        }
+        
+        const recommendation = routeToOptimalModel(role, task, constraints);
+        setModelRecommendation(recommendation);
+        setSuggestedModelId(recommendation.primary.modelId);
+      } catch (error) {
+        console.error('Model routing failed:', error);
+        // Fallback to default
+        setSuggestedModelId(DEFAULT_MODEL);
+        setModelRecommendation(null);
+      }
+    } else {
+      setSuggestedModelId(null);
+      setModelRecommendation(null);
+    }
   }, [formData, enrichmentData]);
 
   // New: Update selected model to suggestion if user hasn't overridden
@@ -294,6 +328,7 @@ const PromptGenerator = () => {
               <ModelSelector
                 selectedModel={selectedModel}
                 suggestedModelId={suggestedModelId}
+                modelRecommendation={modelRecommendation}
                 onModelChange={handleModelChange}
               />
             </div>
