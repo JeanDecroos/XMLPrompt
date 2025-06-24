@@ -1,19 +1,51 @@
-import React, { useState } from 'react'
-import { RotateCcw, User, Target, FileText, CheckSquare, Palette, Download, Lock, Sparkles, ChevronDown, ChevronRight } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { RotateCcw, User, Target, FileText, CheckSquare, Palette, Download, Lock, Sparkles, ChevronDown, ChevronRight, Eye, EyeOff } from 'lucide-react'
 import { roles } from '../data/roles'
 import { useAuth } from '../contexts/AuthContext'
 import { isAuthEnabled } from '../lib/supabase'
 
 const PromptForm = ({ formData, onChange, onReset, validation }) => {
   const { isAuthenticated, isPro } = useAuth()
-  const [expandedSections, setExpandedSections] = useState({
-    context: false,
-    requirements: false,
-    style: false,
-    output: false
+  const [expandedSections, setExpandedSections] = useState(() => {
+    // Initialize from localStorage or default to all collapsed
+    try {
+      const stored = localStorage.getItem('expandedSections')
+      return stored ? JSON.parse(stored) : {
+        context: false,
+        requirements: false,
+        style: false,
+        output: false
+      }
+    } catch (error) {
+      console.error("Failed to parse expandedSections from localStorage", error)
+      return {
+        context: false,
+        requirements: false,
+        style: false,
+        output: false
+      }
+    }
   })
-  const [quickStartMode, setQuickStartMode] = useState(true)
   
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(() => {
+    try {
+      const storedPref = localStorage.getItem('advancedOptionsDefaultOpen')
+      return storedPref !== null ? JSON.parse(storedPref) : true // Default to true if not set
+    } catch (error) {
+      console.error("Failed to parse advancedOptionsDefaultOpen from localStorage", error)
+      return true // Default to true on error
+    }
+  })
+
+  // Effect to save expanded sections to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('expandedSections', JSON.stringify(expandedSections))
+    } catch (error) {
+      console.error("Failed to save expandedSections to localStorage", error)
+    }
+  }, [expandedSections])
+
   const handleChange = (field) => (e) => {
     onChange(field, e.target.value)
   }
@@ -25,8 +57,20 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
     }))
   }
 
-  // Auto-exit quick start when user fills required fields
-  const isReadyForAdvanced = formData.role && formData.task.length > 20
+  const toggleShowAdvancedOptions = () => {
+    setShowAdvancedOptions(prev => {
+      const newState = !prev
+      try {
+        localStorage.setItem('advancedOptionsDefaultOpen', JSON.stringify(newState))
+      } catch (error) {
+        console.error("Failed to save advancedOptionsDefaultOpen to localStorage", error)
+      }
+      return newState
+    })
+  }
+
+  // Auto-exit quick start when user fills required fields (now less relevant with persistent toggle)
+  // const isReadyForAdvanced = formData.role && formData.task.length > 20
 
   // Determine if Pro features should be enabled
   const isProFeatureEnabled = isAuthEnabled && isAuthenticated && isPro
@@ -35,7 +79,7 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
 
   return (
     <div className="card p-6 fade-in">
-      {/* Header with Progress */}
+      {/* Header with Progress and Advanced Options Toggle */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
@@ -44,13 +88,21 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
               Prompt Builder
             </h3>
             <div className="flex items-center space-x-2">
-              {quickStartMode && isReadyForAdvanced && (
+              {showAdvancedOptions ? (
                 <button
-                  onClick={() => setQuickStartMode(false)}
+                  onClick={toggleShowAdvancedOptions}
                   className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center"
                 >
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  Add Details
+                  <EyeOff className="w-3 h-3 mr-1" />
+                  Hide Advanced Options
+                </button>
+              ) : (
+                <button
+                  onClick={toggleShowAdvancedOptions}
+                  className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center"
+                >
+                  <Eye className="w-3 h-3 mr-1" />
+                  Show Advanced Options
                 </button>
               )}
               <button
@@ -73,10 +125,12 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
                   width: `${Math.min(100, 
                     (formData.role ? 30 : 0) + 
                     (formData.task.length > 10 ? 40 : formData.task.length * 3) + 
-                    (formData.context ? 10 : 0) + 
-                    (formData.requirements ? 10 : 0) + 
-                    (formData.style ? 5 : 0) + 
-                    (formData.output ? 5 : 0)
+                    (showAdvancedOptions ? (
+                      (formData.context && expandedSections.context ? 10 : 0) +
+                      (formData.requirements && expandedSections.requirements ? 10 : 0) +
+                      (formData.style && expandedSections.style ? 5 : 0) +
+                      (formData.output && expandedSections.output ? 5 : 0)
+                    ) : 0)
                   )}%` 
                 }}
               />
@@ -87,9 +141,9 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
           </div>
           
           <p className="text-sm text-gray-500">
-            {quickStartMode 
-              ? "Start with the basics - we'll help you add details as needed"
-              : "Fine-tune your prompt with advanced options"
+            {showAdvancedOptions 
+              ? "Fine-tune your prompt with advanced options and unlock full potential."
+              : "Start with the basics or show advanced options to fine-tune your prompts."
             }
             {!isAuthEnabled && <span className="text-amber-600 ml-2">(Demo Mode)</span>}
           </p>
@@ -161,8 +215,8 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
         </div>
       </div>
 
-      {/* Optional Fields - Collapsible (Hidden in Quick Start) */}
-      {!quickStartMode && (
+      {/* Optional Fields - Collapsible */}
+      {showAdvancedOptions && (
         <div className="space-y-4 animate-slide-up">
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-lg font-semibold text-gray-900 flex items-center">
