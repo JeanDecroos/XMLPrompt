@@ -7,7 +7,16 @@ export const AI_MODEL_CATEGORIES = {
   ANTHROPIC: 'anthropic',
   MISTRAL: 'mistral',
   META: 'meta',
-  COHERE: 'cohere'
+  COHERE: 'cohere',
+  AMAZON: 'amazon',
+  DEEPSEEK: 'deepseek',
+  QWEN: 'qwen',
+  VELVET: 'velvet',
+  BAIDU: 'baidu',
+  BYTEDANCE: 'bytedance',
+  TENCENT: 'tencent',
+  FALCON: 'falcon',
+  INTERNLM: 'internlm'
 }
 
 export const PROMPT_FORMATS = {
@@ -440,6 +449,530 @@ export const AI_MODELS = {
         'Simpler tool use definitions'
       ]
     }
+  },
+
+  // === EXPANDED MODEL ECOSYSTEM ===
+
+  // OpenAI Extended Models
+  'gpt-4-turbo': {
+    id: 'gpt-4-turbo',
+    name: 'GPT-4 Turbo',
+    provider: 'OpenAI',
+    category: AI_MODEL_CATEGORIES.OPENAI,
+    description: 'Latest GPT-4 with improved efficiency and updated knowledge',
+    preferredFormat: PROMPT_FORMATS.STRUCTURED,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.JSON],
+    maxTokens: 128000,
+    contextWindow: 128000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'excellent',
+      multimodal: true
+    },
+    pricing: { input: 1.00, output: 3.00 },
+    features: ['function_calling', 'json_mode', 'vision', 'updated_knowledge'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: true,
+      supportsThinking: false,
+      maxComplexity: 'high',
+      bestPractices: [
+        'Leverage updated knowledge cutoff',
+        'Use structured prompts for complex tasks',
+        'Combine text and vision capabilities'
+      ]
+    }
+  },
+
+  'dall-e-3': {
+    id: 'dall-e-3',
+    name: 'DALL-E 3',
+    provider: 'OpenAI',
+    category: AI_MODEL_CATEGORIES.OPENAI,
+    description: 'Advanced image generation model with improved prompt adherence',
+    preferredFormat: PROMPT_FORMATS.PLAIN,
+    alternativeFormats: [PROMPT_FORMATS.STRUCTURED],
+    maxTokens: 4000,
+    contextWindow: 4000,
+    capabilities: {
+      reasoning: 'limited',
+      coding: 'none',
+      analysis: 'limited',
+      creative: 'excellent',
+      multimodal: true
+    },
+    pricing: { input: 0.04, output: 0.08 }, // per image
+    features: ['image_generation', 'prompt_enhancement'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: false,
+      maxComplexity: 'medium',
+      bestPractices: [
+        'Be specific about visual elements',
+        'Include style and composition details',
+        'Use descriptive language for better results'
+      ]
+    }
+  },
+
+  // Anthropic Extended Models
+  'claude-3-opus': {
+    id: 'claude-3-opus',
+    name: 'Claude 3 Opus',
+    provider: 'Anthropic',
+    category: AI_MODEL_CATEGORIES.CLAUDE,
+    description: 'Most powerful Claude model for complex reasoning and analysis',
+    preferredFormat: PROMPT_FORMATS.XML,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.STRUCTURED],
+    maxTokens: 200000,
+    contextWindow: 200000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'excellent',
+      multimodal: true
+    },
+    pricing: { input: 15.00, output: 75.00 },
+    features: ['xml_tags', 'thinking_tags', 'vision', 'complex_reasoning'],
+    promptGuidelines: {
+      useXMLTags: true,
+      preferStructured: true,
+      supportsThinking: true,
+      maxComplexity: 'very_high',
+      bestPractices: [
+        'Use for most complex reasoning tasks',
+        'Leverage advanced thinking capabilities',
+        'Ideal for research and analysis'
+      ]
+    }
+  },
+
+  // Google Extended Models
+  'gemini-2.0-flash': {
+    id: 'gemini-2.0-flash',
+    name: 'Gemini 2.0 Flash',
+    provider: 'Google',
+    category: AI_MODEL_CATEGORIES.GOOGLE,
+    description: 'Latest Gemini with enhanced multimodal capabilities and speed',
+    preferredFormat: PROMPT_FORMATS.MARKDOWN,
+    alternativeFormats: [PROMPT_FORMATS.STRUCTURED, PROMPT_FORMATS.JSON],
+    maxTokens: 1000000,
+    contextWindow: 1000000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'good',
+      multimodal: true
+    },
+    pricing: { input: 0.30, output: 1.20 },
+    features: ['function_calling', 'code_execution', 'vision', 'audio', 'video', 'live_api'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: false,
+      maxComplexity: 'high',
+      bestPractices: [
+        'Excellent for real-time applications',
+        'Strong multimodal integration',
+        'Fast inference with quality results'
+      ]
+    }
+  },
+
+  'gemma-2-27b': {
+    id: 'gemma-2-27b',
+    name: 'Gemma 2 27B',
+    provider: 'Google',
+    category: AI_MODEL_CATEGORIES.GOOGLE,
+    description: 'Open-source model from Google with strong performance',
+    preferredFormat: PROMPT_FORMATS.MARKDOWN,
+    alternativeFormats: [PROMPT_FORMATS.PLAIN, PROMPT_FORMATS.STRUCTURED],
+    maxTokens: 8192,
+    contextWindow: 8192,
+    capabilities: {
+      reasoning: 'good',
+      coding: 'good',
+      analysis: 'good',
+      creative: 'good',
+      multimodal: false
+    },
+    pricing: { input: 0.27, output: 0.27 },
+    features: ['open_source', 'efficient_inference'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: false,
+      maxComplexity: 'medium',
+      bestPractices: [
+        'Good for cost-effective deployment',
+        'Strong general-purpose capabilities',
+        'Open-source flexibility'
+      ]
+    }
+  },
+
+  // Meta Extended Models
+  'llama-3.2-90b': {
+    id: 'llama-3.2-90b',
+    name: 'Llama 3.2 90B',
+    provider: 'Meta',
+    category: AI_MODEL_CATEGORIES.META,
+    description: 'Latest Llama model with enhanced capabilities and efficiency',
+    preferredFormat: PROMPT_FORMATS.PLAIN,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.STRUCTURED],
+    maxTokens: 128000,
+    contextWindow: 128000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'good',
+      multimodal: false
+    },
+    pricing: { input: 0.90, output: 0.90 },
+    features: ['open_source', 'multilingual', 'tool_use'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: false,
+      maxComplexity: 'high',
+      bestPractices: [
+        'Excellent for reasoning tasks',
+        'Strong multilingual support',
+        'Cost-effective for large deployments'
+      ]
+    }
+  },
+
+  'llama-3.2-11b-vision': {
+    id: 'llama-3.2-11b-vision',
+    name: 'Llama 3.2 11B Vision',
+    provider: 'Meta',
+    category: AI_MODEL_CATEGORIES.META,
+    description: 'Multimodal Llama model with vision capabilities',
+    preferredFormat: PROMPT_FORMATS.PLAIN,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN],
+    maxTokens: 128000,
+    contextWindow: 128000,
+    capabilities: {
+      reasoning: 'good',
+      coding: 'good',
+      analysis: 'good',
+      creative: 'good',
+      multimodal: true
+    },
+    pricing: { input: 0.35, output: 0.35 },
+    features: ['open_source', 'vision', 'multilingual'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: false,
+      maxComplexity: 'medium',
+      bestPractices: [
+        'Combine text and image understanding',
+        'Cost-effective vision model',
+        'Good for multimodal applications'
+      ]
+    }
+  },
+
+  // Amazon Models
+  'amazon-titan-text-v2': {
+    id: 'amazon-titan-text-v2',
+    name: 'Amazon Titan Text v2',
+    provider: 'Amazon',
+    category: AI_MODEL_CATEGORIES.AMAZON,
+    description: 'Enterprise-focused model with strong safety and reliability',
+    preferredFormat: PROMPT_FORMATS.STRUCTURED,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.JSON],
+    maxTokens: 32000,
+    contextWindow: 32000,
+    capabilities: {
+      reasoning: 'good',
+      coding: 'good',
+      analysis: 'good',
+      creative: 'good',
+      multimodal: false
+    },
+    pricing: { input: 0.50, output: 1.50 },
+    features: ['enterprise_safety', 'content_filtering', 'RAG_optimized'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: true,
+      supportsThinking: false,
+      maxComplexity: 'medium',
+      bestPractices: [
+        'Ideal for enterprise applications',
+        'Strong content safety features',
+        'Good for RAG implementations'
+      ]
+    }
+  },
+
+  // DeepSeek Models
+  'deepseek-r1': {
+    id: 'deepseek-r1',
+    name: 'DeepSeek R1',
+    provider: 'DeepSeek',
+    category: AI_MODEL_CATEGORIES.DEEPSEEK,
+    description: 'Advanced reasoning model with strong mathematical capabilities',
+    preferredFormat: PROMPT_FORMATS.STRUCTURED,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.PLAIN],
+    maxTokens: 64000,
+    contextWindow: 64000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'good',
+      multimodal: false
+    },
+    pricing: { input: 0.14, output: 0.28 },
+    features: ['advanced_reasoning', 'mathematics', 'open_source'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: true,
+      supportsThinking: true,
+      maxComplexity: 'high',
+      bestPractices: [
+        'Excellent for complex reasoning',
+        'Strong mathematical problem solving',
+        'Cost-effective reasoning model'
+      ]
+    }
+  },
+
+  'deepseek-v3': {
+    id: 'deepseek-v3',
+    name: 'DeepSeek V3',
+    provider: 'DeepSeek',
+    category: AI_MODEL_CATEGORIES.DEEPSEEK,
+    description: 'Latest general-purpose model with balanced capabilities',
+    preferredFormat: PROMPT_FORMATS.STRUCTURED,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.PLAIN],
+    maxTokens: 64000,
+    contextWindow: 64000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'good',
+      creative: 'good',
+      multimodal: false
+    },
+    pricing: { input: 0.07, output: 0.28 },
+    features: ['general_purpose', 'efficient', 'open_source'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: true,
+      supportsThinking: false,
+      maxComplexity: 'high',
+      bestPractices: [
+        'Balanced performance across tasks',
+        'Very cost-effective',
+        'Good for general applications'
+      ]
+    }
+  },
+
+  // Mistral Extended Models
+  'mistral-large-2': {
+    id: 'mistral-large-2',
+    name: 'Mistral Large 2',
+    provider: 'Mistral AI',
+    category: AI_MODEL_CATEGORIES.MISTRAL,
+    description: 'Latest flagship model from Mistral with enhanced capabilities',
+    preferredFormat: PROMPT_FORMATS.STRUCTURED,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.JSON],
+    maxTokens: 128000,
+    contextWindow: 128000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'good',
+      multimodal: false
+    },
+    pricing: { input: 2.00, output: 6.00 },
+    features: ['function_calling', 'json_mode', 'multilingual'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: true,
+      supportsThinking: false,
+      maxComplexity: 'high',
+      bestPractices: [
+        'Strong European alternative',
+        'Excellent multilingual support',
+        'Good for complex reasoning'
+      ]
+    }
+  },
+
+  'mixtral-8x22b': {
+    id: 'mixtral-8x22b',
+    name: 'Mixtral 8x22B',
+    provider: 'Mistral AI',
+    category: AI_MODEL_CATEGORIES.MISTRAL,
+    description: 'Mixture of experts model with excellent efficiency',
+    preferredFormat: PROMPT_FORMATS.STRUCTURED,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.PLAIN],
+    maxTokens: 64000,
+    contextWindow: 64000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'good',
+      creative: 'good',
+      multimodal: false
+    },
+    pricing: { input: 0.90, output: 0.90 },
+    features: ['mixture_of_experts', 'efficient', 'open_source'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: true,
+      supportsThinking: false,
+      maxComplexity: 'high',
+      bestPractices: [
+        'Efficient for complex tasks',
+        'Good cost-performance ratio',
+        'Strong coding capabilities'
+      ]
+    }
+  },
+
+  // Qwen Models (Alibaba)
+  'qwen-2.5-72b': {
+    id: 'qwen-2.5-72b',
+    name: 'Qwen 2.5 72B',
+    provider: 'Alibaba',
+    category: AI_MODEL_CATEGORIES.QWEN,
+    description: 'Advanced Chinese-English bilingual model with strong capabilities',
+    preferredFormat: PROMPT_FORMATS.STRUCTURED,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.PLAIN],
+    maxTokens: 32768,
+    contextWindow: 32768,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'good',
+      creative: 'good',
+      multimodal: false
+    },
+    pricing: { input: 0.70, output: 0.70 },
+    features: ['chinese_english', 'multilingual', 'open_source'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: true,
+      supportsThinking: false,
+      maxComplexity: 'high',
+      bestPractices: [
+        'Excellent for Chinese-English tasks',
+        'Strong reasoning in multiple languages',
+        'Good for cross-cultural applications'
+      ]
+    }
+  },
+
+  'qwen-2.5-coder-32b': {
+    id: 'qwen-2.5-coder-32b',
+    name: 'Qwen 2.5 Coder 32B',
+    provider: 'Alibaba',
+    category: AI_MODEL_CATEGORIES.QWEN,
+    description: 'Specialized coding model with strong programming capabilities',
+    preferredFormat: PROMPT_FORMATS.STRUCTURED,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.PLAIN],
+    maxTokens: 32768,
+    contextWindow: 32768,
+    capabilities: {
+      reasoning: 'good',
+      coding: 'excellent',
+      analysis: 'good',
+      creative: 'limited',
+      multimodal: false
+    },
+    pricing: { input: 0.50, output: 0.50 },
+    features: ['code_specialized', 'multilingual_code', 'open_source'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: true,
+      supportsThinking: false,
+      maxComplexity: 'high',
+      bestPractices: [
+        'Specialized for coding tasks',
+        'Strong in multiple programming languages',
+        'Good for code generation and debugging'
+      ]
+    }
+  },
+
+  // Velvet AI Models (European)
+  'velvet-14b': {
+    id: 'velvet-14b',
+    name: 'Velvet 14B',
+    provider: 'Velvet AI',
+    category: AI_MODEL_CATEGORIES.VELVET,
+    description: 'European multilingual model with strong EU language support',
+    preferredFormat: PROMPT_FORMATS.STRUCTURED,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.PLAIN],
+    maxTokens: 32768,
+    contextWindow: 32768,
+    capabilities: {
+      reasoning: 'good',
+      coding: 'good',
+      analysis: 'good',
+      creative: 'good',
+      multimodal: false
+    },
+    pricing: { input: 0.40, output: 0.40 },
+    features: ['eu_languages', 'gdpr_compliant', 'multilingual'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: true,
+      supportsThinking: false,
+      maxComplexity: 'medium',
+      bestPractices: [
+        'Excellent for European languages',
+        'GDPR compliant processing',
+        'Good for EU-specific applications'
+      ]
+    }
+  },
+
+  // Falcon Models
+  'falcon-180b': {
+    id: 'falcon-180b',
+    name: 'Falcon 180B',
+    provider: 'TII',
+    category: AI_MODEL_CATEGORIES.FALCON,
+    description: 'Large open-source model with strong general capabilities',
+    preferredFormat: PROMPT_FORMATS.PLAIN,
+    alternativeFormats: [PROMPT_FORMATS.STRUCTURED, PROMPT_FORMATS.MARKDOWN],
+    maxTokens: 2048,
+    contextWindow: 2048,
+    capabilities: {
+      reasoning: 'good',
+      coding: 'good',
+      analysis: 'good',
+      creative: 'good',
+      multimodal: false
+    },
+    pricing: { input: 1.80, output: 1.80 },
+    features: ['open_source', 'large_scale', 'multilingual'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: false,
+      maxComplexity: 'medium',
+      bestPractices: [
+        'Good for research applications',
+        'Strong open-source alternative',
+        'Suitable for fine-tuning'
+      ]
+    }
   }
 }
 
@@ -498,67 +1031,87 @@ export const MODEL_RECOMMENDATIONS = {
   TASK_RECOMMENDATIONS: {
     coding: {
       primary: 'claude-3-5-sonnet',
-      alternatives: ['gpt-4o', 'llama-3.1-405b', 'gemini-1.5-pro'],
+      alternatives: ['deepseek-r1', 'qwen-2.5-coder-32b', 'gpt-4o', 'llama-3.2-90b', 'mixtral-8x22b'],
       reasoning: 'Excellent at code generation, debugging, and complex programming tasks'
     },
     reasoning: {
-      primary: 'llama-3.1-405b',
-      alternatives: ['claude-3-5-sonnet', 'gpt-4o', 'mistral-large'],
+      primary: 'deepseek-r1',
+      alternatives: ['claude-3-opus', 'llama-3.1-405b', 'claude-3-5-sonnet', 'mistral-large-2'],
       reasoning: 'Superior performance on complex logical reasoning and mathematical problems'
     },
     writing: {
       primary: 'claude-3-5-sonnet',
-      alternatives: ['gpt-4o', 'gemini-1.5-pro', 'command-r-plus'],
+      alternatives: ['claude-3-opus', 'gpt-4o', 'gemini-1.5-pro', 'mistral-large-2'],
       reasoning: 'Excellent prose quality, creativity, and nuanced understanding'
     },
     analysis: {
-      primary: 'gpt-4o',
-      alternatives: ['claude-3-5-sonnet', 'gemini-1.5-pro', 'llama-3.1-405b'],
+      primary: 'claude-3-opus',
+      alternatives: ['gpt-4o', 'claude-3-5-sonnet', 'gemini-2.0-flash', 'llama-3.2-90b'],
       reasoning: 'Strong analytical capabilities and structured thinking'
     },
     conversation: {
       primary: 'gpt-4o',
-      alternatives: ['claude-3-5-sonnet', 'gemini-1.5-pro', 'command-r-plus'],
+      alternatives: ['claude-3-5-sonnet', 'gemini-2.0-flash', 'command-r-plus', 'mistral-large-2'],
       reasoning: 'Natural conversational flow and contextual understanding'
     },
     'cost-effective': {
-      primary: 'gpt-4o-mini',
-      alternatives: ['gemini-1.5-flash', 'claude-3-haiku', 'mistral-7b-instruct'],
+      primary: 'deepseek-v3',
+      alternatives: ['gpt-4o-mini', 'gemini-1.5-flash', 'claude-3-haiku', 'qwen-2.5-72b'],
       reasoning: 'Best balance of performance and cost for most tasks'
     },
     speed: {
-      primary: 'command-r-plus',
-      alternatives: ['gemini-1.5-flash', 'claude-3-haiku', 'gpt-4o-mini'],
+      primary: 'gemini-2.0-flash',
+      alternatives: ['command-r-plus', 'gemini-1.5-flash', 'claude-3-haiku', 'deepseek-v3'],
       reasoning: 'Fastest inference times while maintaining quality'
     },
     'long-context': {
       primary: 'gemini-1.5-pro',
-      alternatives: ['claude-3-5-sonnet', 'llama-3.1-405b', 'command-r-plus'],
+      alternatives: ['claude-3-5-sonnet', 'claude-3-opus', 'llama-3.2-90b', 'command-r-plus'],
       reasoning: 'Excellent handling of long documents and extended conversations'
+    },
+    multimodal: {
+      primary: 'gpt-4o',
+      alternatives: ['gemini-2.0-flash', 'claude-3-opus', 'llama-3.2-11b-vision', 'dall-e-3'],
+      reasoning: 'Superior multimodal capabilities combining text, vision, and audio'
+    },
+    multilingual: {
+      primary: 'qwen-2.5-72b',
+      alternatives: ['velvet-14b', 'mistral-large-2', 'gemini-2.0-flash', 'llama-3.2-90b'],
+      reasoning: 'Strong performance across multiple languages and cultural contexts'
+    },
+    'open-source': {
+      primary: 'llama-3.2-90b',
+      alternatives: ['deepseek-r1', 'mixtral-8x22b', 'qwen-2.5-72b', 'gemma-2-27b'],
+      reasoning: 'Best open-source models for deployment flexibility and customization'
+    },
+    enterprise: {
+      primary: 'amazon-titan-text-v2',
+      alternatives: ['mistral-large-2', 'claude-3-5-sonnet', 'command-r-plus', 'velvet-14b'],
+      reasoning: 'Enterprise-grade security, compliance, and reliability features'
     }
   },
 
   // Performance tiers based on benchmark scores and real-world usage
   PERFORMANCE_TIERS: {
     flagship: {
-      models: ['claude-3-5-sonnet', 'gpt-4o', 'gemini-1.5-pro', 'llama-3.1-405b'],
+      models: ['claude-3-opus', 'claude-3-5-sonnet', 'gpt-4o', 'deepseek-r1', 'gemini-2.0-flash', 'llama-3.2-90b'],
       description: 'Top-tier models for demanding tasks requiring highest quality',
       useCase: 'Complex reasoning, advanced coding, research, professional writing'
     },
     balanced: {
-      models: ['gpt-4o-mini', 'gemini-1.5-flash', 'mistral-large', 'command-r-plus'],
+      models: ['gpt-4-turbo', 'mistral-large-2', 'gemini-1.5-pro', 'qwen-2.5-72b', 'mixtral-8x22b', 'command-r-plus'],
       description: 'High-quality models with good performance-to-cost ratio',
       useCase: 'General tasks, business applications, content creation'
     },
     efficient: {
-      models: ['claude-3-haiku', 'mistral-7b-instruct', 'llama-3-8b-instruct'],
+      models: ['deepseek-v3', 'gpt-4o-mini', 'gemini-1.5-flash', 'claude-3-haiku', 'gemma-2-27b', 'velvet-14b'],
       description: 'Fast and cost-effective for simpler tasks',
       useCase: 'Simple queries, chatbots, basic content generation'
     },
     specialized: {
-      models: ['command-r', 'llama-3-70b-instruct'],
+      models: ['qwen-2.5-coder-32b', 'dall-e-3', 'amazon-titan-text-v2', 'llama-3.2-11b-vision', 'falcon-180b'],
       description: 'Models optimized for specific use cases',
-      useCase: 'RAG applications, domain-specific tasks'
+      useCase: 'Domain-specific tasks, specialized applications'
     }
   },
 
@@ -623,6 +1176,102 @@ export const MODEL_RECOMMENDATIONS = {
       weaknesses: ['Complex tasks', 'Reasoning', 'Context length'],
       bestFor: 'Simple tasks requiring minimal resources',
       score: 6.8
+    },
+    'claude-3-opus': {
+      strengths: ['Complex reasoning', 'Deep analysis', 'Research', 'Multimodal'],
+      weaknesses: ['Very high cost', 'Speed'],
+      bestFor: 'Most complex analytical and reasoning tasks',
+      score: 9.8
+    },
+    'gpt-4-turbo': {
+      strengths: ['Updated knowledge', 'Efficiency', 'Multimodal', 'Balance'],
+      weaknesses: ['Cost', 'Complex reasoning vs Opus'],
+      bestFor: 'General high-performance applications with recent knowledge',
+      score: 9.0
+    },
+    'gemini-2.0-flash': {
+      strengths: ['Speed', 'Multimodal', 'Real-time', 'Cost-effective'],
+      weaknesses: ['Complex reasoning', 'Depth vs slower models'],
+      bestFor: 'Fast multimodal applications and real-time use cases',
+      score: 8.5
+    },
+    'deepseek-r1': {
+      strengths: ['Advanced reasoning', 'Mathematics', 'Cost-effective', 'Open source'],
+      weaknesses: ['Limited multimodal', 'Conversation'],
+      bestFor: 'Complex reasoning and mathematical problem solving',
+      score: 9.3
+    },
+    'deepseek-v3': {
+      strengths: ['Very cost-effective', 'General purpose', 'Efficient', 'Open source'],
+      weaknesses: ['Specialized tasks', 'Multimodal'],
+      bestFor: 'Cost-conscious general applications',
+      score: 8.0
+    },
+    'mistral-large-2': {
+      strengths: ['European', 'Multilingual', 'Privacy', 'Reasoning'],
+      weaknesses: ['Cost', 'Ecosystem vs OpenAI'],
+      bestFor: 'European applications requiring data sovereignty',
+      score: 8.7
+    },
+    'mixtral-8x22b': {
+      strengths: ['Mixture of experts', 'Efficiency', 'Open source', 'Coding'],
+      weaknesses: ['Complexity', 'Deployment'],
+      bestFor: 'Efficient large-scale deployments',
+      score: 8.4
+    },
+    'qwen-2.5-72b': {
+      strengths: ['Chinese-English', 'Multilingual', 'Open source', 'Cultural context'],
+      weaknesses: ['Western cultural nuances', 'Specialized domains'],
+      bestFor: 'Chinese-English and Asian market applications',
+      score: 8.6
+    },
+    'qwen-2.5-coder-32b': {
+      strengths: ['Code specialization', 'Multilingual code', 'Cost-effective', 'Open source'],
+      weaknesses: ['General tasks', 'Conversation'],
+      bestFor: 'Specialized coding and development tasks',
+      score: 8.3
+    },
+    'llama-3.2-90b': {
+      strengths: ['Latest Meta', 'Open source', 'Reasoning', 'Multilingual'],
+      weaknesses: ['Deployment complexity', 'Speed'],
+      bestFor: 'Open-source deployments requiring strong reasoning',
+      score: 8.9
+    },
+    'llama-3.2-11b-vision': {
+      strengths: ['Multimodal', 'Cost-effective', 'Open source', 'Vision'],
+      weaknesses: ['Performance vs larger models', 'Complex reasoning'],
+      bestFor: 'Cost-effective multimodal applications',
+      score: 7.8
+    },
+    'amazon-titan-text-v2': {
+      strengths: ['Enterprise security', 'AWS integration', 'Compliance', 'Reliability'],
+      weaknesses: ['Performance vs flagship models', 'Cost'],
+      bestFor: 'Enterprise applications requiring high security',
+      score: 7.5
+    },
+    'velvet-14b': {
+      strengths: ['European languages', 'GDPR compliance', 'Regional focus', 'Privacy'],
+      weaknesses: ['Performance vs global models', 'Limited scale'],
+      bestFor: 'European applications with strict privacy requirements',
+      score: 7.2
+    },
+    'gemma-2-27b': {
+      strengths: ['Google backing', 'Open source', 'Efficient', 'Research friendly'],
+      weaknesses: ['Performance vs larger models', 'Limited features'],
+      bestFor: 'Research and cost-effective Google ecosystem integration',
+      score: 7.6
+    },
+    'dall-e-3': {
+      strengths: ['Image generation', 'Prompt adherence', 'Creative', 'Quality'],
+      weaknesses: ['Text-only tasks', 'Cost per image'],
+      bestFor: 'High-quality image generation and creative visual content',
+      score: 9.1
+    },
+    'falcon-180b': {
+      strengths: ['Large scale', 'Open source', 'Research', 'Multilingual'],
+      weaknesses: ['Deployment complexity', 'Speed', 'Context length'],
+      bestFor: 'Research applications and large-scale open-source deployments',
+      score: 7.4
     }
   }
 };
