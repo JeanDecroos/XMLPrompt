@@ -109,7 +109,6 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
             <label className="block text-sm font-semibold text-gray-900 flex items-center">
               <User className="w-4 h-4 mr-2 text-primary-600" />
               Role *
-              <span className="badge badge-free ml-2">Free</span>
             </label>
             <select
               value={formData.role}
@@ -138,7 +137,6 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
             <label className="block text-sm font-semibold text-gray-900 flex items-center">
               <Target className="w-4 h-4 mr-2 text-primary-600" />
               Task Description *
-              <span className="badge badge-free ml-2">Free</span>
             </label>
             <textarea
               value={formData.task}
