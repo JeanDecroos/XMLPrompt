@@ -973,6 +973,375 @@ export const AI_MODELS = {
         'Suitable for fine-tuning'
       ]
     }
+  },
+
+  // === LATEST HIGH-IMPACT MODELS (2025) ===
+
+  // Anthropic Claude 4 Series (Latest Flagship Models)
+  'claude-4-opus': {
+    id: 'claude-4-opus',
+    name: 'Claude 4 Opus',
+    provider: 'Anthropic',
+    category: AI_MODEL_CATEGORIES.CLAUDE,
+    description: 'Most powerful Claude model yet, world\'s best coding model with sustained performance',
+    preferredFormat: PROMPT_FORMATS.XML,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.STRUCTURED],
+    maxTokens: 200000,
+    contextWindow: 200000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'excellent',
+      multimodal: true
+    },
+    pricing: { input: 15.00, output: 75.00 },
+    features: ['xml_tags', 'thinking_tags', 'artifacts', 'vision', 'extended_thinking', 'tool_use', 'memory_files'],
+    promptGuidelines: {
+      useXMLTags: true,
+      preferStructured: true,
+      supportsThinking: true,
+      maxComplexity: 'very_high',
+      bestPractices: [
+        'Leading SWE-bench performance (72.5%)',
+        'Sustained performance for hours-long tasks',
+        'Excels at complex codebase understanding',
+        'Can work continuously for several hours'
+      ]
+    }
+  },
+
+  'claude-4-sonnet': {
+    id: 'claude-4-sonnet',
+    name: 'Claude 4 Sonnet',
+    provider: 'Anthropic',
+    category: AI_MODEL_CATEGORIES.CLAUDE,
+    description: 'Significant upgrade to Claude 3.7 Sonnet with superior coding and reasoning',
+    preferredFormat: PROMPT_FORMATS.XML,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.STRUCTURED],
+    maxTokens: 200000,
+    contextWindow: 200000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'excellent',
+      multimodal: true
+    },
+    pricing: { input: 3.00, output: 15.00 },
+    features: ['xml_tags', 'thinking_tags', 'artifacts', 'vision', 'extended_thinking', 'tool_use', 'parallel_tools'],
+    promptGuidelines: {
+      useXMLTags: true,
+      preferStructured: true,
+      supportsThinking: true,
+      maxComplexity: 'high',
+      bestPractices: [
+        'Superior coding and reasoning vs 3.7 Sonnet',
+        'Enhanced steerability for precise control',
+        'Excellent for agentic scenarios',
+        'Powering GitHub Copilot coding agent'
+      ]
+    }
+  },
+
+  'claude-4-sonnet-thinking': {
+    id: 'claude-4-sonnet-thinking',
+    name: 'Claude 4 Sonnet (Thinking Mode)',
+    provider: 'Anthropic',
+    category: AI_MODEL_CATEGORIES.CLAUDE,
+    description: 'Claude 4 Sonnet with extended thinking capabilities for complex reasoning',
+    preferredFormat: PROMPT_FORMATS.XML,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.STRUCTURED],
+    maxTokens: 200000,
+    contextWindow: 200000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'excellent',
+      multimodal: true
+    },
+    pricing: { input: 3.00, output: 15.00 },
+    features: ['xml_tags', 'thinking_tags', 'extended_thinking', 'tool_use', 'vision', 'thinking_with_tools'],
+    promptGuidelines: {
+      useXMLTags: true,
+      preferStructured: true,
+      supportsThinking: true,
+      maxComplexity: 'very_high',
+      bestPractices: [
+        'Extended thinking with tool use',
+        'Can alternate between reasoning and tool use',
+        'Visible thinking process to users',
+        'Ideal for complex multi-step problems'
+      ]
+    }
+  },
+
+  // OpenAI O-Series (Latest Reasoning Models)
+  'o3': {
+    id: 'o3',
+    name: 'OpenAI o3',
+    provider: 'OpenAI',
+    category: AI_MODEL_CATEGORIES.OPENAI,
+    description: 'Advanced reasoning model with simulated reasoning capabilities',
+    preferredFormat: PROMPT_FORMATS.STRUCTURED,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.JSON],
+    maxTokens: 200000,
+    contextWindow: 200000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'good',
+      multimodal: true
+    },
+    pricing: { input: 10.00, output: 40.00 },
+    features: ['simulated_reasoning', 'visual_reasoning', 'tool_use', 'self_fact_checking'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: true,
+      supportsThinking: true,
+      maxComplexity: 'very_high',
+      bestPractices: [
+        'Excels at complex reasoning tasks',
+        'Strong performance on SWE-bench (69.1%)',
+        'Advanced mathematical capabilities (88.9% AIME)',
+        'Deliberative alignment for safety'
+      ]
+    }
+  },
+
+  'o4-mini': {
+    id: 'o4-mini',
+    name: 'OpenAI o4-mini',
+    provider: 'OpenAI',
+    category: AI_MODEL_CATEGORIES.OPENAI,
+    description: 'Cost-efficient reasoning model with excellent math performance',
+    preferredFormat: PROMPT_FORMATS.STRUCTURED,
+    alternativeFormats: [PROMPT_FORMATS.MARKDOWN, PROMPT_FORMATS.JSON],
+    maxTokens: 200000,
+    contextWindow: 200000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'good',
+      multimodal: true
+    },
+    pricing: { input: 1.10, output: 4.40 },
+    features: ['simulated_reasoning', 'visual_reasoning', 'tool_use', 'high_reasoning_variant'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: true,
+      supportsThinking: true,
+      maxComplexity: 'high',
+      bestPractices: [
+        'Outstanding math performance (92.7% AIME 2025)',
+        'Cost-effective reasoning model',
+        'Strong coding capabilities (68.1% SWE-bench)',
+        'Available in standard and high-reasoning variants'
+      ]
+    }
+  },
+
+  // Google Gemini 2.5 Series (Latest Thinking Models)
+  'gemini-2.5-pro': {
+    id: 'gemini-2.5-pro',
+    name: 'Gemini 2.5 Pro',
+    provider: 'Google',
+    category: AI_MODEL_CATEGORIES.GOOGLE,
+    description: 'Most intelligent AI model with thinking capabilities and massive context',
+    preferredFormat: PROMPT_FORMATS.MARKDOWN,
+    alternativeFormats: [PROMPT_FORMATS.STRUCTURED, PROMPT_FORMATS.JSON],
+    maxTokens: 2000000,
+    contextWindow: 2000000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'excellent',
+      multimodal: true
+    },
+    pricing: { input: 1.25, output: 10.00 },
+    features: ['thinking_capabilities', 'massive_context', 'multimodal_native', 'web_access', 'thinking_budgets'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: true,
+      maxComplexity: 'very_high',
+      bestPractices: [
+        'Leading performance on advanced reasoning benchmarks',
+        'Tops LMArena leaderboard by significant margin',
+        '18.8% on Humanity\'s Last Exam (no tools)',
+        'Excellent for complex coding and web development'
+      ]
+    }
+  },
+
+  'gemini-2.5-pro-deep-think': {
+    id: 'gemini-2.5-pro-deep-think',
+    name: 'Gemini 2.5 Pro Deep Think',
+    provider: 'Google',
+    category: AI_MODEL_CATEGORIES.GOOGLE,
+    description: 'Enhanced reasoning mode with parallel thinking techniques',
+    preferredFormat: PROMPT_FORMATS.MARKDOWN,
+    alternativeFormats: [PROMPT_FORMATS.STRUCTURED, PROMPT_FORMATS.JSON],
+    maxTokens: 2000000,
+    contextWindow: 2000000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'excellent',
+      creative: 'excellent',
+      multimodal: true
+    },
+    pricing: { input: 2.50, output: 15.00 },
+    features: ['parallel_thinking', 'enhanced_reasoning', 'multiple_hypotheses', 'frontier_safety'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: true,
+      maxComplexity: 'very_high',
+      bestPractices: [
+        'Cutting-edge research in reasoning',
+        'Considers multiple hypotheses before responding',
+        'Impressive performance on hardest math benchmarks',
+        'Currently available to trusted testers'
+      ]
+    }
+  },
+
+  'gemini-2.5-flash': {
+    id: 'gemini-2.5-flash',
+    name: 'Gemini 2.5 Flash',
+    provider: 'Google',
+    category: AI_MODEL_CATEGORIES.GOOGLE,
+    description: 'Efficient workhorse model with controllable reasoning and thinking budgets',
+    preferredFormat: PROMPT_FORMATS.MARKDOWN,
+    alternativeFormats: [PROMPT_FORMATS.STRUCTURED, PROMPT_FORMATS.JSON],
+    maxTokens: 1000000,
+    contextWindow: 1000000,
+    capabilities: {
+      reasoning: 'excellent',
+      coding: 'excellent',
+      analysis: 'good',
+      creative: 'good',
+      multimodal: true
+    },
+    pricing: { input: 0.30, output: 2.50 },
+    features: ['thinking_budgets', 'controllable_reasoning', 'moe_architecture', 'high_efficiency'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: true,
+      maxComplexity: 'high',
+      bestPractices: [
+        'Adjustable thinking time based on query complexity',
+        'Developers can control thinking budget',
+        'Balance response quality, speed, and cost',
+        'Ideal for high-volume applications'
+      ]
+    }
+  },
+
+  // Latest Specialized Models
+  'gpt-image-1': {
+    id: 'gpt-image-1',
+    name: 'GPT Image 1',
+    provider: 'OpenAI',
+    category: AI_MODEL_CATEGORIES.OPENAI,
+    description: 'Advanced image generation with precise prompt adherence and text rendering',
+    preferredFormat: PROMPT_FORMATS.PLAIN,
+    alternativeFormats: [PROMPT_FORMATS.STRUCTURED],
+    maxTokens: 4000,
+    contextWindow: 4000,
+    capabilities: {
+      reasoning: 'limited',
+      coding: 'none',
+      analysis: 'limited',
+      creative: 'excellent',
+      multimodal: true
+    },
+    pricing: { input: 0.04, output: 0.08 },
+    features: ['advanced_image_generation', 'text_rendering', 'conversational_editing', 'safe_generation'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: false,
+      maxComplexity: 'medium',
+      bestPractices: [
+        'Exceptional text rendering in images',
+        'Conversational image editing capabilities',
+        'Safe and responsible image generation',
+        'Ideal for advertisements and social posts'
+      ]
+    }
+  },
+
+  'veo-3': {
+    id: 'veo-3',
+    name: 'Veo 3',
+    provider: 'Google',
+    category: AI_MODEL_CATEGORIES.GOOGLE,
+    description: 'Advanced AI video generation with synchronized audio and cinematic quality',
+    preferredFormat: PROMPT_FORMATS.PLAIN,
+    alternativeFormats: [PROMPT_FORMATS.STRUCTURED],
+    maxTokens: 4000,
+    contextWindow: 4000,
+    capabilities: {
+      reasoning: 'limited',
+      coding: 'none',
+      analysis: 'limited',
+      creative: 'excellent',
+      multimodal: true
+    },
+    pricing: { input: 0.10, output: 0.20 },
+    features: ['video_generation', 'synchronized_audio', 'high_resolution', 'cinematic_control'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: false,
+      maxComplexity: 'medium',
+      bestPractices: [
+        'High-resolution video with synchronized audio',
+        'Precise camera control and cinematic elements',
+        'Advanced understanding of physics and movement',
+        'Ideal for professional content creation'
+      ]
+    }
+  },
+
+  'lyria-2': {
+    id: 'lyria-2',
+    name: 'Lyria 2',
+    provider: 'Google',
+    category: AI_MODEL_CATEGORIES.GOOGLE,
+    description: 'AI model for high-quality instrumental music generation with precise controls',
+    preferredFormat: PROMPT_FORMATS.PLAIN,
+    alternativeFormats: [PROMPT_FORMATS.STRUCTURED],
+    maxTokens: 2000,
+    contextWindow: 2000,
+    capabilities: {
+      reasoning: 'limited',
+      coding: 'none',
+      analysis: 'limited',
+      creative: 'excellent',
+      multimodal: true
+    },
+    pricing: { input: 0.05, output: 0.10 },
+    features: ['music_generation', 'instrumental_focus', 'precise_controls', 'high_quality_audio'],
+    promptGuidelines: {
+      useXMLTags: false,
+      preferStructured: false,
+      supportsThinking: false,
+      maxComplexity: 'medium',
+      bestPractices: [
+        'Creates high-quality instrumental music',
+        'Precise controls for creators',
+        'Professional audio quality',
+        'Ideal for content creators and musicians'
+      ]
+    }
   }
 }
 
@@ -1030,64 +1399,64 @@ export const MODEL_RECOMMENDATIONS = {
   // Task-based recommendations with performance scores (1-10)
   TASK_RECOMMENDATIONS: {
     coding: {
-      primary: 'claude-3-5-sonnet',
-      alternatives: ['deepseek-r1', 'qwen-2.5-coder-32b', 'gpt-4o', 'llama-3.2-90b', 'mixtral-8x22b'],
-      reasoning: 'Excellent at code generation, debugging, and complex programming tasks'
+      primary: 'claude-4-opus',
+      alternatives: ['claude-4-sonnet', 'gemini-2.5-pro', 'o3', 'claude-3-5-sonnet', 'o4-mini'],
+      reasoning: 'Claude 4 Opus leads SWE-bench with sustained performance for hours-long coding tasks'
     },
     reasoning: {
-      primary: 'deepseek-r1',
-      alternatives: ['claude-3-opus', 'llama-3.1-405b', 'claude-3-5-sonnet', 'mistral-large-2'],
-      reasoning: 'Superior performance on complex logical reasoning and mathematical problems'
+      primary: 'gemini-2.5-pro-deep-think',
+      alternatives: ['o3', 'claude-4-opus', 'gemini-2.5-pro', 'claude-4-sonnet-thinking', 'o4-mini'],
+      reasoning: 'Gemini 2.5 Pro Deep Think uses cutting-edge parallel thinking techniques for complex reasoning'
     },
     writing: {
-      primary: 'claude-3-5-sonnet',
-      alternatives: ['claude-3-opus', 'gpt-4o', 'gemini-1.5-pro', 'mistral-large-2'],
-      reasoning: 'Excellent prose quality, creativity, and nuanced understanding'
+      primary: 'claude-4-sonnet',
+      alternatives: ['claude-4-opus', 'gemini-2.5-pro', 'claude-3-5-sonnet', 'gpt-4o'],
+      reasoning: 'Claude 4 Sonnet offers superior writing quality with enhanced steerability and precise control'
     },
     analysis: {
-      primary: 'claude-3-opus',
-      alternatives: ['gpt-4o', 'claude-3-5-sonnet', 'gemini-2.0-flash', 'llama-3.2-90b'],
-      reasoning: 'Strong analytical capabilities and structured thinking'
-    },
-    conversation: {
-      primary: 'gpt-4o',
-      alternatives: ['claude-3-5-sonnet', 'gemini-2.0-flash', 'command-r-plus', 'mistral-large-2'],
-      reasoning: 'Natural conversational flow and contextual understanding'
-    },
-    'cost-effective': {
-      primary: 'deepseek-v3',
-      alternatives: ['gpt-4o-mini', 'gemini-1.5-flash', 'claude-3-haiku', 'qwen-2.5-72b'],
-      reasoning: 'Best balance of performance and cost for most tasks'
-    },
-    speed: {
-      primary: 'gemini-2.0-flash',
-      alternatives: ['command-r-plus', 'gemini-1.5-flash', 'claude-3-haiku', 'deepseek-v3'],
-      reasoning: 'Fastest inference times while maintaining quality'
-    },
-    'long-context': {
-      primary: 'gemini-1.5-pro',
-      alternatives: ['claude-3-5-sonnet', 'claude-3-opus', 'llama-3.2-90b', 'command-r-plus'],
-      reasoning: 'Excellent handling of long documents and extended conversations'
+      primary: 'gemini-2.5-pro',
+      alternatives: ['claude-4-opus', 'o3', 'claude-4-sonnet', 'gemini-2.5-pro-deep-think'],
+      reasoning: 'Gemini 2.5 Pro excels with massive 2M token context for analyzing vast datasets and documents'
     },
     multimodal: {
-      primary: 'gpt-4o',
-      alternatives: ['gemini-2.0-flash', 'claude-3-opus', 'llama-3.2-11b-vision', 'dall-e-3'],
-      reasoning: 'Superior multimodal capabilities combining text, vision, and audio'
+      primary: 'gemini-2.5-pro',
+      alternatives: ['claude-4-opus', 'claude-4-sonnet', 'gpt-4o', 'o3'],
+      reasoning: 'Gemini 2.5 Pro built natively multimodal from ground up with superior vision and audio capabilities'
     },
-    multilingual: {
-      primary: 'qwen-2.5-72b',
-      alternatives: ['velvet-14b', 'mistral-large-2', 'gemini-2.0-flash', 'llama-3.2-90b'],
-      reasoning: 'Strong performance across multiple languages and cultural contexts'
+    'cost-effective': {
+      primary: 'o4-mini',
+      alternatives: ['gemini-2.5-flash', 'claude-3-haiku', 'gpt-4o-mini', 'claude-4-sonnet'],
+      reasoning: 'o4-mini delivers exceptional reasoning and math performance at cost-effective pricing'
     },
-    'open-source': {
-      primary: 'llama-3.2-90b',
-      alternatives: ['deepseek-r1', 'mixtral-8x22b', 'qwen-2.5-72b', 'gemma-2-27b'],
-      reasoning: 'Best open-source models for deployment flexibility and customization'
+    'image-generation': {
+      primary: 'gpt-image-1',
+      alternatives: ['dall-e-3', 'midjourney-v6'],
+      reasoning: 'GPT Image 1 offers exceptional text rendering and conversational editing capabilities'
+    },
+    'video-generation': {
+      primary: 'veo-3',
+      alternatives: ['sora', 'runway-gen3'],
+      reasoning: 'Veo 3 provides high-resolution video with synchronized audio and cinematic control'
+    },
+    'music-generation': {
+      primary: 'lyria-2',
+      alternatives: ['suno-v3', 'udio-v2'],
+      reasoning: 'Lyria 2 creates high-quality instrumental music with precise controls for creators'
+    },
+    'thinking-tasks': {
+      primary: 'claude-4-sonnet-thinking',
+      alternatives: ['gemini-2.5-pro-deep-think', 'o3', 'claude-4-opus', 'gemini-2.5-flash'],
+      reasoning: 'Claude 4 Sonnet Thinking Mode provides visible thinking process with tool use capabilities'
     },
     enterprise: {
-      primary: 'amazon-titan-text-v2',
-      alternatives: ['mistral-large-2', 'claude-3-5-sonnet', 'command-r-plus', 'velvet-14b'],
-      reasoning: 'Enterprise-grade security, compliance, and reliability features'
+      primary: 'claude-4-opus',
+      alternatives: ['gemini-2.5-pro', 'claude-4-sonnet', 'o3', 'gpt-4o'],
+      reasoning: 'Claude 4 Opus offers sustained performance for complex enterprise workflows with excellent reliability'
+    },
+    research: {
+      primary: 'gemini-2.5-pro',
+      alternatives: ['claude-4-opus', 'gemini-2.5-pro-deep-think', 'o3', 'claude-4-sonnet-thinking'],
+      reasoning: 'Gemini 2.5 Pro leads on advanced benchmarks like Humanity\'s Last Exam and GPQA Diamond'
     }
   },
 
@@ -1272,6 +1641,72 @@ export const MODEL_RECOMMENDATIONS = {
       weaknesses: ['Deployment complexity', 'Speed', 'Context length'],
       bestFor: 'Research applications and large-scale open-source deployments',
       score: 7.4
+    },
+    'claude-4-opus': {
+      strengths: ['World-class coding', 'Sustained performance', 'Complex reasoning', 'Hours-long tasks'],
+      weaknesses: ['Very high cost', 'Slower responses'],
+      bestFor: 'Most complex coding projects and enterprise workflows requiring sustained performance',
+      score: 9.9
+    },
+    'claude-4-sonnet': {
+      strengths: ['Superior coding', 'Enhanced steerability', 'Precise control', 'Agentic scenarios'],
+      weaknesses: ['Higher cost than 3.5 Sonnet', 'Speed vs Deep Think'],
+      bestFor: 'Professional coding, writing, and business applications requiring precision',
+      score: 9.6
+    },
+    'claude-4-sonnet-thinking': {
+      strengths: ['Visible thinking', 'Tool use reasoning', 'Complex problem solving', 'Transparency'],
+      weaknesses: ['Higher latency', 'Cost for thinking time'],
+      bestFor: 'Complex multi-step problems where understanding the reasoning process is crucial',
+      score: 9.5
+    },
+    'o3': {
+      strengths: ['Advanced reasoning', 'Strong coding', 'Mathematical excellence', 'Safety alignment'],
+      weaknesses: ['High cost', 'Slower than standard models'],
+      bestFor: 'Complex reasoning tasks, advanced mathematics, and sophisticated coding challenges',
+      score: 9.4
+    },
+    'o4-mini': {
+      strengths: ['Exceptional math', 'Cost-effective reasoning', 'Strong coding', 'Efficient'],
+      weaknesses: ['Limited context vs Pro models', 'Less creative than larger models'],
+      bestFor: 'Mathematical problem solving and coding tasks with budget constraints',
+      score: 9.2
+    },
+    'gemini-2.5-pro': {
+      strengths: ['Massive 2M context', 'Native multimodality', 'LMArena leader', 'Advanced benchmarks'],
+      weaknesses: ['Newer model', 'Limited availability'],
+      bestFor: 'Complex analysis of vast datasets, research, and advanced multimodal tasks',
+      score: 9.7
+    },
+    'gemini-2.5-pro-deep-think': {
+      strengths: ['Parallel thinking', 'Multiple hypotheses', 'Cutting-edge reasoning', 'Frontier research'],
+      weaknesses: ['Limited availability', 'Experimental status', 'Higher cost'],
+      bestFor: 'Most complex reasoning challenges requiring frontier AI capabilities',
+      score: 9.8
+    },
+    'gemini-2.5-flash': {
+      strengths: ['Thinking budgets', 'Controllable reasoning', 'High efficiency', 'Cost-performance'],
+      weaknesses: ['Less capable than Pro', 'Newer architecture'],
+      bestFor: 'High-volume applications requiring balanced performance and cost optimization',
+      score: 9.0
+    },
+    'gpt-image-1': {
+      strengths: ['Text rendering', 'Conversational editing', 'Safe generation', 'Precise prompts'],
+      weaknesses: ['Image-only', 'Limited reasoning', 'Specialized use'],
+      bestFor: 'Professional image generation requiring text rendering and iterative editing',
+      score: 8.8
+    },
+    'veo-3': {
+      strengths: ['Synchronized audio', 'High resolution', 'Cinematic control', 'Physics understanding'],
+      weaknesses: ['Video-only', 'High computational cost', 'Limited availability'],
+      bestFor: 'Professional video content creation requiring cinematic quality and audio sync',
+      score: 8.9
+    },
+    'lyria-2': {
+      strengths: ['High-quality audio', 'Instrumental focus', 'Precise controls', 'Professional output'],
+      weaknesses: ['Music-only', 'Limited to instrumental', 'Specialized use'],
+      bestFor: 'Professional music creation and content requiring high-quality instrumental tracks',
+      score: 8.7
     }
   }
 };
