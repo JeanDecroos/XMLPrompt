@@ -12,6 +12,7 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
     style: false,
     output: false
   })
+  const [quickStartMode, setQuickStartMode] = useState(true)
   
   const handleChange = (field) => (e) => {
     onChange(field, e.target.value)
@@ -24,6 +25,9 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
     }))
   }
 
+  // Auto-exit quick start when user fills required fields
+  const isReadyForAdvanced = formData.role && formData.task.length > 20
+
   // Determine if Pro features should be enabled
   const isProFeatureEnabled = isAuthEnabled && isAuthenticated && isPro
   // In demo mode, show all features as enabled
@@ -31,26 +35,65 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
 
   return (
     <div className="card p-6 fade-in">
-      {/* Header */}
+      {/* Header with Progress */}
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-xl font-semibold text-gray-900 flex items-center">
-            <FileText className="w-5 h-5 mr-2 text-primary-600" />
-            Prompt Configuration
-          </h3>
-          <p className="text-sm text-gray-500 mt-1">
-            Build your AI prompt step by step
+        <div className="flex-1">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xl font-semibold text-gray-900 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-primary-600" />
+              Prompt Builder
+            </h3>
+            <div className="flex items-center space-x-2">
+              {quickStartMode && isReadyForAdvanced && (
+                <button
+                  onClick={() => setQuickStartMode(false)}
+                  className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center"
+                >
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  Add Details
+                </button>
+              )}
+              <button
+                onClick={onReset}
+                className="btn btn-secondary btn-sm flex items-center hover-lift"
+                title="Reset form"
+              >
+                <RotateCcw className="w-4 h-4 mr-1" />
+                Reset
+              </button>
+            </div>
+          </div>
+          
+          {/* Progress Indicator */}
+          <div className="flex items-center space-x-2 mb-2">
+            <div className="flex-1 bg-gray-200 rounded-full h-1.5">
+              <div 
+                className="bg-gradient-to-r from-primary-500 to-purple-500 h-1.5 rounded-full transition-all duration-500"
+                style={{ 
+                  width: `${Math.min(100, 
+                    (formData.role ? 30 : 0) + 
+                    (formData.task.length > 10 ? 40 : formData.task.length * 3) + 
+                    (formData.context ? 10 : 0) + 
+                    (formData.requirements ? 10 : 0) + 
+                    (formData.style ? 5 : 0) + 
+                    (formData.output ? 5 : 0)
+                  )}%` 
+                }}
+              />
+            </div>
+            <span className="text-xs text-gray-500 font-medium">
+              {formData.role && formData.task.length > 10 ? 'Ready' : 'Getting started'}
+            </span>
+          </div>
+          
+          <p className="text-sm text-gray-500">
+            {quickStartMode 
+              ? "Start with the basics - we'll help you add details as needed"
+              : "Fine-tune your prompt with advanced options"
+            }
             {!isAuthEnabled && <span className="text-amber-600 ml-2">(Demo Mode)</span>}
           </p>
         </div>
-        <button
-          onClick={onReset}
-          className="btn btn-secondary btn-sm flex items-center hover-lift"
-          title="Reset form"
-        >
-          <RotateCcw className="w-4 h-4 mr-1" />
-          Reset
-        </button>
       </div>
 
       {/* Essential Fields - Always Visible */}
@@ -120,253 +163,255 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
         </div>
       </div>
 
-      {/* Optional Fields - Collapsible */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="text-lg font-semibold text-gray-900 flex items-center">
-            <Sparkles className="w-4 h-4 mr-2 text-primary-600" />
-            Optional Enhancements
-          </h4>
-          <button
-            onClick={() => {
-              const allExpanded = Object.values(expandedSections).every(Boolean)
-              const newState = allExpanded ? false : true
-              setExpandedSections({
-                context: newState,
-                requirements: newState,
-                style: newState,
-                output: newState
-              })
-            }}
-            className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-          >
-            {Object.values(expandedSections).every(Boolean) ? 'Collapse All' : 'Expand All'}
-          </button>
-        </div>
+      {/* Optional Fields - Collapsible (Hidden in Quick Start) */}
+      {!quickStartMode && (
+        <div className="space-y-4 animate-slide-up">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-lg font-semibold text-gray-900 flex items-center">
+              <Sparkles className="w-4 h-4 mr-2 text-primary-600" />
+              Advanced Options
+            </h4>
+            <button
+              onClick={() => {
+                const allExpanded = Object.values(expandedSections).every(Boolean)
+                const newState = allExpanded ? false : true
+                setExpandedSections({
+                  context: newState,
+                  requirements: newState,
+                  style: newState,
+                  output: newState
+                })
+              }}
+              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+            >
+              {Object.values(expandedSections).every(Boolean) ? 'Collapse All' : 'Expand All'}
+            </button>
+          </div>
 
-        {/* Context Section */}
-        <div className="border border-gray-200 rounded-lg">
-          <button
-            onClick={() => toggleSection('context')}
-            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg"
-          >
-            <div className="flex items-center space-x-3">
-              <FileText className="w-5 h-5 text-primary-600" />
-              <div className="text-left">
-                <h5 className="font-semibold text-gray-900">Context</h5>
-                <p className="text-sm text-gray-500">Background information and situational details</p>
+          {/* Context Section */}
+          <div className="border border-gray-200 rounded-lg">
+            <button
+              onClick={() => toggleSection('context')}
+              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg"
+            >
+              <div className="flex items-center space-x-3">
+                <FileText className="w-5 h-5 text-primary-600" />
+                <div className="text-left">
+                  <h5 className="font-semibold text-gray-900">Context</h5>
+                  <p className="text-sm text-gray-500">Background information and situational details</p>
+                </div>
+                <span className="badge badge-free">Free</span>
               </div>
-              <span className="badge badge-free">Free</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              {formData.context && (
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              )}
-              {expandedSections.context ? 
-                <ChevronDown className="w-5 h-5 text-gray-400" /> : 
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              }
-            </div>
-          </button>
-          {expandedSections.context && (
-            <div className="p-4 pt-0 scale-in">
-              <textarea
-                value={formData.context}
-                onChange={handleChange('context')}
-                placeholder="Provide background information, relevant details, or situational context that will help the AI understand the task better."
-                className="textarea-field"
-                rows={3}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Requirements Section */}
-        <div className="border border-gray-200 rounded-lg">
-          <button
-            onClick={() => toggleSection('requirements')}
-            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg"
-          >
-            <div className="flex items-center space-x-3">
-              <CheckSquare className="w-5 h-5 text-primary-600" />
-              <div className="text-left">
-                <h5 className="font-semibold text-gray-900">Requirements</h5>
-                <p className="text-sm text-gray-500">Specific constraints and criteria</p>
-              </div>
-              {isAuthEnabled ? (
-                <span className="badge badge-premium">Pro</span>
-              ) : (
-                <span className="badge badge-free">Demo</span>
-              )}
-            </div>
-            <div className="flex items-center space-x-2">
-              {formData.requirements && (
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              )}
-              {expandedSections.requirements ? 
-                <ChevronDown className="w-5 h-5 text-gray-400" /> : 
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              }
-            </div>
-          </button>
-          {expandedSections.requirements && (
-            <div className="p-4 pt-0 scale-in">
-              <textarea
-                value={formData.requirements}
-                onChange={handleChange('requirements')}
-                placeholder="List specific requirements, constraints, or criteria that must be met. Use bullet points or numbered lists for clarity."
-                className={`textarea-field ${!showProFeatures ? 'bg-gray-50 border-gray-200' : ''}`}
-                rows={3}
-                disabled={!showProFeatures}
-              />
-              <div className="mt-2">
-                {!isAuthEnabled ? (
-                  <div className="text-xs text-gray-500 flex items-center">
-                    <Sparkles className="w-3 h-3 mr-1 text-amber-500" />
-                    <span>All features available in demo mode</span>
-                  </div>
-                ) : !isProFeatureEnabled ? (
-                  <div className="text-xs text-gray-500 flex items-center">
-                    <Lock className="w-3 h-3 mr-1 text-gray-400" />
-                    <span>Enhanced with AI optimization in Pro version</span>
-                  </div>
-                ) : (
-                  <div className="text-xs text-gray-500 flex items-center">
-                    <Sparkles className="w-3 h-3 mr-1 text-blue-500" />
-                    <span>Enhanced with AI optimization</span>
-                  </div>
+              <div className="flex items-center space-x-2">
+                {formData.context && (
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Style Guidelines Section */}
-        <div className="border border-gray-200 rounded-lg">
-          <button
-            onClick={() => toggleSection('style')}
-            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg"
-          >
-            <div className="flex items-center space-x-3">
-              <Palette className="w-5 h-5 text-primary-600" />
-              <div className="text-left">
-                <h5 className="font-semibold text-gray-900">Style Guidelines</h5>
-                <p className="text-sm text-gray-500">Tone, format, and presentation preferences</p>
-              </div>
-              {isAuthEnabled ? (
-                <span className="badge badge-premium">Pro</span>
-              ) : (
-                <span className="badge badge-free">Demo</span>
-              )}
-            </div>
-            <div className="flex items-center space-x-2">
-              {formData.style && (
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              )}
-              {expandedSections.style ? 
-                <ChevronDown className="w-5 h-5 text-gray-400" /> : 
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              }
-            </div>
-          </button>
-          {expandedSections.style && (
-            <div className="p-4 pt-0 scale-in">
-              <textarea
-                value={formData.style}
-                onChange={handleChange('style')}
-                placeholder={showProFeatures 
-                  ? "Specify tone, writing style, format preferences, or presentation guidelines."
-                  : "Specify tone, writing style, format preferences, or presentation guidelines. (Pro feature for advanced styling)"
+                {expandedSections.context ? 
+                  <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+                  <ChevronRight className="w-5 h-5 text-gray-400" />
                 }
-                className={`textarea-field ${!showProFeatures ? 'bg-gray-50 border-gray-200' : ''}`}
-                rows={2}
-                disabled={!showProFeatures}
-              />
-              <div className="mt-2">
-                {!isAuthEnabled ? (
-                  <div className="text-xs text-gray-500 flex items-center">
-                    <Sparkles className="w-3 h-3 mr-1 text-amber-500" />
-                    <span>All styling controls available in demo mode</span>
-                  </div>
-                ) : !isProFeatureEnabled ? (
-                  <div className="text-xs text-gray-500 flex items-center">
-                    <Lock className="w-3 h-3 mr-1 text-gray-400" />
-                    <span>Advanced styling controls available with Pro</span>
-                  </div>
-                ) : (
-                  <div className="text-xs text-gray-500 flex items-center">
-                    <Sparkles className="w-3 h-3 mr-1 text-blue-500" />
-                    <span>Advanced styling controls enabled</span>
-                  </div>
-                )}
               </div>
-            </div>
-          )}
-        </div>
+            </button>
+            {expandedSections.context && (
+              <div className="p-4 pt-0 scale-in">
+                <textarea
+                  value={formData.context}
+                  onChange={handleChange('context')}
+                  placeholder="Provide background information, relevant details, or situational context that will help the AI understand the task better."
+                  className="textarea-field"
+                  rows={3}
+                />
+              </div>
+            )}
+          </div>
 
-        {/* Output Format Section */}
-        <div className="border border-gray-200 rounded-lg">
-          <button
-            onClick={() => toggleSection('output')}
-            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg"
-          >
-            <div className="flex items-center space-x-3">
-              <Download className="w-5 h-5 text-primary-600" />
-              <div className="text-left">
-                <h5 className="font-semibold text-gray-900">Output Format</h5>
-                <p className="text-sm text-gray-500">Structure and delivery specifications</p>
-              </div>
-              {isAuthEnabled ? (
-                <span className="badge badge-premium">Pro</span>
-              ) : (
-                <span className="badge badge-free">Demo</span>
-              )}
-            </div>
-            <div className="flex items-center space-x-2">
-              {formData.output && (
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              )}
-              {expandedSections.output ? 
-                <ChevronDown className="w-5 h-5 text-gray-400" /> : 
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              }
-            </div>
-          </button>
-          {expandedSections.output && (
-            <div className="p-4 pt-0 scale-in">
-              <textarea
-                value={formData.output}
-                onChange={handleChange('output')}
-                placeholder={showProFeatures
-                  ? "Describe the desired output format, structure, or delivery method."
-                  : "Describe the desired output format, structure, or delivery method. (Pro feature for custom formatting)"
-                }
-                className={`textarea-field ${!showProFeatures ? 'bg-gray-50 border-gray-200' : ''}`}
-                rows={2}
-                disabled={!showProFeatures}
-              />
-              <div className="mt-2">
-                {!isAuthEnabled ? (
-                  <div className="text-xs text-gray-500 flex items-center">
-                    <Sparkles className="w-3 h-3 mr-1 text-amber-500" />
-                    <span>All output formatting available in demo mode</span>
-                  </div>
-                ) : !isProFeatureEnabled ? (
-                  <div className="text-xs text-gray-500 flex items-center">
-                    <Lock className="w-3 h-3 mr-1 text-gray-400" />
-                    <span>Custom output formatting available with Pro</span>
-                  </div>
+          {/* Requirements Section */}
+          <div className="border border-gray-200 rounded-lg">
+            <button
+              onClick={() => toggleSection('requirements')}
+              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg"
+            >
+              <div className="flex items-center space-x-3">
+                <CheckSquare className="w-5 h-5 text-primary-600" />
+                <div className="text-left">
+                  <h5 className="font-semibold text-gray-900">Requirements</h5>
+                  <p className="text-sm text-gray-500">Specific constraints and criteria</p>
+                </div>
+                {isAuthEnabled ? (
+                  <span className="badge badge-premium">Pro</span>
                 ) : (
-                  <div className="text-xs text-gray-500 flex items-center">
-                    <Sparkles className="w-3 h-3 mr-1 text-blue-500" />
-                    <span>Custom output formatting enabled</span>
-                  </div>
+                  <span className="badge badge-free">Demo</span>
                 )}
               </div>
-            </div>
-          )}
+              <div className="flex items-center space-x-2">
+                {formData.requirements && (
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                )}
+                {expandedSections.requirements ? 
+                  <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+                  <ChevronRight className="w-5 h-5 text-gray-400" />
+                }
+              </div>
+            </button>
+            {expandedSections.requirements && (
+              <div className="p-4 pt-0 scale-in">
+                <textarea
+                  value={formData.requirements}
+                  onChange={handleChange('requirements')}
+                  placeholder="List specific requirements, constraints, or criteria that must be met. Use bullet points or numbered lists for clarity."
+                  className={`textarea-field ${!showProFeatures ? 'bg-gray-50 border-gray-200' : ''}`}
+                  rows={3}
+                  disabled={!showProFeatures}
+                />
+                <div className="mt-2">
+                  {!isAuthEnabled ? (
+                    <div className="text-xs text-gray-500 flex items-center">
+                      <Sparkles className="w-3 h-3 mr-1 text-amber-500" />
+                      <span>All features available in demo mode</span>
+                    </div>
+                  ) : !isProFeatureEnabled ? (
+                    <div className="text-xs text-gray-500 flex items-center">
+                      <Lock className="w-3 h-3 mr-1 text-gray-400" />
+                      <span>Enhanced with AI optimization in Pro version</span>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-500 flex items-center">
+                      <Sparkles className="w-3 h-3 mr-1 text-blue-500" />
+                      <span>Enhanced with AI optimization</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Style Guidelines Section */}
+          <div className="border border-gray-200 rounded-lg">
+            <button
+              onClick={() => toggleSection('style')}
+              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg"
+            >
+              <div className="flex items-center space-x-3">
+                <Palette className="w-5 h-5 text-primary-600" />
+                <div className="text-left">
+                  <h5 className="font-semibold text-gray-900">Style Guidelines</h5>
+                  <p className="text-sm text-gray-500">Tone, format, and presentation preferences</p>
+                </div>
+                {isAuthEnabled ? (
+                  <span className="badge badge-premium">Pro</span>
+                ) : (
+                  <span className="badge badge-free">Demo</span>
+                )}
+              </div>
+              <div className="flex items-center space-x-2">
+                {formData.style && (
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                )}
+                {expandedSections.style ? 
+                  <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+                  <ChevronRight className="w-5 h-5 text-gray-400" />
+                }
+              </div>
+            </button>
+            {expandedSections.style && (
+              <div className="p-4 pt-0 scale-in">
+                <textarea
+                  value={formData.style}
+                  onChange={handleChange('style')}
+                  placeholder={showProFeatures 
+                    ? "Specify tone, writing style, format preferences, or presentation guidelines."
+                    : "Specify tone, writing style, format preferences, or presentation guidelines. (Pro feature for advanced styling)"
+                  }
+                  className={`textarea-field ${!showProFeatures ? 'bg-gray-50 border-gray-200' : ''}`}
+                  rows={2}
+                  disabled={!showProFeatures}
+                />
+                <div className="mt-2">
+                  {!isAuthEnabled ? (
+                    <div className="text-xs text-gray-500 flex items-center">
+                      <Sparkles className="w-3 h-3 mr-1 text-amber-500" />
+                      <span>All styling controls available in demo mode</span>
+                    </div>
+                  ) : !isProFeatureEnabled ? (
+                    <div className="text-xs text-gray-500 flex items-center">
+                      <Lock className="w-3 h-3 mr-1 text-gray-400" />
+                      <span>Advanced styling controls available with Pro</span>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-500 flex items-center">
+                      <Sparkles className="w-3 h-3 mr-1 text-blue-500" />
+                      <span>Advanced styling controls enabled</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Output Format Section */}
+          <div className="border border-gray-200 rounded-lg">
+            <button
+              onClick={() => toggleSection('output')}
+              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg"
+            >
+              <div className="flex items-center space-x-3">
+                <Download className="w-5 h-5 text-primary-600" />
+                <div className="text-left">
+                  <h5 className="font-semibold text-gray-900">Output Format</h5>
+                  <p className="text-sm text-gray-500">Structure and delivery specifications</p>
+                </div>
+                {isAuthEnabled ? (
+                  <span className="badge badge-premium">Pro</span>
+                ) : (
+                  <span className="badge badge-free">Demo</span>
+                )}
+              </div>
+              <div className="flex items-center space-x-2">
+                {formData.output && (
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                )}
+                {expandedSections.output ? 
+                  <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+                  <ChevronRight className="w-5 h-5 text-gray-400" />
+                }
+              </div>
+            </button>
+            {expandedSections.output && (
+              <div className="p-4 pt-0 scale-in">
+                <textarea
+                  value={formData.output}
+                  onChange={handleChange('output')}
+                  placeholder={showProFeatures
+                    ? "Describe the desired output format, structure, or delivery method."
+                    : "Describe the desired output format, structure, or delivery method. (Pro feature for custom formatting)"
+                  }
+                  className={`textarea-field ${!showProFeatures ? 'bg-gray-50 border-gray-200' : ''}`}
+                  rows={2}
+                  disabled={!showProFeatures}
+                />
+                <div className="mt-2">
+                  {!isAuthEnabled ? (
+                    <div className="text-xs text-gray-500 flex items-center">
+                      <Sparkles className="w-3 h-3 mr-1 text-amber-500" />
+                      <span>All output formatting available in demo mode</span>
+                    </div>
+                  ) : !isProFeatureEnabled ? (
+                    <div className="text-xs text-gray-500 flex items-center">
+                      <Lock className="w-3 h-3 mr-1 text-gray-400" />
+                      <span>Custom output formatting available with Pro</span>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-500 flex items-center">
+                      <Sparkles className="w-3 h-3 mr-1 text-blue-500" />
+                      <span>Custom output formatting enabled</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Simple Validation Errors - only show if there are errors */}
       {validation.errors.length > 0 && (

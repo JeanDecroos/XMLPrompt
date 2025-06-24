@@ -487,6 +487,88 @@
     transform: translateZ(0);
     backface-visibility: hidden;
   }
+  
+  /* Enhanced Animations and Micro-interactions */
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+    50% { box-shadow: 0 0 30px rgba(99, 102, 241, 0.5); }
+  }
+  
+  @keyframes slide-up {
+    from { 
+      opacity: 0; 
+      transform: translateY(20px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+  
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes bounce-in {
+    0% { 
+      opacity: 0; 
+      transform: scale(0.3); 
+    }
+    50% { 
+      opacity: 1; 
+      transform: scale(1.05); 
+    }
+    70% { 
+      transform: scale(0.9); 
+    }
+    100% { 
+      opacity: 1; 
+      transform: scale(1); 
+    }
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.4s ease-out;
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+  
+  .animate-bounce-in {
+    animation: bounce-in 0.6s ease-out;
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  
+  /* Loading spinner */
+  .spinner {
+    @apply w-5 h-5 border-2 border-gray-300 border-t-primary-600 rounded-full;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Progress bar animation */
+  .progress-bar {
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Hover effects for better feedback */
+  .hover-scale:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s ease-out;
+  }
+  
+  .hover-glow:hover {
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
+    transition: box-shadow 0.3s ease-out;
+  }
 }
 
 /* Dark mode support */
@@ -530,4 +612,46 @@
   .card {
     @apply shadow-none border border-gray-300;
   }
+}
+
+/* Enhanced Mobile Experience */
+@media (max-width: 768px) {
+  .btn {
+    @apply min-h-[44px]; /* iOS touch target minimum */
+    touch-action: manipulation; /* Prevent zoom on double-tap */
+  }
+  
+  .card {
+    @apply mx-2; /* Prevent edge-to-edge on mobile */
+  }
+  
+  .input-field, .textarea-field {
+    @apply text-base; /* Prevent zoom on iOS */
+    touch-action: manipulation;
+  }
+  
+  /* Improve modal experience on mobile */
+  .modal-overlay {
+    @apply p-2;
+  }
+  
+  /* Better spacing for mobile */
+  .space-y-6 > * + * {
+    @apply mt-4;
+  }
+  
+  /* Larger touch targets for mobile */
+  button[class*="btn-"] {
+    @apply min-h-[48px] px-6 py-3;
+  }
+}
+
+/* Smooth scrolling behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus indicators for accessibility */
+.focus-visible {
+  @apply ring-2 ring-primary-500 ring-offset-2 outline-none;
 } 

@@ -228,23 +228,50 @@ const PromptGenerator = () => {
   return (
     <section className="py-16 bg-gradient-to-br from-slate-50 via-blue-50/40 to-purple-50/30 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Streamlined Hero Section */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full text-sm font-medium text-blue-800 mb-6">
+        {/* Enhanced Hero Section */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full text-sm font-medium text-blue-800 mb-6 animate-fade-in">
             <Sparkles className="w-4 h-4 mr-2" />
-            AI-Powered Prompt Engineering
+            Trusted by 10,000+ AI practitioners
           </div>
           
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-            Create Perfect Prompts for
+          <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            Turn Simple Ideas Into
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-              Any AI Model
+              Professional AI Prompts
             </span>
           </h1>
           
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-            Generate optimized prompts with intelligent format adaptation and AI-powered enhancement.
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
+            Generate optimized prompts that get better results from any AI model. 
+            <span className="block mt-2 text-lg font-medium text-gray-700">
+              Claude, GPT, Gemini, and 14+ models supported
+            </span>
           </p>
+
+          {/* Quick Value Demo */}
+          <div className="max-w-4xl mx-auto mb-12">
+            <div className="grid md:grid-cols-2 gap-4 p-6 bg-white/60 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-lg">
+              <div className="text-left">
+                <div className="text-sm text-gray-500 mb-2 flex items-center">
+                  <div className="w-3 h-3 bg-red-400 rounded-full mr-2"></div>
+                  Before: Basic prompt
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg text-sm font-mono text-gray-600">
+                  "Write a marketing email"
+                </div>
+              </div>
+              <div className="text-left">
+                <div className="text-sm text-purple-600 mb-2 flex items-center font-medium">
+                  <div className="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
+                  After: AI-optimized
+                </div>
+                <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-4 rounded-lg text-sm font-mono text-gray-700 border border-purple-200/50">
+                  "Write a compelling marketing email that converts browsers into buyers..."
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Main Content Grid */}

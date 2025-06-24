@@ -1,21 +1,39 @@
+// This file has been renamed to .eslintrc.cjs to fix module compatibility issues
 module.exports = {
   root: true,
   env: { browser: true, es2020: true },
   extends: [
     'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:react/jsx-runtime',
+    '@typescript-eslint/recommended',
     'plugin:react-hooks/recommended',
+    'plugin:import/errors',
+    'plugin:import/warnings'
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
-  parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
-  settings: { react: { version: '18.2' } },
-  plugins: ['react-refresh'],
+  parser: '@typescript-eslint/parser',
+  plugins: ['react-refresh', 'import'],
   rules: {
     'react-refresh/only-export-components': [
       'warn',
       { allowConstantExport: true },
     ],
-    'react/prop-types': 'off',
+    // Prevent import/export mismatches
+    'import/no-unresolved': 'error',
+    'import/default': 'error',
+    'import/export': 'error',
+    'import/named': 'error',
+    'import/namespace': 'error',
+    // Ensure consistent import/export style
+    'import/no-anonymous-default-export': 'warn',
+    'import/prefer-default-export': 'off', // Allow named exports
+    // Require explicit default exports
+    'import/no-default-export': 'off',
   },
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx']
+      }
+    }
+  }
 } 

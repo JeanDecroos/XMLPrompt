@@ -61,7 +61,26 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
         throw response.error
       }
     } catch (err) {
-      setError(err.message || `Failed to ${mode}.`)
+      console.error(`${mode} error:`, err)
+      
+      // Provide more specific error messages
+      let errorMessage = err.message || `Failed to ${mode}.`
+      
+      if (err.message?.includes('Invalid login credentials')) {
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.'
+      } else if (err.message?.includes('Email not confirmed')) {
+        errorMessage = 'Please check your email and click the confirmation link before signing in.'
+      } else if (err.message?.includes('User already registered')) {
+        errorMessage = 'An account with this email already exists. Try signing in instead.'
+      } else if (err.message?.includes('Password should be at least')) {
+        errorMessage = 'Password must be at least 6 characters long.'
+      } else if (err.message?.includes('Unable to validate email address')) {
+        errorMessage = 'Please enter a valid email address.'
+      } else if (err.message?.includes('Database error') || err.message?.includes('500')) {
+        errorMessage = 'Server error occurred. Please try again in a few moments or contact support if the issue persists.'
+      }
+      
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -145,6 +164,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
                 className="input-field pl-12"
               />
             </div>
@@ -158,12 +178,14 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                 className="input-field pl-12 pr-12"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
