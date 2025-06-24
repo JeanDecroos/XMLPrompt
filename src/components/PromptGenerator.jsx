@@ -5,6 +5,7 @@ import EnrichmentOptions from './EnrichmentOptions'
 import EnhancedPromptPreview from './EnhancedPromptPreview'
 import ModelSelector from './ModelSelector'
 import PromptHistory from './PromptHistory'
+import RotatingPromptExamples from './RotatingPromptExamples'
 import { generateClaudePrompt, validatePromptConfig } from '../utils/promptGenerator'
 import { enrichPrompt } from '../utils/promptEnricher'
 import { promptEnrichmentService } from '../services/promptEnrichment'
@@ -279,33 +280,12 @@ const PromptGenerator = () => {
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
             Generate optimized prompts that get better results from any AI model. 
             <span className="block mt-2 text-lg font-medium text-gray-700">
-              Claude, GPT, Gemini, and 14+ models supported
+              Claude, GPT, Gemini, and 40+ models supported
             </span>
           </p>
 
-          {/* Quick Value Demo */}
-          <div className="max-w-4xl mx-auto mb-12">
-            <div className="grid md:grid-cols-2 gap-4 p-6 bg-white/60 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-lg">
-              <div className="text-left">
-                <div className="text-sm text-gray-500 mb-2 flex items-center">
-                  <div className="w-3 h-3 bg-red-400 rounded-full mr-2"></div>
-                  Before: Basic prompt
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg text-sm font-mono text-gray-600">
-                  "Write a marketing email"
-                </div>
-              </div>
-              <div className="text-left">
-                <div className="text-sm text-purple-600 mb-2 flex items-center font-medium">
-                  <div className="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
-                  After: AI-optimized
-                </div>
-                <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-4 rounded-lg text-sm font-mono text-gray-700 border border-purple-200/50">
-                  "Write a compelling marketing email that converts browsers into buyers..."
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Dynamic Rotating Examples */}
+          <RotatingPromptExamples />
         </div>
 
         {/* Main Content Grid */}
