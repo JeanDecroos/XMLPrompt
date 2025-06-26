@@ -4,19 +4,20 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 let isAuthEnabled;
+let supabase;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Missing Supabase environment variables! Using mock authentication.');
   // You might want to throw an error or handle this more robustly in production
   // For now, it will proceed with mockAuth if not configured
   isAuthEnabled = false;
+  supabase = null;
 } else {
   isAuthEnabled = true;
+  supabase = createClient(supabaseUrl, supabaseAnonKey);
 }
 
-export { isAuthEnabled };
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export { isAuthEnabled, supabase };
 
 // Mock auth object for when Supabase is not configured
 const mockAuth = {
