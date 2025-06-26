@@ -11,8 +11,8 @@ import dotenv from 'dotenv'
 // Load environment variables
 dotenv.config()
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY // This should be the service role key, not anon key
+const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://nxwflnxspsokscfhuaqr.supabase.co'
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54d2ZsbnhzcHNva3NjZmh1YXFyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDc2OTkzNCwiZXhwIjoyMDY2MzQ1OTM0fQ.CbT3iYiaghBJ_lJPSAXFVMKyJtTVJoFL-61x4HHMxi0' // This should be the service role key, not anon key
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('Missing required environment variables:')

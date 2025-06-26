@@ -1,11 +1,22 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://xihttgwgcvzexxqkqtkn.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpaHR0Z3dnY3Z6ZXh4cWtxdGtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2OTYwMDEsImV4cCI6MjA2NjI3MjAwMX0.CcNLyIcXbc9LuApU2N2H3hWkR1IoqOo2yNOfy6620mk';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+let isAuthEnabled;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn('Missing Supabase environment variables! Using mock authentication.');
+  // You might want to throw an error or handle this more robustly in production
+  // For now, it will proceed with mockAuth if not configured
+  isAuthEnabled = false;
+} else {
+  isAuthEnabled = true;
+}
+
+export { isAuthEnabled };
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-export const isAuthEnabled = true;
 
 // Mock auth object for when Supabase is not configured
 const mockAuth = {

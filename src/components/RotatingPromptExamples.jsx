@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { ChevronLeft, ChevronRight, Crown, Sparkles } from 'lucide-react'
 
 const promptExamples = [
@@ -56,6 +56,112 @@ const RotatingPromptExamples = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoRotating, setIsAutoRotating] = useState(true)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [containerHeight, setContainerHeight] = useState(null)
+  const containerRef = useRef(null)
+  const contentRef = useRef(null)
+  const measurementTimeoutRef = useRef(null)
+
+  // Debounced height calculation function
+  const calculateOptimalHeight = useCallback(() => {
+    if (!contentRef.current) return
+
+    // Clear any pending measurements
+    if (measurementTimeoutRef.current) {
+      clearTimeout(measurementTimeoutRef.current)
+    }
+
+    measurementTimeoutRef.current = setTimeout(() => {
+      // Create a temporary container to measure heights of all examples
+      const tempContainer = document.createElement('div')
+      tempContainer.style.position = 'absolute'
+      tempContainer.style.visibility = 'hidden'
+      tempContainer.style.top = '-9999px'
+      tempContainer.style.left = '-9999px'
+      tempContainer.style.width = contentRef.current.offsetWidth + 'px'
+      tempContainer.style.fontFamily = window.getComputedStyle(contentRef.current).fontFamily
+      document.body.appendChild(tempContainer)
+
+      let maxHeight = 0
+
+      // Measure each example
+      promptExamples.forEach((example) => {
+        tempContainer.innerHTML = `
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4" style="width: ${contentRef.current.offsetWidth}px;">
+            <div class="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm p-4">
+              <div class="text-sm text-gray-500 mb-3 flex items-center">
+                <div class="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
+                <span class="font-medium">Basic</span>
+              </div>
+              <div class="bg-gray-50 p-4 rounded-lg text-sm font-mono text-gray-600 min-h-[120px] flex items-start leading-relaxed">
+                <span class="block w-full">"${example.basic}"</span>
+              </div>
+              <div class="mt-3 text-xs text-gray-500">
+                Raw input - what most people start with
+              </div>
+            </div>
+            <div class="bg-white/60 backdrop-blur-sm rounded-xl border border-blue-200/50 shadow-sm p-4 relative">
+              <div class="text-sm text-blue-600 mb-3 flex items-center">
+                <div class="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
+                <span class="font-medium">Structured</span>
+                <span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">FREE</span>
+              </div>
+              <div class="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg text-sm font-mono text-gray-700 border border-blue-200/50 min-h-[120px] flex items-start leading-relaxed">
+                <span class="block w-full">"${example.structured}"</span>
+              </div>
+              <div class="mt-3 text-xs text-blue-600">
+                ✨ Better structure and clarity - available to all users
+              </div>
+            </div>
+            <div class="bg-white/60 backdrop-blur-sm rounded-xl border border-purple-200/50 shadow-lg p-4 relative">
+              <div class="text-sm text-purple-600 mb-3 flex items-center">
+                <div class="w-3 h-3 bg-purple-400 rounded-full mr-2"></div>
+                <span class="font-medium">AI-Enriched</span>
+                <span class="ml-2 px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-xs rounded-full flex items-center">
+                  PRO
+                </span>
+              </div>
+              <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg text-sm font-mono text-gray-700 border border-purple-200/50 min-h-[120px] flex items-start leading-relaxed">
+                <span class="block w-full">"${example.enriched}"</span>
+              </div>
+              <div class="mt-3 text-xs text-purple-600 flex items-center">
+                Full AI optimization with context and strategy
+              </div>
+            </div>
+          </div>
+        `
+        
+        const height = tempContainer.offsetHeight
+        if (height > maxHeight) {
+          maxHeight = height
+        }
+      })
+
+      document.body.removeChild(tempContainer)
+      
+      // Add some padding for safety and smooth transitions
+      setContainerHeight(maxHeight + 32)
+    }, 150) // Debounce delay
+  }, [])
+
+  // Calculate and set the maximum height needed for all examples
+  useEffect(() => {
+    calculateOptimalHeight()
+  }, [calculateOptimalHeight])
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      calculateOptimalHeight()
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      if (measurementTimeoutRef.current) {
+        clearTimeout(measurementTimeoutRef.current)
+      }
+    }
+  }, [calculateOptimalHeight])
 
   // Auto-rotation effect
   useEffect(() => {
@@ -119,72 +225,92 @@ const RotatingPromptExamples = () => {
           <p className="text-sm text-gray-600 mt-2">See how prompts evolve from basic to AI-enhanced</p>
         </div>
 
-        {/* 3-Tier Comparison */}
-        <div className={`grid lg:grid-cols-3 gap-4 transition-all duration-300 ${
-          isTransitioning ? 'opacity-80 scale-[0.98]' : 'opacity-100 scale-100'
-        }`}>
-          
-          {/* Basic Prompt */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm p-4">
-            <div className="text-sm text-gray-500 mb-3 flex items-center">
-              <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
-              <span className="font-medium">Basic</span>
+        {/* 3-Tier Comparison with Fixed Height Container */}
+        <div 
+          ref={containerRef}
+          className="relative overflow-hidden transition-all duration-300 ease-in-out"
+          style={{ 
+            height: containerHeight ? `${containerHeight}px` : 'auto',
+            minHeight: containerHeight ? `${containerHeight}px` : '400px'
+          }}
+        >
+          <div 
+            ref={contentRef}
+            className={`grid grid-cols-1 lg:grid-cols-3 gap-4 transition-all duration-300 ${
+              isTransitioning ? 'opacity-80 scale-[0.98]' : 'opacity-100 scale-100'
+            }`}
+          >
+            
+            {/* Basic Prompt */}
+            <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm p-4 h-fit">
+              <div className="text-sm text-gray-500 mb-3 flex items-center">
+                <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
+                <span className="font-medium">Basic</span>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg text-sm font-mono text-gray-600 min-h-[120px] flex items-start leading-relaxed">
+                <span className="block w-full">"{currentExample.basic}"</span>
+              </div>
+              <div className="mt-3 text-xs text-gray-500">
+                Raw input - what most people start with
+              </div>
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg text-sm font-mono text-gray-600 min-h-[100px] flex items-center transition-all duration-300">
-              "{currentExample.basic}"
-            </div>
-            <div className="mt-3 text-xs text-gray-500">
-              Raw input - what most people start with
-            </div>
-          </div>
 
-          {/* Structured Prompt (Free) */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-blue-200/50 shadow-sm p-4 relative">
-            <div className="text-sm text-blue-600 mb-3 flex items-center">
-              <div className="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
-              <span className="font-medium">Structured</span>
-              <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">FREE</span>
+            {/* Structured Prompt (Free) */}
+            <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-blue-200/50 shadow-sm p-4 relative h-fit">
+              <div className="text-sm text-blue-600 mb-3 flex items-center">
+                <div className="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
+                <span className="font-medium">Structured</span>
+                <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">FREE</span>
+              </div>
+              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg text-sm font-mono text-gray-700 border border-blue-200/50 min-h-[120px] flex items-start leading-relaxed">
+                <span className="block w-full">"{currentExample.structured}"</span>
+              </div>
+              <div className="mt-3 text-xs text-blue-600">
+                ✨ Better structure and clarity - available to all users
+              </div>
             </div>
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg text-sm font-mono text-gray-700 border border-blue-200/50 min-h-[100px] flex items-center transition-all duration-300">
-              "{currentExample.structured}"
-            </div>
-            <div className="mt-3 text-xs text-blue-600">
-              ✨ Better structure and clarity - available to all users
-            </div>
-          </div>
 
-          {/* AI-Enriched Prompt (Pro) */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-purple-200/50 shadow-lg p-4 relative">
-            <div className="text-sm text-purple-600 mb-3 flex items-center">
-              <div className="w-3 h-3 bg-purple-400 rounded-full mr-2"></div>
-              <span className="font-medium">AI-Enriched</span>
-              <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-xs rounded-full flex items-center">
-                <Crown className="w-3 h-3 mr-1" />
-                PRO
-              </span>
-            </div>
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg text-sm font-mono text-gray-700 border border-purple-200/50 min-h-[100px] flex items-center transition-all duration-300">
-              "{currentExample.enriched}"
-            </div>
-            <div className="mt-3 text-xs text-purple-600 flex items-center">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Full AI optimization with context and strategy
+            {/* AI-Enriched Prompt (Pro) */}
+            <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-purple-200/50 shadow-lg p-4 relative h-fit">
+              <div className="text-sm text-purple-600 mb-3 flex items-center">
+                <div className="w-3 h-3 bg-purple-400 rounded-full mr-2"></div>
+                <span className="font-medium">AI-Enriched</span>
+                <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-xs rounded-full flex items-center">
+                  <Crown className="w-3 h-3 mr-1" />
+                  PRO
+                </span>
+              </div>
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg text-sm font-mono text-gray-700 border border-purple-200/50 min-h-[120px] flex items-start leading-relaxed">
+                <span className="block w-full">"{currentExample.enriched}"</span>
+              </div>
+              <div className="mt-3 text-xs text-purple-600 flex items-center">
+                <Sparkles className="w-3 h-3 mr-1" />
+                Full AI optimization with context and strategy
+              </div>
             </div>
           </div>
         </div>
 
         {/* Value Progression Indicator */}
         <div className="flex justify-center mt-6">
-          <div className="flex items-center space-x-4 text-sm text-gray-600">
+          <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-4 text-sm text-gray-600">
             <span>Basic</span>
             <div className="flex items-center">
-              <div className="w-8 h-0.5 bg-blue-300"></div>
-              <ChevronRight className="w-4 h-4 text-blue-400 mx-1" />
+              <div className="w-8 h-0.5 bg-blue-300 hidden lg:block"></div>
+              <div className="w-0.5 h-8 bg-blue-300 lg:hidden"></div>
+              <ChevronRight className="w-4 h-4 text-blue-400 mx-1 hidden lg:block" />
+              <div className="w-4 h-4 text-blue-400 mx-1 lg:hidden rotate-90">
+                <ChevronRight className="w-4 h-4" />
+              </div>
             </div>
             <span className="text-blue-600">Structured</span>
             <div className="flex items-center">
-              <div className="w-8 h-0.5 bg-purple-300"></div>
-              <ChevronRight className="w-4 h-4 text-purple-400 mx-1" />
+              <div className="w-8 h-0.5 bg-purple-300 hidden lg:block"></div>
+              <div className="w-0.5 h-8 bg-purple-300 lg:hidden"></div>
+              <ChevronRight className="w-4 h-4 text-purple-400 mx-1 hidden lg:block" />
+              <div className="w-4 h-4 text-purple-400 mx-1 lg:hidden rotate-90">
+                <ChevronRight className="w-4 h-4" />
+              </div>
             </div>
             <span className="text-purple-600">AI-Enhanced</span>
           </div>

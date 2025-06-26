@@ -1392,7 +1392,7 @@ export const estimateTokenCost = (modelId, inputTokens, outputTokens) => {
 }
 
 // Default model selection
-export const DEFAULT_MODEL = 'claude-3-5-sonnet'
+export const DEFAULT_MODEL = 'claude-3-5-sonnet' 
 
 // Enhanced Model Recommendation System
 export const MODEL_RECOMMENDATIONS = {
