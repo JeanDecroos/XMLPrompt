@@ -1,7 +1,7 @@
 import React from 'react'
 import { AuthProvider } from './contexts/AuthContext'
 import Header from './components/Header'
-import PromptGenerator from './components/PromptGenerator'
+import RedesignedPromptGenerator from './components/RedesignedPromptGenerator'
 import PricingSection from './components/PricingSection'
 import Footer from './components/Footer'
 
@@ -11,7 +11,7 @@ function App() {
       <div className="min-h-screen flex flex-col circuit-pattern">
         <Header />
         <main className="flex-1">
-          <PromptGenerator />
+          <RedesignedPromptGenerator />
           <PricingSection />
         </main>
         <Footer />

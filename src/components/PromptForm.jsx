@@ -4,7 +4,7 @@ import { roles } from '../data/roles'
 import { useAuth } from '../contexts/AuthContext'
 import { isAuthEnabled } from '../lib/supabase'
 
-const PromptForm = ({ formData, onChange, onReset, validation }) => {
+const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDefault = null }) => {
   const { isAuthenticated, isPro } = useAuth()
   const [expandedSections, setExpandedSections] = useState(() => {
     // Initialize from localStorage or default to all collapsed
@@ -28,6 +28,11 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
   })
   
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(() => {
+    // If showAdvancedByDefault is explicitly provided, use that value
+    if (showAdvancedByDefault !== null) {
+      return showAdvancedByDefault
+    }
+    
     try {
       const storedPref = localStorage.getItem('advancedOptionsDefaultOpen')
       return storedPref !== null ? JSON.parse(storedPref) : true // Default to true if not set
@@ -36,6 +41,13 @@ const PromptForm = ({ formData, onChange, onReset, validation }) => {
       return true // Default to true on error
     }
   })
+
+  // Update showAdvancedOptions when showAdvancedByDefault changes
+  useEffect(() => {
+    if (showAdvancedByDefault !== null) {
+      setShowAdvancedOptions(showAdvancedByDefault)
+    }
+  }, [showAdvancedByDefault])
 
   // Effect to save expanded sections to localStorage
   useEffect(() => {
