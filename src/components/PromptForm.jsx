@@ -4,10 +4,20 @@ import { roles } from '../data/roles'
 import { useAuth } from '../contexts/AuthContext'
 import { isAuthEnabled } from '../lib/supabase'
 
-const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDefault = null }) => {
+const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDefault = null, forceShowAdvanced = false }) => {
   const { isAuthenticated, isPro } = useAuth()
   const [expandedSections, setExpandedSections] = useState(() => {
     // Initialize from localStorage or default to all collapsed
+    // If forceShowAdvanced is true, expand all sections
+    if (forceShowAdvanced) {
+      return {
+        context: true,
+        requirements: true,
+        style: true,
+        output: true
+      }
+    }
+    
     try {
       const stored = localStorage.getItem('expandedSections')
       return stored ? JSON.parse(stored) : {
@@ -28,6 +38,11 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
   })
   
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(() => {
+    // If forceShowAdvanced is true, always show advanced options
+    if (forceShowAdvanced) {
+      return true
+    }
+    
     // If showAdvancedByDefault is explicitly provided, use that value
     if (showAdvancedByDefault !== null) {
       return showAdvancedByDefault
@@ -44,25 +59,44 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
 
   // Update showAdvancedOptions when showAdvancedByDefault changes
   useEffect(() => {
-    if (showAdvancedByDefault !== null) {
+    if (forceShowAdvanced) {
+      setShowAdvancedOptions(true)
+    } else if (showAdvancedByDefault !== null) {
       setShowAdvancedOptions(showAdvancedByDefault)
     }
-  }, [showAdvancedByDefault])
+  }, [showAdvancedByDefault, forceShowAdvanced])
 
-  // Effect to save expanded sections to localStorage
+  // Update expandedSections when forceShowAdvanced changes
   useEffect(() => {
-    try {
-      localStorage.setItem('expandedSections', JSON.stringify(expandedSections))
-    } catch (error) {
-      console.error("Failed to save expandedSections to localStorage", error)
+    if (forceShowAdvanced) {
+      setExpandedSections({
+        context: true,
+        requirements: true,
+        style: true,
+        output: true
+      })
     }
-  }, [expandedSections])
+  }, [forceShowAdvanced])
+
+  // Effect to save expanded sections to localStorage (only when not forced)
+  useEffect(() => {
+    if (!forceShowAdvanced) {
+      try {
+        localStorage.setItem('expandedSections', JSON.stringify(expandedSections))
+      } catch (error) {
+        console.error("Failed to save expandedSections to localStorage", error)
+      }
+    }
+  }, [expandedSections, forceShowAdvanced])
 
   const handleChange = (field) => (e) => {
     onChange(field, e.target.value)
   }
 
   const toggleSection = (section) => {
+    // Don't allow toggling when forceShowAdvanced is true
+    if (forceShowAdvanced) return
+    
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
@@ -70,6 +104,9 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
   }
 
   const toggleShowAdvancedOptions = () => {
+    // Don't allow toggling when forceShowAdvanced is true
+    if (forceShowAdvanced) return
+    
     setShowAdvancedOptions(prev => {
       const newState = !prev
       try {
@@ -100,22 +137,27 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
               Prompt Builder
             </h3>
             <div className="flex items-center space-x-2">
-              {showAdvancedOptions ? (
-                <button
-                  onClick={toggleShowAdvancedOptions}
-                  className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center"
-                >
-                  <EyeOff className="w-3 h-3 mr-1" />
-                  Hide Advanced Options
-                </button>
-              ) : (
-                <button
-                  onClick={toggleShowAdvancedOptions}
-                  className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center"
-                >
-                  <Eye className="w-3 h-3 mr-1" />
-                  Show Advanced Options
-                </button>
+              {/* Only show toggle button when not forced */}
+              {!forceShowAdvanced && (
+                <>
+                  {showAdvancedOptions ? (
+                    <button
+                      onClick={toggleShowAdvancedOptions}
+                      className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center"
+                    >
+                      <EyeOff className="w-3 h-3 mr-1" />
+                      Hide Advanced Options
+                    </button>
+                  ) : (
+                    <button
+                      onClick={toggleShowAdvancedOptions}
+                      className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center"
+                    >
+                      <Eye className="w-3 h-3 mr-1" />
+                      Show Advanced Options
+                    </button>
+                  )}
+                </>
               )}
               <button
                 onClick={onReset}
@@ -153,9 +195,11 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
           </div>
           
           <p className="text-sm text-gray-500">
-            {showAdvancedOptions 
-              ? "Fine-tune your prompt with advanced options and unlock full potential."
-              : "Start with the basics or show advanced options to fine-tune your prompts."
+            {forceShowAdvanced ? 
+              "All advanced prompt fields are available for professional use."
+              : showAdvancedOptions ? 
+                "Fine-tune your prompt with advanced options and unlock full potential."
+                : "Start with the basics or show advanced options to fine-tune your prompts."
             }
             {!isAuthEnabled && <span className="text-amber-600 ml-2">(Demo Mode)</span>}
           </p>
@@ -227,7 +271,7 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
         </div>
       </div>
 
-      {/* Optional Fields - Collapsible */}
+      {/* Optional Fields - Collapsible (or always visible when forced) */}
       {showAdvancedOptions && (
         <div className="space-y-4 animate-slide-up">
           <div className="flex items-center justify-between mb-4">
@@ -235,28 +279,34 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
               <Sparkles className="w-4 h-4 mr-2 text-primary-600" />
               Advanced Options
             </h4>
-            <button
-              onClick={() => {
-                const allExpanded = Object.values(expandedSections).every(Boolean)
-                const newState = allExpanded ? false : true
-                setExpandedSections({
-                  context: newState,
-                  requirements: newState,
-                  style: newState,
-                  output: newState
-                })
-              }}
-              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-            >
-              {Object.values(expandedSections).every(Boolean) ? 'Collapse All' : 'Expand All'}
-            </button>
+            {/* Only show expand/collapse button when not forced */}
+            {!forceShowAdvanced && (
+              <button
+                onClick={() => {
+                  const allExpanded = Object.values(expandedSections).every(Boolean)
+                  const newState = allExpanded ? false : true
+                  setExpandedSections({
+                    context: newState,
+                    requirements: newState,
+                    style: newState,
+                    output: newState
+                  })
+                }}
+                className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+              >
+                {Object.values(expandedSections).every(Boolean) ? 'Collapse All' : 'Expand All'}
+              </button>
+            )}
           </div>
 
           {/* Context Section */}
           <div className="border border-gray-200 rounded-lg">
             <button
               onClick={() => toggleSection('context')}
-              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg"
+              className={`w-full p-4 flex items-center justify-between transition-colors rounded-lg ${
+                forceShowAdvanced ? 'cursor-default' : 'hover:bg-gray-50'
+              }`}
+              disabled={forceShowAdvanced}
             >
               <div className="flex items-center space-x-3">
                 <FileText className="w-5 h-5 text-primary-600" />
@@ -270,10 +320,11 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
                 {formData.context && (
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 )}
-                {expandedSections.context ? 
-                  <ChevronDown className="w-5 h-5 text-gray-400" /> : 
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                }
+                {!forceShowAdvanced && (
+                  expandedSections.context ? 
+                    <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                )}
               </div>
             </button>
             {expandedSections.context && (
@@ -293,7 +344,10 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
           <div className="border border-gray-200 rounded-lg">
             <button
               onClick={() => toggleSection('requirements')}
-              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg"
+              className={`w-full p-4 flex items-center justify-between transition-colors rounded-lg ${
+                forceShowAdvanced ? 'cursor-default' : 'hover:bg-gray-50'
+              }`}
+              disabled={forceShowAdvanced}
             >
               <div className="flex items-center space-x-3">
                 <CheckSquare className="w-5 h-5 text-primary-600" />
@@ -311,10 +365,11 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
                 {formData.requirements && (
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 )}
-                {expandedSections.requirements ? 
-                  <ChevronDown className="w-5 h-5 text-gray-400" /> : 
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                }
+                {!forceShowAdvanced && (
+                  expandedSections.requirements ? 
+                    <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                )}
               </div>
             </button>
             {expandedSections.requirements && (
@@ -353,7 +408,10 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
           <div className="border border-gray-200 rounded-lg">
             <button
               onClick={() => toggleSection('style')}
-              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg"
+              className={`w-full p-4 flex items-center justify-between transition-colors rounded-lg ${
+                forceShowAdvanced ? 'cursor-default' : 'hover:bg-gray-50'
+              }`}
+              disabled={forceShowAdvanced}
             >
               <div className="flex items-center space-x-3">
                 <Palette className="w-5 h-5 text-primary-600" />
@@ -371,10 +429,11 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
                 {formData.style && (
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 )}
-                {expandedSections.style ? 
-                  <ChevronDown className="w-5 h-5 text-gray-400" /> : 
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                }
+                {!forceShowAdvanced && (
+                  expandedSections.style ? 
+                    <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                )}
               </div>
             </button>
             {expandedSections.style && (
@@ -416,7 +475,10 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
           <div className="border border-gray-200 rounded-lg">
             <button
               onClick={() => toggleSection('output')}
-              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg"
+              className={`w-full p-4 flex items-center justify-between transition-colors rounded-lg ${
+                forceShowAdvanced ? 'cursor-default' : 'hover:bg-gray-50'
+              }`}
+              disabled={forceShowAdvanced}
             >
               <div className="flex items-center space-x-3">
                 <Download className="w-5 h-5 text-primary-600" />
@@ -434,10 +496,11 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
                 {formData.output && (
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 )}
-                {expandedSections.output ? 
-                  <ChevronDown className="w-5 h-5 text-gray-400" /> : 
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                }
+                {!forceShowAdvanced && (
+                  expandedSections.output ? 
+                    <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                )}
               </div>
             </button>
             {expandedSections.output && (

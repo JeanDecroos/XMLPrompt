@@ -135,38 +135,6 @@ const PricingSection = () => {
             </div>
           </div>
         </div>
-
-        {/* Simplified Comparison */}
-        <div className="mt-16 text-center">
-          <div className="max-w-2xl mx-auto">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              See the Difference
-            </h3>
-            <p className="text-gray-600 mb-8">
-              AI enhancement transforms basic prompts into optimized, professional instructions
-            </p>
-            
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Free Example */}
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-left">
-                <div className="text-sm text-gray-500 mb-2">Free Plan</div>
-                <div className="text-sm font-mono text-gray-700">
-                  Write a product description
-                </div>
-              </div>
-
-              {/* Premium Example */}
-              <div className="bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg p-4 text-left">
-                <div className="text-sm text-purple-600 font-medium mb-2 flex items-center">
-                  Premium Plan <Sparkles className="w-3 h-3 ml-1" />
-                </div>
-                <div className="text-sm font-mono text-gray-700">
-                  Write a compelling, SEO-optimized product description that highlights key benefits, addresses customer pain points, and includes a clear call-to-action
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   )
