@@ -27,7 +27,7 @@ const EnrichmentOptions = ({ enrichmentData, onChange, isEnriching }) => {
   }
 
   return (
-    <div className="card-premium p-6 slide-up">
+    <div className="slide-up">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl mr-3 shadow-lg">

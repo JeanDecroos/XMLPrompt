@@ -91,7 +91,7 @@ const NavigationFlow = ({
   if (!isVisible) return null
 
   return (
-    <div className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-4 mb-6">
+    <div className="card-secondary p-4 mb-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Your Progress</h3>
         <div className="text-sm text-gray-500">

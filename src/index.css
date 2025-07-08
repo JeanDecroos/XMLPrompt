@@ -183,11 +183,11 @@
   .btn-lg { @apply px-8 py-4 text-base; }
   .btn-xl { @apply px-10 py-5 text-lg; }
   
-  /* Enhanced Card System */
+  /* Enhanced Card System - Standardized Colors */
   .card {
-    @apply bg-white/70 backdrop-blur-xl border border-gray-200/50 shadow-lg;
+    @apply bg-white/85 backdrop-blur-xl border border-gray-200/60 shadow-lg;
     border-radius: var(--radius-2xl);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
   }
   
@@ -198,24 +198,41 @@
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), transparent);
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   }
   
   .card:hover {
-    @apply shadow-2xl border-gray-300/60;
-    transform: translateY(-4px) scale(1.01);
+    @apply shadow-xl border-gray-300/70;
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.95);
+  }
+  
+  /* Secondary Card - Lighter, for supporting content */
+  .card-secondary {
+    @apply bg-white/75 backdrop-blur-lg border border-gray-200/50 shadow-md;
+    border-radius: var(--radius-xl);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+  
+  .card-secondary:hover {
+    @apply shadow-lg border-gray-300/60;
+    transform: translateY(-1px);
     background: rgba(255, 255, 255, 0.85);
   }
   
+  /* Premium Card - Enhanced with gradient borders */
   .card-premium {
-    @apply relative overflow-hidden;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));
+    @apply bg-white/90 backdrop-blur-xl shadow-xl;
+    border-radius: var(--radius-2xl);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
     border: 2px solid transparent;
     background-clip: padding-box;
   }
   
-  .card-premium::after {
+  .card-premium::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -224,11 +241,88 @@
     border-radius: var(--radius-2xl);
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: xor;
+    -webkit-mask-composite: xor;
   }
   
   .card-premium:hover {
     box-shadow: var(--shadow-glow-lg);
-    transform: translateY(-6px) scale(1.02);
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.95);
+  }
+  
+  /* Accent Card - For special highlights */
+  .card-accent {
+    @apply bg-gradient-to-br from-blue-50/90 to-purple-50/90 backdrop-blur-xl border border-blue-200/60 shadow-lg;
+    border-radius: var(--radius-2xl);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+  
+  .card-accent::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent);
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  }
+  
+  .card-accent:hover {
+    @apply shadow-xl border-blue-300/70;
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(245, 243, 255, 0.95));
+  }
+  
+  /* Success Card - For positive states */
+  .card-success {
+    @apply bg-gradient-to-br from-green-50/90 to-emerald-50/90 backdrop-blur-xl border border-green-200/60 shadow-lg;
+    border-radius: var(--radius-2xl);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+  
+  .card-success::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.4), transparent);
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  }
+  
+  .card-success:hover {
+    @apply shadow-xl border-green-300/70;
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, rgba(240, 253, 244, 0.95), rgba(236, 253, 245, 0.95));
+  }
+  
+  /* Warning Card - For attention-grabbing content */
+  .card-warning {
+    @apply bg-gradient-to-br from-amber-50/90 to-orange-50/90 backdrop-blur-xl border border-amber-200/60 shadow-lg;
+    border-radius: var(--radius-2xl);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+  
+  .card-warning::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.4), transparent);
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  }
+  
+  .card-warning:hover {
+    @apply shadow-xl border-amber-300/70;
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, rgba(255, 251, 235, 0.95), rgba(254, 243, 199, 0.95));
   }
   
   /* Enhanced Form Elements */

@@ -423,7 +423,7 @@ const FinalPromptGenerator = () => {
               </div>
               
               {/* Model Selection - Integrated */}
-              <div className="bg-white/70 backdrop-blur-sm rounded-lg border border-gray-200 p-4">
+              <div className="card-secondary p-4">
                 <ModelSelector
                   selectedModel={selectedModel}
                   suggestedModelId={suggestedModelId}
@@ -453,7 +453,7 @@ const FinalPromptGenerator = () => {
               
               {/* Enhanced Enrichment Options for Premium Users */}
               {hasFullAccess && (
-                <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-200">
+                <div className="mt-6 card-accent p-6">
                   <div className="flex items-center space-x-2 mb-4">
                     <Sparkles className="w-5 h-5 text-purple-600" />
                     <h4 className="text-lg font-semibold text-gray-900">AI Enhancement Options</h4>
@@ -468,7 +468,7 @@ const FinalPromptGenerator = () => {
               
               {/* Premium Upgrade Prompt for Free Users */}
               {!hasFullAccess && isAuthEnabled && (
-                <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200">
+                <div className="mt-4 card-warning p-6">
                   <div className="flex items-center space-x-2 mb-2">
                     <Crown className="w-5 h-5 text-amber-600" />
                     <h4 className="text-lg font-semibold text-gray-900">Unlock Full Potential</h4>
@@ -491,7 +491,7 @@ const FinalPromptGenerator = () => {
           <div className="text-center mb-8">
             <button
               onClick={() => setShowSupportingTools(!showSupportingTools)}
-              className="inline-flex items-center px-6 py-3 bg-white/70 backdrop-blur-sm rounded-lg border border-gray-200 hover:bg-white/80 transition-all duration-200 shadow-sm"
+              className="inline-flex items-center px-6 py-3 card-secondary rounded-lg hover:shadow-md transition-all duration-200"
             >
               <Zap className="w-5 h-5 mr-2 text-blue-600" />
               <span className="font-medium text-gray-900">
@@ -505,7 +505,7 @@ const FinalPromptGenerator = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
               
               {/* Session History & Workflow Tools */}
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm p-6">
+              <div className="card-secondary p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                     <Zap className="w-5 h-5 mr-2 text-blue-600" />
@@ -543,7 +543,7 @@ const FinalPromptGenerator = () => {
               </div>
 
               {/* Analytics & Insights (Premium Feature) */}
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm p-6">
+              <div className={hasFullAccess ? "card-accent p-6" : "card-secondary p-6"}>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                     <Target className="w-5 h-5 mr-2 text-purple-600" />

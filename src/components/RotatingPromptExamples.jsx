@@ -242,7 +242,7 @@ const RotatingPromptExamples = () => {
           >
             
             {/* Basic Prompt */}
-            <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm p-4 h-fit">
+            <div className="card-secondary p-4 h-fit">
               <div className="text-sm text-gray-500 mb-3 flex items-center">
                 <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
                 <span className="font-medium">Basic</span>
@@ -256,7 +256,7 @@ const RotatingPromptExamples = () => {
             </div>
 
             {/* Structured Prompt (Free) */}
-            <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-blue-200/50 shadow-sm p-4 relative h-fit">
+            <div className="card-accent p-4 relative h-fit">
               <div className="text-sm text-blue-600 mb-3 flex items-center">
                 <div className="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
                 <span className="font-medium">Structured</span>
@@ -271,7 +271,7 @@ const RotatingPromptExamples = () => {
             </div>
 
             {/* AI-Enriched Prompt (Pro) */}
-            <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-purple-200/50 shadow-lg p-4 relative h-fit">
+            <div className="card-premium p-4 relative h-fit">
               <div className="text-sm text-purple-600 mb-3 flex items-center">
                 <div className="w-3 h-3 bg-purple-400 rounded-full mr-2"></div>
                 <span className="font-medium">AI-Enriched</span>
@@ -320,7 +320,7 @@ const RotatingPromptExamples = () => {
         <div className="flex items-center justify-center mt-8 space-x-4">
           <button
             onClick={goToPrevious}
-            className="p-2 rounded-full bg-white/80 hover:bg-white border border-gray-200 hover:border-gray-300 transition-all duration-200 hover:scale-105"
+            className="p-2 rounded-full card-secondary transition-all duration-200 hover:scale-105"
             aria-label="Previous example"
           >
             <ChevronLeft className="w-4 h-4 text-gray-600" />
@@ -344,7 +344,7 @@ const RotatingPromptExamples = () => {
 
           <button
             onClick={goToNext}
-            className="p-2 rounded-full bg-white/80 hover:bg-white border border-gray-200 hover:border-gray-300 transition-all duration-200 hover:scale-105"
+            className="p-2 rounded-full card-secondary transition-all duration-200 hover:scale-105"
             aria-label="Next example"
           >
             <ChevronRight className="w-4 h-4 text-gray-600" />
