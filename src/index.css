@@ -185,7 +185,7 @@
   
   /* Enhanced Card System - Standardized Colors */
   .card {
-    @apply bg-white/85 backdrop-blur-xl border border-gray-200/60 shadow-lg;
+    @apply bg-white/95 backdrop-blur-xl border border-gray-200/60 shadow-lg;
     border-radius: var(--radius-2xl);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -205,12 +205,12 @@
   .card:hover {
     @apply shadow-xl border-gray-300/70;
     transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 1);
   }
   
   /* Secondary Card - Lighter, for supporting content */
   .card-secondary {
-    @apply bg-white/75 backdrop-blur-lg border border-gray-200/50 shadow-md;
+    @apply bg-white/90 backdrop-blur-lg border border-gray-200/50 shadow-md;
     border-radius: var(--radius-xl);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -219,12 +219,12 @@
   .card-secondary:hover {
     @apply shadow-lg border-gray-300/60;
     transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.98);
   }
   
   /* Premium Card - Enhanced with gradient borders */
   .card-premium {
-    @apply bg-white/90 backdrop-blur-xl shadow-xl;
+    @apply bg-white/96 backdrop-blur-xl shadow-xl;
     border-radius: var(--radius-2xl);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -247,12 +247,13 @@
   .card-premium:hover {
     box-shadow: var(--shadow-glow-lg);
     transform: translateY(-3px);
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 1);
   }
   
   /* Accent Card - For special highlights */
   .card-accent {
-    @apply bg-gradient-to-br from-blue-50/90 to-purple-50/90 backdrop-blur-xl border border-blue-200/60 shadow-lg;
+    background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(245, 243, 255, 0.95));
+    @apply backdrop-blur-xl border border-blue-200/60 shadow-lg;
     border-radius: var(--radius-2xl);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -272,12 +273,13 @@
   .card-accent:hover {
     @apply shadow-xl border-blue-300/70;
     transform: translateY(-2px);
-    background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(245, 243, 255, 0.95));
+    background: linear-gradient(135deg, rgba(239, 246, 255, 1), rgba(245, 243, 255, 1));
   }
   
   /* Success Card - For positive states */
   .card-success {
-    @apply bg-gradient-to-br from-green-50/90 to-emerald-50/90 backdrop-blur-xl border border-green-200/60 shadow-lg;
+    background: linear-gradient(135deg, rgba(240, 253, 244, 0.95), rgba(236, 253, 245, 0.95));
+    @apply backdrop-blur-xl border border-green-200/60 shadow-lg;
     border-radius: var(--radius-2xl);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -297,12 +299,13 @@
   .card-success:hover {
     @apply shadow-xl border-green-300/70;
     transform: translateY(-2px);
-    background: linear-gradient(135deg, rgba(240, 253, 244, 0.95), rgba(236, 253, 245, 0.95));
+    background: linear-gradient(135deg, rgba(240, 253, 244, 1), rgba(236, 253, 245, 1));
   }
   
   /* Warning Card - For attention-grabbing content */
   .card-warning {
-    @apply bg-gradient-to-br from-amber-50/90 to-orange-50/90 backdrop-blur-xl border border-amber-200/60 shadow-lg;
+    background: linear-gradient(135deg, rgba(255, 251, 235, 0.95), rgba(254, 243, 199, 0.95));
+    @apply backdrop-blur-xl border border-amber-200/60 shadow-lg;
     border-radius: var(--radius-2xl);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -322,7 +325,7 @@
   .card-warning:hover {
     @apply shadow-xl border-amber-300/70;
     transform: translateY(-2px);
-    background: linear-gradient(135deg, rgba(255, 251, 235, 0.95), rgba(254, 243, 199, 0.95));
+    background: linear-gradient(135deg, rgba(255, 251, 235, 1), rgba(254, 243, 199, 1));
   }
   
   /* Enhanced Form Elements */
