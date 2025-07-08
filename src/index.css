@@ -225,9 +225,8 @@
   
   /* Optimized hover state with GPU acceleration */
   .card:hover {
-    @apply shadow-xl border-gray-300/70;
+    @apply shadow-xl;
     transform: translateY(-2px) translateZ(0);
-    background: rgba(255, 255, 255, 1);
   }
   
   /* Secondary Card - Lightweight version */
@@ -243,9 +242,8 @@
   }
   
   .card-secondary:hover {
-    @apply shadow-lg border-gray-300/60;
+    @apply shadow-lg;
     transform: translateY(-1px) translateZ(0);
-    background: rgba(255, 255, 255, 0.98);
   }
   
   /* Premium Card - Optimized gradient implementation */
@@ -281,7 +279,6 @@
   .card-premium:hover {
     box-shadow: var(--shadow-glow-lg);
     transform: translateY(-3px) translateZ(0);
-    background: rgba(255, 255, 255, 1);
   }
   
   /* Optimized colored cards with shared base */
@@ -314,9 +311,8 @@
   }
   
   .card-accent:hover {
-    @apply shadow-xl border-blue-300/70;
+    @apply shadow-xl;
     transform: translateY(-2px) translateZ(0);
-    background: linear-gradient(135deg, rgba(239, 246, 255, 1), rgba(245, 243, 255, 1));
   }
   
   /* Success Card - Optimized green theme */
@@ -338,9 +334,8 @@
   }
   
   .card-success:hover {
-    @apply shadow-xl border-green-300/70;
+    @apply shadow-xl;
     transform: translateY(-2px) translateZ(0);
-    background: linear-gradient(135deg, rgba(240, 253, 244, 1), rgba(236, 253, 245, 1));
   }
   
   /* Warning Card - Optimized amber theme */
@@ -362,9 +357,8 @@
   }
   
   .card-warning:hover {
-    @apply shadow-xl border-amber-300/70;
+    @apply shadow-xl;
     transform: translateY(-2px) translateZ(0);
-    background: linear-gradient(135deg, rgba(255, 251, 235, 1), rgba(254, 243, 199, 1));
   }
   
   /* Card Utility Classes for Common Patterns */
@@ -501,7 +495,7 @@
   }
   
   .status-indicator:hover {
-    @apply bg-white shadow-md;
+    @apply shadow-md;
     transform: translateY(-1px);
   }
   
@@ -829,7 +823,6 @@
   }
   
   .goal-card:hover {
-    background: rgba(255, 255, 255, 0.9);
     transform: translateY(-2px) translateZ(0);
   }
   
@@ -844,7 +837,7 @@
   }
   
   .role-card {
-    @apply backdrop-blur-sm border-2 border-gray-200 rounded-lg p-3 hover:border-primary-300 hover:shadow-md;
+    @apply backdrop-blur-sm border-2 border-gray-200 rounded-lg p-3 hover:shadow-md;
     background: rgba(255, 255, 255, 0.9);
     /* Faster transition for better UX */
     transition: all 0.2s ease-out;
