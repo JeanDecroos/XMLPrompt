@@ -229,56 +229,44 @@
     transform: translateY(-2px) translateZ(0);
   }
   
-  /* Secondary Card - Lightweight version */
+    /* Secondary Card - Same as base card */
   .card-secondary {
-    @apply backdrop-blur-lg border border-gray-200/50 shadow-md;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: var(--radius-xl);
-    /* Simplified transition for better performance */
-    transition: all 0.25s ease-out;
-    position: relative;
-    /* Lighter GPU acceleration */
-    transform: translateZ(0);
+    @apply backdrop-blur-xl border border-gray-200/60 shadow-lg;
+    background: rgba(255, 255, 255, 0.95);
+    /* Extend base card properties */
+    @apply card-base;
   }
-  
+
   .card-secondary:hover {
-    @apply shadow-lg;
-    transform: translateY(-1px) translateZ(0);
+    @apply shadow-xl;
+    transform: translateY(-2px) translateZ(0);
   }
   
-  /* Premium Card - Optimized gradient implementation */
+    /* Premium Card - Same as base card */
   .card-premium {
-    @apply backdrop-blur-xl shadow-xl;
-    background: rgba(255, 255, 255, 0.96);
-    border-radius: var(--radius-2xl);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    /* Optimized for complex visual effects */
-    border: 2px solid transparent;
-    background-clip: padding-box;
-    /* Enhanced GPU acceleration for complex effects */
-    will-change: transform, box-shadow, background;
-    transform: translateZ(0);
-    backface-visibility: hidden;
+    @apply backdrop-blur-xl border border-gray-200/60 shadow-lg;
+    background: rgba(255, 255, 255, 0.95);
+    /* Extend base card properties */
+    @apply card-base;
   }
-  
-  /* More efficient gradient border using single pseudo-element */
+
+  /* Remove gradient border styling */
   .card-premium::before {
     content: '';
     position: absolute;
-    inset: 0;
-    padding: 2px;
-    background: linear-gradient(135deg, var(--premium-start), var(--premium-end));
-    border-radius: var(--radius-2xl);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: xor;
-    -webkit-mask-composite: xor;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), transparent);
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    /* Prevent unnecessary repaints */
     pointer-events: none;
   }
-  
+
   .card-premium:hover {
-    box-shadow: var(--shadow-glow-lg);
-    transform: translateY(-3px) translateZ(0);
+    @apply shadow-xl;
+    transform: translateY(-2px) translateZ(0);
   }
   
   /* Optimized colored cards with shared base */
@@ -292,70 +280,76 @@
     backface-visibility: hidden;
   }
   
-  /* Accent Card - Optimized blue theme */
+    /* Accent Card - Same as base card */
   .card-accent {
-    @apply card-colored border-blue-200/60;
-    background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(245, 243, 255, 0.95));
+    @apply backdrop-blur-xl border border-gray-200/60 shadow-lg;
+    background: rgba(255, 255, 255, 0.95);
+    /* Extend base card properties */
+    @apply card-base;
   }
-  
+
   .card-accent::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), transparent);
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
     pointer-events: none;
   }
-  
+
   .card-accent:hover {
     @apply shadow-xl;
     transform: translateY(-2px) translateZ(0);
   }
   
-  /* Success Card - Optimized green theme */
+    /* Success Card - Same as base card */
   .card-success {
-    @apply card-colored border-green-200/60;
-    background: linear-gradient(135deg, rgba(240, 253, 244, 0.95), rgba(236, 253, 245, 0.95));
+    @apply backdrop-blur-xl border border-gray-200/60 shadow-lg;
+    background: rgba(255, 255, 255, 0.95);
+    /* Extend base card properties */
+    @apply card-base;
   }
-  
+
   .card-success::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.4), transparent);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), transparent);
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
     pointer-events: none;
   }
-  
+
   .card-success:hover {
     @apply shadow-xl;
     transform: translateY(-2px) translateZ(0);
   }
   
-  /* Warning Card - Optimized amber theme */
+    /* Warning Card - Same as base card */
   .card-warning {
-    @apply card-colored border-amber-200/60;
-    background: linear-gradient(135deg, rgba(255, 251, 235, 0.95), rgba(254, 243, 199, 0.95));
+    @apply backdrop-blur-xl border border-gray-200/60 shadow-lg;
+    background: rgba(255, 255, 255, 0.95);
+    /* Extend base card properties */
+    @apply card-base;
   }
-  
+
   .card-warning::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.4), transparent);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), transparent);
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
     pointer-events: none;
   }
-  
+
   .card-warning:hover {
     @apply shadow-xl;
     transform: translateY(-2px) translateZ(0);
