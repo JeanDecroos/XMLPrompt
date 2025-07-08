@@ -157,7 +157,10 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
       <div className="relative">
         <div 
           ref={triggerRef}
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            console.log('Dropdown clicked, current isOpen:', isOpen)
+            setIsOpen(!isOpen)
+          }}
           className="relative w-full bg-white border border-gray-200 rounded-lg px-4 py-3 cursor-pointer hover:border-primary-300 hover:shadow-sm transition-all duration-200"
         >
           <div className="flex items-center justify-between">
@@ -185,17 +188,20 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
         </div>
 
         {/* Dropdown content, positioned to appear above all other content */}
-        {isOpen && (
-          <div 
-            ref={dropdownRef}
-            className="fixed bg-white border border-gray-200 rounded-lg shadow-2xl max-h-80 overflow-hidden z-[9999] model-selector-dropdown"
-            style={{ 
-              width: triggerRef.current?.offsetWidth || 'auto', 
-              zIndex: 9999,
-              top: triggerRef.current ? triggerRef.current.getBoundingClientRect().bottom + window.scrollY + 8 : 0,
-              left: triggerRef.current ? triggerRef.current.getBoundingClientRect().left + window.scrollX : 0
-            }}
-          >
+        {isOpen && triggerRef.current && (() => {
+          const rect = triggerRef.current.getBoundingClientRect()
+          console.log('Dropdown rendering, rect:', rect, 'isOpen:', isOpen)
+          return (
+            <div 
+              ref={dropdownRef}
+              className="fixed bg-white border border-gray-200 rounded-lg shadow-2xl max-h-80 overflow-hidden z-[9999] model-selector-dropdown"
+              style={{ 
+                width: triggerRef.current.offsetWidth + 'px', 
+                zIndex: 9999,
+                top: (rect.bottom + 8) + 'px',
+                left: rect.left + 'px'
+              }}
+            >
             {/* Simple Provider Filter */}
             <div className="p-3 bg-gray-50 border-b border-gray-100">
               <div className="flex flex-wrap gap-2">
@@ -277,7 +283,8 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
               })}
             </div>
           </div>
-        )}
+          )
+        })()}
       </div>
 
       {/* Simple Summary */}
