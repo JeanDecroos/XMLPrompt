@@ -163,8 +163,9 @@
   }
   
   .btn-secondary {
-    @apply bg-white/80 backdrop-blur-sm border border-gray-200/60 text-gray-700 hover:bg-white hover:border-gray-300;
+    @apply backdrop-blur-sm border border-gray-200/60 text-gray-700 hover:bg-white hover:border-gray-300;
     @apply focus:ring-gray-400 shadow-md hover:shadow-lg;
+    background: rgba(255, 255, 255, 0.8);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
@@ -173,9 +174,12 @@
   }
   
   .btn-ghost {
-    @apply text-gray-600 hover:text-gray-900 hover:bg-gray-100/80;
-    @apply focus:ring-gray-400;
+    @apply text-gray-600 hover:text-gray-900 focus:ring-gray-400;
     backdrop-filter: blur(10px);
+  }
+  
+  .btn-ghost:hover {
+    background: rgba(243, 244, 246, 0.8); /* gray-100 with 80% opacity */
   }
   
   .btn-sm { @apply px-4 py-2 text-sm; }
@@ -185,7 +189,8 @@
   
   /* Enhanced Card System - Standardized Colors */
   .card {
-    @apply bg-white/95 backdrop-blur-xl border border-gray-200/60 shadow-lg;
+    @apply backdrop-blur-xl border border-gray-200/60 shadow-lg;
+    background: rgba(255, 255, 255, 0.95);
     border-radius: var(--radius-2xl);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -210,7 +215,8 @@
   
   /* Secondary Card - Lighter, for supporting content */
   .card-secondary {
-    @apply bg-white/90 backdrop-blur-lg border border-gray-200/50 shadow-md;
+    @apply backdrop-blur-lg border border-gray-200/50 shadow-md;
+    background: rgba(255, 255, 255, 0.9);
     border-radius: var(--radius-xl);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -224,7 +230,8 @@
   
   /* Premium Card - Enhanced with gradient borders */
   .card-premium {
-    @apply bg-white/96 backdrop-blur-xl shadow-xl;
+    @apply backdrop-blur-xl shadow-xl;
+    background: rgba(255, 255, 255, 0.96);
     border-radius: var(--radius-2xl);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -330,9 +337,10 @@
   
   /* Enhanced Form Elements */
   .input-field {
-    @apply w-full px-5 py-4 bg-white/80 backdrop-blur-sm border border-gray-200/60 text-gray-900 placeholder-gray-500;
+    @apply w-full px-5 py-4 backdrop-blur-sm border border-gray-200/60 text-gray-900 placeholder-gray-500;
     @apply focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-400;
     @apply transition-all duration-300;
+    background: rgba(255, 255, 255, 0.8);
     border-radius: var(--radius-lg);
     font-size: 0.875rem;
     box-shadow: var(--shadow-sm);
@@ -381,7 +389,8 @@
   }
   
   .badge-free {
-    @apply bg-gray-100/80 text-gray-700 border border-gray-200/60;
+    @apply text-gray-700 border border-gray-200/60;
+    background: rgba(243, 244, 246, 0.8); /* gray-100 with 80% opacity */
     backdrop-filter: blur(10px);
   }
   
@@ -425,7 +434,8 @@
   
   /* Status Indicators */
   .status-indicator {
-    @apply inline-flex items-center space-x-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200/60;
+    @apply inline-flex items-center space-x-2 px-4 py-2 backdrop-blur-sm rounded-full border border-gray-200/60;
+    background: rgba(255, 255, 255, 0.8);
     transition: all 0.3s ease;
     box-shadow: var(--shadow-sm);
   }
@@ -745,7 +755,8 @@
 
   /* Goal-First Role Selector Styles */
   .goal-card {
-    @apply bg-white/80 backdrop-blur-sm border-2 border-gray-200 rounded-xl transition-all duration-300 hover:border-primary-300 hover:shadow-lg hover:bg-white/90;
+    @apply backdrop-blur-sm border-2 border-gray-200 rounded-xl transition-all duration-300 hover:border-primary-300 hover:shadow-lg;
+    background: rgba(255, 255, 255, 0.8);
     transform: translateY(0);
     min-height: 120px;
     display: flex;
@@ -754,6 +765,7 @@
   }
   
   .goal-card:hover {
+    background: rgba(255, 255, 255, 0.9);
     transform: translateY(-2px);
   }
   
@@ -766,11 +778,13 @@
   }
   
   .role-card {
-    @apply bg-white/90 backdrop-blur-sm border-2 border-gray-200 rounded-lg p-3 transition-all duration-200 hover:border-primary-300 hover:shadow-md;
+    @apply backdrop-blur-sm border-2 border-gray-200 rounded-lg p-3 transition-all duration-200 hover:border-primary-300 hover:shadow-md;
+    background: rgba(255, 255, 255, 0.9);
   }
   
   .role-card.selected {
-    @apply border-primary-500 bg-primary-50/80 shadow-sm;
+    @apply border-primary-500 shadow-sm;
+    background: rgba(239, 246, 255, 0.8); /* primary-50 with 80% opacity */
   }
   
   .role-card:hover {
