@@ -388,7 +388,7 @@ const FinalPromptGenerator = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             {/* LEFT: Prompt Builder */}
-            <div className="card p-6 space-y-6">
+            <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Target className="w-6 h-6 text-blue-600" />
@@ -416,7 +416,7 @@ const FinalPromptGenerator = () => {
             </div>
 
             {/* RIGHT: Generated Prompts & Results */}
-            <div className="card p-6 space-y-6">
+            <div className="space-y-6">
               <div className="flex items-center space-x-2">
                 <Sparkles className="w-6 h-6 text-purple-600" />
                 <h3 className="text-xl font-bold text-gray-900">Generated Prompts</h3>
