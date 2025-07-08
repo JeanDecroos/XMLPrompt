@@ -100,41 +100,246 @@ const MODEL_CAPABILITY_VECTORS = {
 
 // Role-based capability requirements (what each role typically needs)
 const ROLE_CAPABILITY_PROFILES = {
+  // === TECHNOLOGY & ENGINEERING ===
   'Software Developer': {
     coding: 1.0, reasoning: 0.9, analysis: 0.8, creative: 0.3,
-    speed: 0.7, cost: 0.6, sustained_work: 0.8
+    speed: 0.7, cost: 0.6, sustained_work: 0.8, step_by_step: 0.7
   },
   'Data Scientist': {
     reasoning: 0.9, analysis: 1.0, coding: 0.8, creative: 0.4,
-    mathematics: 0.9, context: 0.8, research: 0.8
+    mathematics: 0.9, context: 0.8, research: 0.8, benchmarks: 0.8
+  },
+  'DevOps Engineer': {
+    coding: 0.8, reasoning: 0.8, analysis: 0.7, creative: 0.2,
+    speed: 0.9, efficiency: 0.9, sustained_work: 0.7, cost: 0.8
+  },
+  'Cybersecurity Analyst': {
+    reasoning: 0.9, analysis: 1.0, coding: 0.7, creative: 0.3,
+    step_by_step: 0.8, precision: 0.9, safety: 1.0, context: 0.8
+  },
+  'AI Researcher': {
+    reasoning: 1.0, analysis: 1.0, coding: 0.8, creative: 0.6,
+    mathematics: 1.0, research: 1.0, frontier_research: 0.9, context: 0.9
+  },
+  'Systems Architect': {
+    reasoning: 0.9, analysis: 0.9, coding: 0.7, creative: 0.4,
+    structured_output: 0.9, context: 0.9, sustained_work: 0.8
+  },
+  'Mobile Developer': {
+    coding: 1.0, reasoning: 0.8, analysis: 0.6, creative: 0.4,
+    multimodal: 0.6, speed: 0.8, cost: 0.7, versatility: 0.7
+  },
+
+  // === CREATIVE & CONTENT ===
+  'UX/UI Designer': {
+    creative: 1.0, multimodal: 0.9, analysis: 0.6, reasoning: 0.5,
+    image_generation: 0.8, speed: 0.7, cost: 0.6, versatility: 0.8
+  },
+  'Content Writer': {
+    creative: 1.0, reasoning: 0.6, analysis: 0.5, coding: 0.1,
+    speed: 0.8, cost: 0.7, versatility: 0.9, precision: 0.7
+  },
+  'Graphic Designer': {
+    creative: 1.0, multimodal: 1.0, analysis: 0.4, reasoning: 0.4,
+    image_generation: 1.0, text_in_images: 0.9, speed: 0.7
+  },
+  'Video Producer': {
+    creative: 1.0, multimodal: 1.0, analysis: 0.5, reasoning: 0.5,
+    video_generation: 1.0, cinematic: 1.0, synchronized_audio: 0.9
+  },
+  'Copywriter': {
+    creative: 1.0, reasoning: 0.7, analysis: 0.6, coding: 0.1,
+    precision: 0.9, speed: 0.8, versatility: 0.8
+  },
+  'Brand Strategist': {
+    creative: 0.9, reasoning: 0.8, analysis: 0.8, coding: 0.1,
+    context: 0.8, versatility: 0.9, precision: 0.8
+  },
+  'Social Media Manager': {
+    creative: 0.9, multimodal: 0.7, analysis: 0.6, reasoning: 0.5,
+    speed: 0.9, cost: 0.8, versatility: 0.9
+  },
+
+  // === BUSINESS & MANAGEMENT ===
+  'Business Consultant': {
+    reasoning: 0.9, analysis: 0.9, creative: 0.6, coding: 0.2,
+    context: 0.9, structured_output: 0.8, precision: 0.8
   },
   'Product Manager': {
     analysis: 0.8, creative: 0.7, reasoning: 0.7, coding: 0.2,
-    speed: 0.8, cost: 0.7, versatility: 0.9
+    speed: 0.8, cost: 0.7, versatility: 0.9, context: 0.8
   },
-  'Designer': {
-    creative: 1.0, multimodal: 0.9, analysis: 0.6, reasoning: 0.5,
-    image_generation: 0.8, speed: 0.7, cost: 0.6
+  'Project Manager': {
+    analysis: 0.8, reasoning: 0.7, creative: 0.5, coding: 0.2,
+    structured_output: 0.9, speed: 0.8, cost: 0.8, precision: 0.8
   },
-  'Content Creator': {
-    creative: 1.0, multimodal: 0.8, analysis: 0.6, reasoning: 0.5,
-    speed: 0.8, cost: 0.7, versatility: 0.8
-  },
-  'Researcher': {
-    reasoning: 1.0, analysis: 1.0, creative: 0.6, coding: 0.5,
-    context: 1.0, research: 1.0, benchmarks: 0.8
+  'Startup Advisor': {
+    reasoning: 0.8, analysis: 0.8, creative: 0.7, coding: 0.3,
+    speed: 0.8, versatility: 0.9, cost: 0.7
   },
   'Business Analyst': {
     analysis: 1.0, reasoning: 0.8, creative: 0.6, coding: 0.3,
-    context: 0.8, speed: 0.7, cost: 0.8
+    context: 0.8, speed: 0.7, cost: 0.8, structured_output: 0.9
   },
-  'Marketing Manager': {
+  'Operations Manager': {
+    analysis: 0.9, reasoning: 0.7, creative: 0.4, coding: 0.2,
+    efficiency: 0.9, speed: 0.8, cost: 0.9, structured_output: 0.8
+  },
+  'Strategy Consultant': {
+    reasoning: 1.0, analysis: 1.0, creative: 0.6, coding: 0.2,
+    context: 0.9, research: 0.8, precision: 0.9
+  },
+
+  // === MARKETING & SALES ===
+  'Marketing Specialist': {
     creative: 0.9, analysis: 0.7, reasoning: 0.6, coding: 0.1,
-    speed: 0.8, cost: 0.7, versatility: 0.8
+    speed: 0.8, cost: 0.7, versatility: 0.8, multimodal: 0.6
+  },
+  'SEO Specialist': {
+    analysis: 0.8, reasoning: 0.7, creative: 0.6, coding: 0.4,
+    speed: 0.8, cost: 0.8, context: 0.7, precision: 0.8
+  },
+  'Sales Manager': {
+    creative: 0.7, reasoning: 0.7, analysis: 0.7, coding: 0.1,
+    speed: 0.9, versatility: 0.9, cost: 0.8
+  },
+  'Growth Hacker': {
+    analysis: 0.8, reasoning: 0.8, creative: 0.7, coding: 0.5,
+    speed: 0.9, efficiency: 0.8, cost: 0.8, versatility: 0.8
+  },
+  'Email Marketer': {
+    creative: 0.8, analysis: 0.7, reasoning: 0.6, coding: 0.3,
+    speed: 0.8, cost: 0.8, precision: 0.8
+  },
+
+  // === FINANCE & LEGAL ===
+  'Financial Analyst': {
+    analysis: 1.0, reasoning: 0.9, mathematics: 0.9, creative: 0.3,
+    precision: 1.0, context: 0.8, structured_output: 0.9
+  },
+  'Accountant': {
+    analysis: 0.9, reasoning: 0.7, mathematics: 0.8, creative: 0.2,
+    precision: 1.0, structured_output: 1.0, cost: 0.8
+  },
+  'Investment Advisor': {
+    analysis: 1.0, reasoning: 0.9, mathematics: 0.9, creative: 0.4,
+    research: 0.8, context: 0.9, precision: 0.9
+  },
+  'Legal Counsel': {
+    reasoning: 1.0, analysis: 0.9, creative: 0.5, coding: 0.1,
+    precision: 1.0, context: 1.0, structured_output: 0.9
+  },
+  'Contract Lawyer': {
+    reasoning: 0.9, analysis: 0.9, creative: 0.4, coding: 0.1,
+    precision: 1.0, structured_output: 1.0, context: 0.9
+  },
+  'Compliance Officer': {
+    analysis: 0.9, reasoning: 0.8, creative: 0.3, coding: 0.2,
+    precision: 1.0, safety: 0.9, structured_output: 0.9
+  },
+
+  // === HEALTHCARE & LIFE SCIENCES ===
+  'Medical Researcher': {
+    reasoning: 1.0, analysis: 1.0, research: 1.0, creative: 0.4,
+    mathematics: 0.8, precision: 1.0, context: 0.9, safety: 0.9
+  },
+  'Healthcare Administrator': {
+    analysis: 0.8, reasoning: 0.7, creative: 0.4, coding: 0.2,
+    structured_output: 0.9, efficiency: 0.8, cost: 0.8
+  },
+  'Clinical Data Analyst': {
+    analysis: 1.0, reasoning: 0.8, mathematics: 0.9, creative: 0.3,
+    precision: 1.0, research: 0.8, context: 0.8
+  },
+  'Pharmaceutical Researcher': {
+    reasoning: 0.9, analysis: 1.0, research: 1.0, creative: 0.4,
+    mathematics: 0.8, precision: 1.0, safety: 1.0
+  },
+
+  // === EDUCATION & TRAINING ===
+  'Educator': {
+    creative: 0.8, reasoning: 0.7, analysis: 0.6, coding: 0.2,
+    versatility: 0.9, context: 0.8, structured_output: 0.7
+  },
+  'Instructional Designer': {
+    creative: 0.9, reasoning: 0.7, analysis: 0.7, coding: 0.3,
+    multimodal: 0.7, structured_output: 0.8, versatility: 0.8
+  },
+  'Corporate Trainer': {
+    creative: 0.8, reasoning: 0.7, analysis: 0.6, coding: 0.2,
+    versatility: 0.9, speed: 0.7, cost: 0.7
+  },
+  'Curriculum Developer': {
+    creative: 0.8, reasoning: 0.8, analysis: 0.7, coding: 0.2,
+    structured_output: 0.9, context: 0.8, versatility: 0.8
+  },
+
+  // === RESEARCH & ANALYSIS ===
+  'Research Specialist': {
+    reasoning: 1.0, analysis: 1.0, creative: 0.6, coding: 0.5,
+    context: 1.0, research: 1.0, benchmarks: 0.8, precision: 0.9
+  },
+  'Market Researcher': {
+    analysis: 1.0, reasoning: 0.8, creative: 0.6, coding: 0.3,
+    research: 0.9, context: 0.8, structured_output: 0.8
+  },
+  'Policy Analyst': {
+    reasoning: 0.9, analysis: 1.0, creative: 0.5, coding: 0.2,
+    research: 0.9, context: 1.0, precision: 0.9
+  },
+  'Scientific Researcher': {
+    reasoning: 1.0, analysis: 1.0, mathematics: 0.9, creative: 0.5,
+    research: 1.0, precision: 1.0, context: 0.9
+  },
+
+  // === HUMAN RESOURCES & OPERATIONS ===
+  'HR Manager': {
+    analysis: 0.7, reasoning: 0.7, creative: 0.6, coding: 0.1,
+    versatility: 0.8, speed: 0.7, cost: 0.7, context: 0.8
+  },
+  'Recruiter': {
+    analysis: 0.7, reasoning: 0.6, creative: 0.7, coding: 0.1,
+    speed: 0.8, versatility: 0.8, cost: 0.8
+  },
+  'Supply Chain Manager': {
+    analysis: 0.9, reasoning: 0.8, creative: 0.4, coding: 0.3,
+    efficiency: 0.9, cost: 0.9, structured_output: 0.8
+  },
+  'Quality Assurance': {
+    analysis: 0.9, reasoning: 0.8, creative: 0.3, coding: 0.6,
+    precision: 1.0, step_by_step: 0.9, structured_output: 0.9
+  },
+
+  // === CUSTOMER SUCCESS & SUPPORT ===
+  'Customer Success Manager': {
+    analysis: 0.7, reasoning: 0.7, creative: 0.7, coding: 0.2,
+    versatility: 0.9, speed: 0.8, cost: 0.7
+  },
+  'Technical Support': {
+    reasoning: 0.8, analysis: 0.8, creative: 0.4, coding: 0.6,
+    step_by_step: 0.9, speed: 0.8, precision: 0.8
+  },
+  'Community Manager': {
+    creative: 0.8, analysis: 0.6, reasoning: 0.5, coding: 0.2,
+    speed: 0.8, versatility: 0.9, cost: 0.8
+  },
+
+  // === SPECIALIZED ROLES ===
+  'Journalist': {
+    creative: 0.9, reasoning: 0.8, analysis: 0.8, coding: 0.1,
+    speed: 0.9, research: 0.8, precision: 0.8, context: 0.8
   },
   'Technical Writer': {
     creative: 0.8, analysis: 0.7, reasoning: 0.7, coding: 0.4,
     context: 0.8, structured_output: 0.9, precision: 0.8
+  },
+  'Sustainability Consultant': {
+    reasoning: 0.8, analysis: 0.9, creative: 0.6, coding: 0.2,
+    research: 0.8, context: 0.9, precision: 0.8
+  },
+  'Nonprofit Director': {
+    reasoning: 0.7, analysis: 0.8, creative: 0.7, coding: 0.2,
+    versatility: 0.8, cost: 0.9, context: 0.8
   }
 };
 
