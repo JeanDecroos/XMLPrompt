@@ -71,7 +71,7 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
   }, [isOpen])
 
   return (
-    <div className={compact ? "relative z-50" : "card p-6 relative z-50"}>
+    <div className={compact ? "relative z-50 model-selector" : "card p-6 relative z-50 model-selector model-selector-container"}>
       {!compact && (
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -170,8 +170,8 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
         {isOpen && (
           <div 
             ref={dropdownRef}
-            className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-2xl max-h-80 overflow-hidden z-[9999]"
-            style={{ width: triggerRef.current?.offsetWidth || 'auto' }}
+            className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-2xl max-h-80 overflow-hidden z-[9999] model-selector-dropdown"
+            style={{ width: triggerRef.current?.offsetWidth || 'auto', zIndex: 9999 }}
           >
             {/* Simple Provider Filter */}
             <div className="p-3 bg-gray-50 border-b border-gray-100">
