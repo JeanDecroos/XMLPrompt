@@ -154,7 +154,7 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
       )}
       
       {/* Current Selection Display */}
-      <div className="relative">
+      <div className="relative z-50">
         <div 
           ref={triggerRef}
           onClick={() => {
@@ -188,20 +188,15 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
         </div>
 
         {/* Dropdown content, positioned to appear above all other content */}
-        {isOpen && triggerRef.current && (() => {
-          const rect = triggerRef.current.getBoundingClientRect()
-          console.log('Dropdown rendering, rect:', rect, 'isOpen:', isOpen)
-          return (
-            <div 
-              ref={dropdownRef}
-              className="fixed bg-white border border-gray-200 rounded-lg shadow-2xl max-h-80 overflow-hidden z-[9999] model-selector-dropdown"
-              style={{ 
-                width: triggerRef.current.offsetWidth + 'px', 
-                zIndex: 9999,
-                top: (rect.bottom + 8) + 'px',
-                left: rect.left + 'px'
-              }}
-            >
+        {isOpen && (
+          <div 
+            ref={dropdownRef}
+            className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-2xl max-h-80 overflow-hidden z-[9999] model-selector-dropdown"
+            style={{ 
+              zIndex: 9999,
+              minWidth: '100%'
+            }}
+          >
             {/* Simple Provider Filter */}
             <div className="p-3 bg-gray-50 border-b border-gray-100">
               <div className="flex flex-wrap gap-2">
@@ -283,8 +278,7 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
               })}
             </div>
           </div>
-          )
-        })()}
+        )}
       </div>
 
       {/* Simple Summary */}
