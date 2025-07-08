@@ -1,5 +1,5 @@
 import React from 'react'
-import { Check, Crown, Zap, Star, ArrowRight, Sparkles } from 'lucide-react'
+import { Check, Crown, Zap, ArrowRight, Sparkles } from 'lucide-react'
 
 const PricingSection = () => {
   const features = {
@@ -13,7 +13,7 @@ const PricingSection = () => {
       'AI-powered prompt enhancement',
       'Advanced optimization suggestions',
       'Priority model recommendations',
-      'Prompt history & library',
+      'Prompt history & template library',
       'Performance analytics',
       'Priority support'
     ]
@@ -22,17 +22,13 @@ const PricingSection = () => {
   return (
     <section id="pricing" className="py-16 bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header with Social Proof */}
+        {/* Section Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-100 to-blue-100 rounded-full text-sm font-medium text-green-800 mb-4">
-            <Star className="w-4 h-4 mr-2" />
-            4.9/5 from 500+ users
-          </div>
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Choose Your AI Advantage
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Join thousands of professionals getting better AI results
+            Join thousands of professionals getting better results with AI
           </p>
         </div>
 
@@ -42,7 +38,7 @@ const PricingSection = () => {
           <div className="card p-8 relative">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900">Free</h3>
+                <h3 className="text-2xl font-bold text-gray-900">Free Plan</h3>
                 <p className="text-gray-600 mt-1">Perfect for getting started</p>
               </div>
               <div className="text-right">
@@ -62,9 +58,12 @@ const PricingSection = () => {
               ))}
             </div>
 
-            <button className="btn btn-secondary btn-lg w-full">
-              <span>Current Plan</span>
-            </button>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-6">
+              <div className="flex items-center justify-center space-x-2">
+                <Check className="w-4 h-4 text-green-600" />
+                <span className="text-sm font-semibold text-green-800">Current Plan Active</span>
+              </div>
+            </div>
           </div>
 
           {/* Premium Plan */}
@@ -72,15 +71,15 @@ const PricingSection = () => {
             {/* Popular Badge */}
             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
               <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
-                <Star className="w-4 h-4" />
-                <span>Save 34% - Limited Time</span>
+                <Sparkles className="w-4 h-4" />
+                <span>Save 34% – Limited-time launch pricing</span>
               </div>
             </div>
 
             <div className="flex items-center justify-between mb-6">
               <div>
                 <div className="flex items-center space-x-2">
-                  <h3 className="text-2xl font-bold text-gray-900">Premium</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">Premium Plan</h3>
                   <Crown className="w-6 h-6 text-purple-600" />
                 </div>
                 <p className="text-gray-600 mt-1">Professional AI optimization</p>
@@ -90,10 +89,7 @@ const PricingSection = () => {
                   <span className="text-lg text-gray-500 line-through">$29</span>
                   <div className="text-3xl font-bold text-gray-900">$19</div>
                 </div>
-                <div className="text-sm text-gray-500">per month</div>
-                <div className="text-xs text-purple-600 font-medium bg-purple-50 px-2 py-1 rounded-full mt-1">
-                  Launch pricing ends soon
-                </div>
+                <div className="text-sm text-gray-500">/ month</div>
               </div>
             </div>
 
@@ -115,7 +111,8 @@ const PricingSection = () => {
                 <span className="text-sm font-semibold text-purple-800">Instant Value</span>
               </div>
               <p className="text-sm text-purple-700">
-                Save 2+ hours per week on prompt creation. ROI typically achieved in first week.
+                Save 2+ hours per week on prompt creation.<br />
+                Most users see ROI within the first week.
               </p>
             </div>
 
@@ -128,9 +125,6 @@ const PricingSection = () => {
             <div className="text-center space-y-1">
               <p className="text-sm text-gray-600">
                 ✓ No credit card required • ✓ Cancel anytime
-              </p>
-              <p className="text-xs text-gray-500">
-                Join 1,000+ professionals already using Premium
               </p>
             </div>
           </div>

@@ -493,7 +493,7 @@ const FinalPromptGenerator = () => {
             >
               <Zap className="w-5 h-5 mr-2 text-blue-600" />
               <span className="font-medium text-gray-900">
-                {showSupportingTools ? 'Hide' : 'Show'} Advanced Tools & History
+                {showSupportingTools ? 'Hide' : 'Show'} Prompt Library & History
               </span>
               {showSupportingTools ? <ChevronUp className="w-5 h-5 ml-2" /> : <ChevronDown className="w-5 h-5 ml-2" />}
             </button>

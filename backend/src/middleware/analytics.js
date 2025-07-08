@@ -23,7 +23,7 @@ export const analyticsMiddleware = async (req, res, next) => {
     };
 
     // Insert into analytics_events table
-    await db.adminClient.from('analytics_events').insert({
+    await db.from('analytics_events').insert({
       user_id: userId,
       event_type: 'api_request',
       event_category: 'backend_api',
