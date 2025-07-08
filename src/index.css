@@ -187,15 +187,29 @@
   .btn-lg { @apply px-8 py-4 text-base; }
   .btn-xl { @apply px-10 py-5 text-lg; }
   
-  /* Enhanced Card System - Standardized Colors */
+  /* Enhanced Card System - Optimized for Performance */
+  
+  /* Base card foundation with shared properties */
+  .card-base {
+    position: relative;
+    border-radius: var(--radius-2xl);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Use will-change for better performance on animated elements */
+    will-change: transform, box-shadow, background;
+    /* Hardware acceleration for smooth animations */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  
+  /* Primary card - Most common usage */
   .card {
     @apply backdrop-blur-xl border border-gray-200/60 shadow-lg;
     background: rgba(255, 255, 255, 0.95);
-    border-radius: var(--radius-2xl);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
+    /* Extend base card properties */
+    @apply card-base;
   }
   
+  /* Optimized pseudo-element for accent line */
   .card::before {
     content: '';
     position: absolute;
@@ -205,40 +219,52 @@
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), transparent);
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    /* Prevent unnecessary repaints */
+    pointer-events: none;
   }
   
+  /* Optimized hover state with GPU acceleration */
   .card:hover {
     @apply shadow-xl border-gray-300/70;
-    transform: translateY(-2px);
+    transform: translateY(-2px) translateZ(0);
     background: rgba(255, 255, 255, 1);
   }
   
-  /* Secondary Card - Lighter, for supporting content */
+  /* Secondary Card - Lightweight version */
   .card-secondary {
     @apply backdrop-blur-lg border border-gray-200/50 shadow-md;
     background: rgba(255, 255, 255, 0.9);
     border-radius: var(--radius-xl);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Simplified transition for better performance */
+    transition: all 0.25s ease-out;
     position: relative;
+    /* Lighter GPU acceleration */
+    transform: translateZ(0);
   }
   
   .card-secondary:hover {
     @apply shadow-lg border-gray-300/60;
-    transform: translateY(-1px);
+    transform: translateY(-1px) translateZ(0);
     background: rgba(255, 255, 255, 0.98);
   }
   
-  /* Premium Card - Enhanced with gradient borders */
+  /* Premium Card - Optimized gradient implementation */
   .card-premium {
     @apply backdrop-blur-xl shadow-xl;
     background: rgba(255, 255, 255, 0.96);
     border-radius: var(--radius-2xl);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
+    /* Optimized for complex visual effects */
     border: 2px solid transparent;
     background-clip: padding-box;
+    /* Enhanced GPU acceleration for complex effects */
+    will-change: transform, box-shadow, background;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
   
+  /* More efficient gradient border using single pseudo-element */
   .card-premium::before {
     content: '';
     position: absolute;
@@ -249,21 +275,30 @@
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: xor;
     -webkit-mask-composite: xor;
+    pointer-events: none;
   }
   
   .card-premium:hover {
     box-shadow: var(--shadow-glow-lg);
-    transform: translateY(-3px);
+    transform: translateY(-3px) translateZ(0);
     background: rgba(255, 255, 255, 1);
   }
   
-  /* Accent Card - For special highlights */
-  .card-accent {
-    background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(245, 243, 255, 0.95));
-    @apply backdrop-blur-xl border border-blue-200/60 shadow-lg;
+  /* Optimized colored cards with shared base */
+  .card-colored {
+    @apply backdrop-blur-xl border shadow-lg;
     border-radius: var(--radius-2xl);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
+    /* Shared GPU acceleration */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  
+  /* Accent Card - Optimized blue theme */
+  .card-accent {
+    @apply card-colored border-blue-200/60;
+    background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(245, 243, 255, 0.95));
   }
   
   .card-accent::before {
@@ -275,21 +310,19 @@
     height: 2px;
     background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent);
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    pointer-events: none;
   }
   
   .card-accent:hover {
     @apply shadow-xl border-blue-300/70;
-    transform: translateY(-2px);
+    transform: translateY(-2px) translateZ(0);
     background: linear-gradient(135deg, rgba(239, 246, 255, 1), rgba(245, 243, 255, 1));
   }
   
-  /* Success Card - For positive states */
+  /* Success Card - Optimized green theme */
   .card-success {
+    @apply card-colored border-green-200/60;
     background: linear-gradient(135deg, rgba(240, 253, 244, 0.95), rgba(236, 253, 245, 0.95));
-    @apply backdrop-blur-xl border border-green-200/60 shadow-lg;
-    border-radius: var(--radius-2xl);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
   }
   
   .card-success::before {
@@ -301,21 +334,19 @@
     height: 2px;
     background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.4), transparent);
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    pointer-events: none;
   }
   
   .card-success:hover {
     @apply shadow-xl border-green-300/70;
-    transform: translateY(-2px);
+    transform: translateY(-2px) translateZ(0);
     background: linear-gradient(135deg, rgba(240, 253, 244, 1), rgba(236, 253, 245, 1));
   }
   
-  /* Warning Card - For attention-grabbing content */
+  /* Warning Card - Optimized amber theme */
   .card-warning {
+    @apply card-colored border-amber-200/60;
     background: linear-gradient(135deg, rgba(255, 251, 235, 0.95), rgba(254, 243, 199, 0.95));
-    @apply backdrop-blur-xl border border-amber-200/60 shadow-lg;
-    border-radius: var(--radius-2xl);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
   }
   
   .card-warning::before {
@@ -327,12 +358,41 @@
     height: 2px;
     background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.4), transparent);
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    pointer-events: none;
   }
   
   .card-warning:hover {
     @apply shadow-xl border-amber-300/70;
-    transform: translateY(-2px);
+    transform: translateY(-2px) translateZ(0);
     background: linear-gradient(135deg, rgba(255, 251, 235, 1), rgba(254, 243, 199, 1));
+  }
+  
+  /* Card Utility Classes for Common Patterns */
+  .card-interactive {
+    cursor: pointer;
+    user-select: none;
+    /* Optimize for frequent interactions */
+    will-change: transform, box-shadow;
+  }
+  
+  .card-interactive:active {
+    transform: translateY(0) translateZ(0);
+  }
+  
+  .card-compact {
+    /* Reduced padding and effects for dense layouts */
+    padding: 1rem;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease-out;
+  }
+  
+  .card-elevated {
+    /* Enhanced shadow for important content */
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  .card-elevated:hover {
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.1);
   }
   
   /* Enhanced Form Elements */
@@ -753,33 +813,43 @@
     transition: box-shadow 0.3s ease-out;
   }
 
-  /* Goal-First Role Selector Styles */
+  /* Goal-First Role Selector Styles - Optimized */
   .goal-card {
-    @apply backdrop-blur-sm border-2 border-gray-200 rounded-xl transition-all duration-300 hover:border-primary-300 hover:shadow-lg;
+    @apply backdrop-blur-sm border-2 border-gray-200 rounded-xl hover:border-primary-300 hover:shadow-lg;
     background: rgba(255, 255, 255, 0.8);
-    transform: translateY(0);
+    /* Optimized performance properties */
+    transition: all 0.25s ease-out;
+    transform: translateZ(0);
     min-height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Prevent unnecessary repaints */
+    will-change: transform, background, border-color;
   }
   
   .goal-card:hover {
     background: rgba(255, 255, 255, 0.9);
-    transform: translateY(-2px);
+    transform: translateY(-2px) translateZ(0);
   }
   
   .goal-card:active {
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
   }
   
   .goal-icon {
     @apply w-12 h-12 rounded-lg flex items-center justify-center text-white text-xl font-semibold shadow-md;
+    /* Optimize icon rendering */
+    transform: translateZ(0);
   }
   
   .role-card {
-    @apply backdrop-blur-sm border-2 border-gray-200 rounded-lg p-3 transition-all duration-200 hover:border-primary-300 hover:shadow-md;
+    @apply backdrop-blur-sm border-2 border-gray-200 rounded-lg p-3 hover:border-primary-300 hover:shadow-md;
     background: rgba(255, 255, 255, 0.9);
+    /* Faster transition for better UX */
+    transition: all 0.2s ease-out;
+    transform: translateZ(0);
+    will-change: transform, background, border-color;
   }
   
   .role-card.selected {
@@ -788,7 +858,7 @@
   }
   
   .role-card:hover {
-    transform: translateY(-1px);
+    transform: translateY(-1px) translateZ(0);
   }
   
   .role-list {
@@ -1138,5 +1208,79 @@ html {
     .section-toggle-button {
       font-size: 0.875rem;
       padding: 0.75rem 1rem;
+    }
+  }
+
+  /* CSS Containment for Performance Isolation */
+  .card,
+  .card-secondary,
+  .card-premium,
+  .card-accent,
+  .card-success,
+  .card-warning {
+    /* Isolate layout and paint for better performance */
+    contain: layout style paint;
+  }
+  
+  /* Performance optimizations for mobile */
+  @media (max-width: 768px) {
+    .card-base {
+      /* Reduce animations on mobile for better performance */
+      transition: all 0.2s ease-out;
+    }
+    
+    .card:hover,
+    .card-secondary:hover,
+    .card-premium:hover,
+    .card-accent:hover,
+    .card-success:hover,
+    .card-warning:hover {
+      /* Minimal transforms on mobile to prevent jank */
+      transform: translateY(-1px) translateZ(0);
+    }
+    
+    /* Reduce blur effects on mobile for better performance */
+    .card,
+    .card-premium,
+    .card-accent,
+    .card-success,
+    .card-warning {
+      backdrop-filter: blur(8px);
+    }
+    
+    .card-secondary {
+      backdrop-filter: blur(4px);
+    }
+    
+    /* Disable complex effects on low-end devices */
+    .card-premium::before,
+    .card-accent::before,
+    .card-success::before,
+    .card-warning::before {
+      display: none;
+    }
+  }
+  
+  /* Reduced motion support for accessibility and performance */
+  @media (prefers-reduced-motion: reduce) {
+    .card-base,
+    .card,
+    .card-secondary,
+    .card-premium,
+    .card-accent,
+    .card-success,
+    .card-warning {
+      transition: none;
+      animation: none;
+      transform: none;
+    }
+    
+    .card:hover,
+    .card-secondary:hover,
+    .card-premium:hover,
+    .card-accent:hover,
+    .card-success:hover,
+    .card-warning:hover {
+      transform: none;
     }
   }
