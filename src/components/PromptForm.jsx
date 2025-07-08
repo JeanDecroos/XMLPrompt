@@ -3,6 +3,7 @@ import { RotateCcw, User, Target, FileText, CheckSquare, Palette, Download, Lock
 import { roles, getRolesByCategory } from '../data/roles'
 import { useAuth } from '../contexts/AuthContext'
 import { isAuthEnabled } from '../lib/supabase'
+import GoalFirstRoleSelector from './GoalFirstRoleSelector'
 
 const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDefault = null, forceShowAdvanced = false }) => {
   const { isAuthenticated, isPro } = useAuth()
@@ -126,8 +127,7 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
   // In demo mode, show all features as enabled
   const showProFeatures = !isAuthEnabled || isProFeatureEnabled
 
-  const [showRoleTooltip, setShowRoleTooltip] = useState(false)
-  const rolesByCategory = getRolesByCategory()
+
 
   return (
     <div className="card p-6 fade-in">
@@ -217,55 +217,13 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
             Essential Information
           </h4>
           
-          {/* Role Selection */}
+          {/* Role Selection with Goal-First Approach */}
           <div className="space-y-3 mb-6">
-            <label className="block text-sm font-semibold text-gray-900 flex items-center">
-              <User className="w-4 h-4 mr-2 text-primary-600" />
-              Role *
-              <div className="relative ml-2">
-                <button
-                  type="button"
-                  onMouseEnter={() => setShowRoleTooltip(true)}
-                  onMouseLeave={() => setShowRoleTooltip(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <Info className="w-4 h-4" />
-                </button>
-                {showRoleTooltip && (
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg whitespace-nowrap z-50">
-                    Your role helps select the optimal AI model for your task
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                  </div>
-                )}
-              </div>
-            </label>
-            <select
-              value={formData.role}
-              onChange={handleChange('role')}
-              className="select-field"
-              required
-            >
-              <option value="">Select a professional role...</option>
-              {Object.entries(rolesByCategory).map(([category, categoryRoles]) => (
-                <optgroup key={category} label={`${category} Roles`}>
-                  {categoryRoles.map(role => (
-                    <option key={role.id} value={role.name}>
-                      {role.name}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-            {formData.role && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg scale-in">
-                <p className="text-sm text-blue-800 font-medium">
-                  {roles.find(r => r.name === formData.role)?.description}
-                </p>
-                <p className="text-xs text-blue-600 mt-1">
-                  💡 This role preference will help select the most suitable AI model for your tasks
-                </p>
-              </div>
-            )}
+            <GoalFirstRoleSelector
+              selectedRole={formData.role}
+              onRoleChange={(role) => onChange('role', role)}
+              showRoleDescription={true}
+            />
           </div>
 
           {/* Task Description */}

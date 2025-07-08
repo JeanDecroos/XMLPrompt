@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { Sparkles, Zap, Target, Wand2 } from 'lucide-react'
 import PromptForm from './PromptForm'
+import StreamlinedPromptForm from './StreamlinedPromptForm'
 import EnrichmentOptions from './EnrichmentOptions'
 import EnhancedPromptPreview from './EnhancedPromptPreview'
 import ModelSelector from './ModelSelector'
@@ -397,76 +398,86 @@ const PromptGenerator = () => {
           <RotatingPromptExamples />
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Left Column - Prompt Configuration */}
-          <div className="xl:col-span-1 space-y-8 relative z-20">
-            {/* Session History Controls */}
-            <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-gray-700 flex items-center">
-                  <Zap className="w-4 h-4 mr-2 text-blue-600" />
-                  Session History
-                </h3>
-                <div className="text-xs text-gray-500 hidden sm:block">
-                  Ctrl+Z / Ctrl+Y
+        {/* Session History Controls */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm p-4 mb-8 max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium text-gray-700 flex items-center">
+              <Zap className="w-4 h-4 mr-2 text-blue-600" />
+              Session History
+            </h3>
+            <div className="text-xs text-gray-500 hidden sm:block">
+              Ctrl+Z / Ctrl+Y
+            </div>
+          </div>
+          <SessionHistoryControls
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            onClear={handleClearSessionHistory}
+            historyStats={getHistoryStats()}
+          />
+          {getHistoryStats().total > 1 && (
+            <p className="text-xs text-gray-500 mt-2">
+              Navigate through your prompt variations without losing work
+            </p>
+          )}
+        </div>
+
+        {/* Main Content - Streamlined Layout */}
+        <div className="space-y-8">
+          {/* Streamlined Form */}
+          <StreamlinedPromptForm
+            formData={formData}
+            onChange={handleFormChange}
+            onReset={handleReset}
+            validation={validation}
+            onGenerate={handleEnrichNow}
+          />
+
+          {/* Model Selection & Preview - Only show when ready */}
+          {validation.isValid && (
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-7xl mx-auto">
+              {/* Model Selection */}
+              <div className="space-y-6">
+                <ModelSelector
+                  selectedModel={selectedModel}
+                  suggestedModelId={suggestedModelId}
+                  modelRecommendation={modelRecommendation}
+                  onModelChange={handleModelChange}
+                />
+                
+                {/* Enrichment Options */}
+                <div className="card p-6">
+                  <EnrichmentOptions
+                    enrichmentData={enrichmentData}
+                    onChange={handleEnrichmentChange}
+                    isEnriching={isEnriching}
+                  />
                 </div>
               </div>
-              <SessionHistoryControls
-                canUndo={canUndo}
-                canRedo={canRedo}
-                onUndo={handleUndo}
-                onRedo={handleRedo}
-                onClear={handleClearSessionHistory}
-                historyStats={getHistoryStats()}
-              />
-              {getHistoryStats().total > 1 && (
-                <p className="text-xs text-gray-500 mt-2">
-                  Navigate through your prompt variations without losing work
-                </p>
-              )}
-            </div>
 
-            <div>
-              <PromptForm
-                formData={formData}
-                onChange={handleFormChange}
-                onReset={handleReset}
-                validation={validation}
-              />
+              {/* Prompt Preview */}
+              <div>
+                <EnhancedPromptPreview
+                  rawPrompt={rawPrompt}
+                  enrichedPrompt={enrichedPrompt}
+                  enrichmentResult={enrichmentResult}
+                  promptMetadata={promptMetadata}
+                  selectedModel={selectedModel}
+                  validation={validation}
+                  isEnriching={isEnriching}
+                  hasEnrichment={hasEnrichment}
+                  onEnrichNow={handleEnrichNow}
+                  enrichmentError={enrichmentError}
+                  isAuthenticated={isAuthenticated}
+                  isPro={isPro}
+                  formData={formData}
+                  onOpenHistory={() => setShowHistory(true)}
+                />
+              </div>
             </div>
-          </div>
-
-          {/* Right Column - Model Selection & Results */}
-          <div className="xl:col-span-2 space-y-8 relative z-30">
-            <div>
-              <ModelSelector
-                selectedModel={selectedModel}
-                suggestedModelId={suggestedModelId}
-                modelRecommendation={modelRecommendation}
-                onModelChange={handleModelChange}
-              />
-            </div>
-            
-            <div>
-              <EnhancedPromptPreview
-                rawPrompt={rawPrompt}
-                enrichedPrompt={enrichedPrompt}
-                enrichmentResult={enrichmentResult}
-                promptMetadata={promptMetadata}
-                selectedModel={selectedModel}
-                validation={validation}
-                isEnriching={isEnriching}
-                hasEnrichment={hasEnrichment}
-                onEnrichNow={handleEnrichNow}
-                enrichmentError={enrichmentError}
-                isAuthenticated={isAuthenticated}
-                isPro={isPro}
-                formData={formData}
-                onOpenHistory={() => setShowHistory(true)}
-              />
-            </div>
-          </div>
+          )}
         </div>
       </div>
       
