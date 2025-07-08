@@ -87,21 +87,18 @@ const GoalFirstRoleSelector = ({
             <button
               key={goal.id}
               onClick={() => handleGoalSelect(goal.id)}
-              className="goal-card group text-left focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              className="goal-card group text-center focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 p-4"
             >
-              <div className="flex items-start space-x-3">
+              <div className="flex flex-col items-center space-y-3">
                 <div className={`goal-icon ${goal.color} flex-shrink-0`}>
                   {goal.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">
+                  <h4 className="font-semibold text-gray-900 group-hover:text-primary-700 transition-colors text-center">
                     {goal.title}
                   </h4>
-                  <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                    {goal.description}
-                  </p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-primary-500 transition-colors flex-shrink-0 mt-1" />
+                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-primary-500 transition-colors flex-shrink-0" />
               </div>
             </button>
           ))}
