@@ -132,7 +132,7 @@ export const userGoals = [
     title: 'Legal & Compliance',
     description: 'Handle legal matters, contracts, or regulatory compliance',
     icon: '⚖️',
-    color: 'bg-slate-500',
+    color: 'bg-blue-600',
     relevantRoles: [
       'legal_counsel',
       'contract_lawyer',
