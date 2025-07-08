@@ -388,7 +388,7 @@ const FinalPromptGenerator = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             {/* LEFT: Prompt Builder */}
-            <div className="space-y-6">
+            <div className="card p-6 space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Target className="w-6 h-6 text-blue-600" />
@@ -416,7 +416,7 @@ const FinalPromptGenerator = () => {
             </div>
 
             {/* RIGHT: Generated Prompts & Results */}
-            <div className="space-y-6">
+            <div className="card p-6 space-y-6">
               <div className="flex items-center space-x-2">
                 <Sparkles className="w-6 h-6 text-purple-600" />
                 <h3 className="text-xl font-bold text-gray-900">Generated Prompts</h3>
@@ -453,7 +453,7 @@ const FinalPromptGenerator = () => {
               
               {/* Enhanced Enrichment Options for Premium Users */}
               {hasFullAccess && (
-                <div className="mt-6 card-accent p-6">
+                <div className="mt-6 card p-6">
                   <div className="flex items-center space-x-2 mb-4">
                     <Sparkles className="w-5 h-5 text-purple-600" />
                     <h4 className="text-lg font-semibold text-gray-900">AI Enhancement Options</h4>
@@ -468,7 +468,7 @@ const FinalPromptGenerator = () => {
               
               {/* Premium Upgrade Prompt for Free Users */}
               {!hasFullAccess && isAuthEnabled && (
-                <div className="mt-4 card-warning p-6">
+                <div className="mt-4 card p-6">
                   <div className="flex items-center space-x-2 mb-2">
                     <Crown className="w-5 h-5 text-amber-600" />
                     <h4 className="text-lg font-semibold text-gray-900">Unlock Full Potential</h4>

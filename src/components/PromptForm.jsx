@@ -130,7 +130,7 @@ const PromptForm = ({ formData, onChange, onReset, validation, showAdvancedByDef
 
 
   return (
-    <div className="card p-6 fade-in">
+    <div className="fade-in">
       {/* Header with Progress and Advanced Options Toggle */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex-1">
