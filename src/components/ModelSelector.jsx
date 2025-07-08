@@ -50,9 +50,27 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
       }
     }
 
+    const handleScroll = () => {
+      if (isOpen) {
+        setIsOpen(false)
+      }
+    }
+
+    const handleResize = () => {
+      if (isOpen) {
+        setIsOpen(false)
+      }
+    }
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
+      window.addEventListener('scroll', handleScroll)
+      window.addEventListener('resize', handleResize)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+        window.removeEventListener('scroll', handleScroll)
+        window.removeEventListener('resize', handleResize)
+      }
     }
   }, [isOpen])
 
@@ -166,12 +184,17 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
           </div>
         </div>
 
-        {/* Dropdown content, now absolute positioned within the relative container */}
+        {/* Dropdown content, positioned to appear above all other content */}
         {isOpen && (
           <div 
             ref={dropdownRef}
-            className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-2xl max-h-80 overflow-hidden z-[9999] model-selector-dropdown"
-            style={{ width: triggerRef.current?.offsetWidth || 'auto', zIndex: 9999 }}
+            className="fixed bg-white border border-gray-200 rounded-lg shadow-2xl max-h-80 overflow-hidden z-[9999] model-selector-dropdown"
+            style={{ 
+              width: triggerRef.current?.offsetWidth || 'auto', 
+              zIndex: 9999,
+              top: triggerRef.current ? triggerRef.current.getBoundingClientRect().bottom + window.scrollY + 8 : 0,
+              left: triggerRef.current ? triggerRef.current.getBoundingClientRect().left + window.scrollX : 0
+            }}
           >
             {/* Simple Provider Filter */}
             <div className="p-3 bg-gray-50 border-b border-gray-100">
