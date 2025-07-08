@@ -67,10 +67,10 @@ const PricingSection = () => {
           </div>
 
           {/* Premium Plan */}
-          <div className="card-premium p-8 relative transform scale-105">
-            {/* Popular Badge - now inside card, not absolutely positioned */}
-            <div className="flex justify-center -mt-8 mb-4">
-              <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center space-x-1 shadow">
+          <div className="card-premium p-8 pt-12 relative transform scale-105 overflow-visible">
+            {/* Popular Badge - floating on top of card */}
+            <div className="absolute left-1/2 -top-6 -translate-x-1/2 z-10">
+              <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center space-x-1 shadow-lg">
                 <Sparkles className="w-4 h-4" />
                 <span>Save 34% – Limited-time launch pricing</span>
               </div>
