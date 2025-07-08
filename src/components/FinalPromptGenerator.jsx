@@ -412,37 +412,7 @@ const FinalPromptGenerator = () => {
                 forceShowAdvanced={hasFullAccess} // Force all fields to be visible for premium
               />
               
-              {/* Enhanced Enrichment Options for Premium Users */}
-              {hasFullAccess && (
-                <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-200">
-                  <div className="flex items-center space-x-2 mb-4">
-                    <Sparkles className="w-5 h-5 text-purple-600" />
-                    <h4 className="text-lg font-semibold text-gray-900">AI Enhancement Options</h4>
-                  </div>
-                  <EnrichmentOptions
-                    enrichmentData={enrichmentData}
-                    onChange={handleEnrichmentChange}
-                    validation={validation}
-                  />
-                </div>
-              )}
-              
-              {/* Premium Upgrade Prompt for Free Users */}
-              {!hasFullAccess && isAuthEnabled && (
-                <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Crown className="w-5 h-5 text-amber-600" />
-                    <h4 className="text-lg font-semibold text-gray-900">Unlock Full Potential</h4>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Get access to all prompt fields, AI enhancement options, and advanced features
-                  </p>
-                  <button className="btn btn-premium btn-sm">
-                    <Crown className="w-4 h-4 mr-1" />
-                    Upgrade to Pro
-                  </button>
-                </div>
-              )}
+
             </div>
 
             {/* RIGHT: Generated Prompts & Results */}
@@ -480,6 +450,38 @@ const FinalPromptGenerator = () => {
                 formData={formData}
                 onOpenHistory={() => setShowHistory(true)}
               />
+              
+              {/* Enhanced Enrichment Options for Premium Users */}
+              {hasFullAccess && (
+                <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-200">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    <h4 className="text-lg font-semibold text-gray-900">AI Enhancement Options</h4>
+                  </div>
+                  <EnrichmentOptions
+                    enrichmentData={enrichmentData}
+                    onChange={handleEnrichmentChange}
+                    validation={validation}
+                  />
+                </div>
+              )}
+              
+              {/* Premium Upgrade Prompt for Free Users */}
+              {!hasFullAccess && isAuthEnabled && (
+                <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Crown className="w-5 h-5 text-amber-600" />
+                    <h4 className="text-lg font-semibold text-gray-900">Unlock Full Potential</h4>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Get access to all prompt fields, AI enhancement options, and advanced features
+                  </p>
+                  <button className="btn btn-premium btn-sm">
+                    <Crown className="w-4 h-4 mr-1" />
+                    Upgrade to Pro
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
