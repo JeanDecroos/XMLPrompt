@@ -39,7 +39,8 @@ const PromptGenerator = () => {
     tone: '',
     goals: '',
     examples: '',
-    constraints: []
+    constraints: [],
+    enrichmentLevel: 50
   }
 
   // Initialize session history with initial state
@@ -242,7 +243,11 @@ const PromptGenerator = () => {
 
     try {
       const userToken = session?.access_token
-      const result = await promptEnrichmentService.enrichPrompt(formData, userToken)
+      const enrichmentRequest = {
+        ...formData,
+        enrichmentLevel: enrichmentData.enrichmentLevel || 50
+      }
+      const result = await promptEnrichmentService.enrichPrompt(enrichmentRequest, userToken)
       
       if (result.success) {
         setEnrichedPrompt(result.data.enrichedPrompt)

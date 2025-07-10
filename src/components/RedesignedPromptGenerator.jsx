@@ -38,7 +38,8 @@ const RedesignedPromptGenerator = () => {
     tone: '',
     goals: '',
     examples: '',
-    constraints: []
+    constraints: [],
+    enrichmentLevel: 50
   }
 
   // Initialize session history with initial state
@@ -242,7 +243,10 @@ const RedesignedPromptGenerator = () => {
     try {
       const enrichmentRequest = {
         rawPrompt,
-        formData,
+        formData: {
+          ...formData,
+          enrichmentLevel: enrichmentData.enrichmentLevel || 50
+        },
         selectedModel,
         userContext: {
           role: formData.role,

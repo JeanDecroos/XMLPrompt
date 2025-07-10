@@ -38,7 +38,8 @@ const FinalPromptGenerator = () => {
     tone: '',
     goals: '',
     examples: '',
-    constraints: []
+    constraints: [],
+    enrichmentLevel: 50
   }
 
   // Session history
@@ -197,7 +198,10 @@ const FinalPromptGenerator = () => {
     try {
       const enrichmentRequest = {
         rawPrompt,
-        formData,
+        formData: {
+          ...formData,
+          enrichmentLevel: enrichmentData.enrichmentLevel || 50
+        },
         selectedModel,
         userContext: {
           role: formData.role,
