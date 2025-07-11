@@ -182,15 +182,16 @@ app.use(`/api/${config.app.apiVersion}`, apiRouter)
 // API DOCUMENTATION
 // ============================================================================
 
-if (config.features.enableApiDocs && config.env === 'development') {
-  const swaggerUi = await import('swagger-ui-express')
-  const swaggerDocument = await import('./docs/swagger.json', {
-    assert: { type: 'json' }
-  })
-  
-  app.use('/api-docs', swaggerUi.default.serve, swaggerUi.default.setup(swaggerDocument.default))
-  logger.info('API documentation available at /api-docs')
-}
+// Temporarily disabled to fix import issues
+// if (config.features.enableApiDocs && config.env === 'development') {
+//   const swaggerUi = await import('swagger-ui-express')
+//   const swaggerDocument = await import('./docs/swagger.json', {
+//     with: { type: 'json' }
+//   })
+//   
+//   app.use('/api-docs', swaggerUi.default.serve, swaggerUi.default.setup(swaggerDocument.default))
+//   logger.info('API documentation available at /api-docs')
+// }
 
 // ============================================================================
 // ERROR HANDLING
