@@ -5,7 +5,7 @@
 
 import { config } from '../config/index.js'
 import { logger } from '../utils/logger.js'
-import { db } from '../config/database.js'
+import { database } from '../config/database.js'
 import { AppError, RateLimitError } from './errorHandler.js'
 
 export const rateLimitMiddleware = async (req, res, next) => {
@@ -21,7 +21,7 @@ export const rateLimitMiddleware = async (req, res, next) => {
 
   try {
     // Get or create rate limit entry
-    let { data: rateLimitEntry, error } = await db
+    let { data: rateLimitEntry, error } = await database.supabase
       .from('rate_limits')
       .select('*')
       .eq('identifier', identifier)
@@ -36,7 +36,7 @@ export const rateLimitMiddleware = async (req, res, next) => {
 
     if (!rateLimitEntry) {
       // Create new entry if not found or expired
-      const { data: newEntry, error: insertError } = await db
+      const { data: newEntry, error: insertError } = await database.supabase
         .from('rate_limits')
         .insert({
           identifier,
@@ -61,7 +61,7 @@ export const rateLimitMiddleware = async (req, res, next) => {
 
       if (currentTime - windowStartTime > windowMs) {
         // Reset window if expired
-        const { data: updatedEntry, error: updateError } = await db
+        const { data: updatedEntry, error: updateError } = await database.supabase
           .from('rate_limits')
           .update({
             request_count: 1,
@@ -79,7 +79,7 @@ export const rateLimitMiddleware = async (req, res, next) => {
         rateLimitEntry = updatedEntry;
       } else {
         // Increment count within current window
-        const { data: updatedEntry, error: updateError } = await db
+        const { data: updatedEntry, error: updateError } = await database.supabase
           .from('rate_limits')
           .update({
             request_count: rateLimitEntry.request_count + 1,

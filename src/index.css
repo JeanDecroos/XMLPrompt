@@ -879,6 +879,221 @@
   .transition-step.transitioning {
     @apply opacity-50 scale-95;
   }
+
+  /* Improved Role Selector Styles */
+  .improved-role-selector {
+    @apply w-full max-w-4xl mx-auto;
+  }
+
+  .goal-card-improved {
+    @apply bg-white border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-lg transition-all duration-200;
+    min-height: 140px;
+    transform: translateZ(0);
+    will-change: transform, border-color, box-shadow;
+  }
+
+  .goal-card-improved:hover {
+    transform: translateY(-2px) translateZ(0);
+  }
+
+  .goal-card-improved:active {
+    transform: translateY(0) translateZ(0);
+  }
+
+  .role-card-improved {
+    @apply bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all duration-200;
+    transform: translateZ(0);
+    will-change: transform, border-color, box-shadow;
+  }
+
+  .role-card-improved:hover {
+    transform: translateY(-1px) translateZ(0);
+  }
+
+  .role-card-improved.selected {
+    @apply border-blue-500 bg-blue-50 shadow-sm;
+  }
+
+  .role-card-improved.selected:hover {
+    @apply border-blue-600 bg-blue-100;
+  }
+
+  /* Search input focus styles */
+  .improved-role-selector input[type="text"]:focus {
+    @apply ring-2 ring-blue-500 border-transparent;
+  }
+
+  /* Category filter buttons */
+  .improved-role-selector .category-filter {
+    @apply px-3 py-1.5 rounded-full text-sm font-medium transition-colors;
+  }
+
+  .improved-role-selector .category-filter.active {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  .improved-role-selector .category-filter:not(.active) {
+    @apply bg-gray-100 text-gray-600 hover:bg-gray-200;
+  }
+
+  /* Simplified Prompt Generator Styles */
+  .simplified-prompt-generator {
+    @apply w-full;
+  }
+
+  /* Enhanced Step Navigation */
+  .step-button {
+    @apply transition-all duration-200 transform;
+  }
+
+  .step-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+
+  .step-button:active {
+    transform: translateY(0);
+  }
+
+  /* Improved Form Styling */
+  .form-section {
+    @apply bg-white rounded-2xl shadow-lg border border-gray-200;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+    backdrop-filter: blur(10px);
+  }
+
+  .form-section:hover {
+    @apply shadow-xl;
+    transform: translateY(-1px);
+  }
+
+  /* Enhanced Input Fields */
+  .enhanced-input {
+    @apply transition-all duration-200;
+  }
+
+  .enhanced-input:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  }
+
+  /* Progress Indicator Enhancements */
+  .progress-step {
+    @apply relative;
+  }
+
+  .progress-step::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    width: 2rem;
+    height: 2px;
+    background: linear-gradient(to right, #e5e7eb, #d1d5db);
+    transform: translateY(-50%);
+  }
+
+  .progress-step:last-child::after {
+    display: none;
+  }
+
+  .progress-step.completed::after {
+    background: linear-gradient(to right, #10b981, #059669);
+  }
+
+  /* Gradient Text Effects */
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .gradient-text-blue {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  }
+
+  /* Enhanced Card Hover Effects */
+  .interactive-card {
+    @apply transition-all duration-300 ease-out;
+    transform: translateZ(0);
+  }
+
+  .interactive-card:hover {
+    transform: translateY(-4px) translateZ(0);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Improved Button Animations */
+  .btn-enhanced {
+    @apply relative overflow-hidden;
+  }
+
+  .btn-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-enhanced:hover::before {
+    left: 100%;
+  }
+
+  /* Loading States */
+  .loading-shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Success Animations */
+  .success-bounce {
+    animation: successBounce 0.6s ease-out;
+  }
+
+  @keyframes successBounce {
+    0% {
+      transform: scale(0.3);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    70% {
+      transform: scale(0.9);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Mobile Optimizations */
+  @media (max-width: 768px) {
+    .form-section {
+      @apply mx-2 rounded-xl;
+    }
+
+    .step-button {
+      @apply px-3 py-2;
+    }
+
+    .progress-step::after {
+      display: none;
+    }
+  }
 }
 
 /* Dark mode support */
@@ -1270,4 +1485,43 @@ html {
     .card-warning:hover {
       transform: none;
     }
+  }
+
+/* Custom Scrollbar Styles */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.7);
+}
+
+.scrollbar-thumb-gray-300 {
+  scrollbar-color: rgba(209, 213, 219, 0.5) transparent;
+}
+
+.scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
+  background-color: rgba(209, 213, 219, 0.5);
+}
+
+.scrollbar-thumb-gray-300::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(209, 213, 219, 0.7);
+}
+
+.scrollbar-track-transparent::-webkit-scrollbar-track {
+  background: transparent;
   }

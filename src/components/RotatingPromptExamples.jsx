@@ -1,355 +1,336 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { ChevronLeft, ChevronRight, Crown, Sparkles } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Crown, Sparkles, ArrowRight, Zap, Target, TrendingUp } from 'lucide-react'
 
 const promptExamples = [
   {
     category: "Marketing Email",
     basic: "Write a marketing email",
-    structured: "Write a marketing email for our new product launch targeting existing customers",
-    enriched: "Write a compelling marketing email for our new product launch that re-engages existing customers by highlighting exclusive early access benefits, addressing their previous purchase history, and including a personalized discount code with urgency-driven language"
+    structured: "Write a marketing email for our new product launch targeting existing customers with a compelling subject line and clear call-to-action",
+    enriched: "Write a compelling marketing email for our new product launch that re-engages existing customers by highlighting exclusive early access benefits, addressing their previous purchase history, including personalized discount codes with urgency-driven language, and featuring customer testimonials to build trust and drive immediate action"
   },
   {
     category: "Social Media",
     basic: "Create an Instagram post",
-    structured: "Create an Instagram post about our company milestone with engaging visuals and relevant hashtags",
-    enriched: "Create a high-engagement Instagram post celebrating our 10K customer milestone that includes behind-the-scenes team photos, trending industry hashtags (#TechStartup #CustomerLove), user-generated content reshares, and a clear call-to-action driving traffic to our thank-you landing page"
+    structured: "Create an Instagram post celebrating our 10K customer milestone with engaging visuals, relevant hashtags, and a call-to-action to drive engagement",
+    enriched: "Create a high-engagement Instagram carousel post celebrating our 10,000 customer milestone that includes behind-the-scenes team celebration photos, trending industry hashtags (#TechStartup #CustomerLove), user-generated content reshares, customer testimonial graphics, and a clear call-to-action driving traffic to our thank-you landing page with exclusive community perks"
   },
   {
     category: "Product Description",
     basic: "Describe this product",
-    structured: "Write a product description that highlights key features, benefits, and target audience for our software tool",
-    enriched: "Write a conversion-optimized product description for our project management software that addresses busy team leads' pain points (missed deadlines, poor communication), highlights unique collaborative features with specific time-saving metrics, includes social proof from similar companies, and incorporates SEO keywords while maintaining natural readability"
+    structured: "Write a product description for our project management software that highlights key features, benefits, and target audience pain points",
+    enriched: "Write a conversion-optimized product description for our project management software that addresses busy team leads' specific pain points (missed deadlines, poor communication), highlights unique collaborative features with specific time-saving metrics, includes social proof from similar companies, incorporates SEO keywords naturally, and features risk-free trial offers with compelling urgency elements"
   },
   {
-    category: "Blog Post",
-    basic: "Write a blog intro",
-    structured: "Write an engaging blog post introduction about industry trends that hooks readers and previews key insights",
-    enriched: "Write a captivating blog post introduction about emerging AI trends in marketing that opens with a surprising statistic, relates to current reader challenges (staying competitive), teases 3 actionable insights they'll learn, includes a relevant industry example, and uses storytelling elements to create emotional connection while optimizing for 8-second attention spans"
+    category: "Technical Documentation",
+    basic: "Write API docs",
+    structured: "Create comprehensive API documentation for our REST endpoints with clear examples, error handling, and authentication requirements",
+    enriched: "Create developer-friendly API documentation for our REST endpoints that includes interactive code examples, comprehensive error codes with troubleshooting steps, rate limiting guidelines, authentication flows with code samples in multiple languages, and a getting-started tutorial that gets developers to their first successful API call in under 5 minutes"
   },
   {
-    category: "Customer Outreach",
-    basic: "Write a sales email",
-    structured: "Write a personalized sales email that introduces our service and requests a meeting with a potential client",
-    enriched: "Write a highly personalized sales email to [Company Name]'s [Title] that references their recent [specific company news/achievement], demonstrates understanding of their industry challenges through relevant case studies, offers specific value propositions tied to their business goals, includes social proof from similar companies, and requests a 15-minute conversation with 3 specific meeting time options"
-  },
-  {
-    category: "Ad Copy",
-    basic: "Create an ad for our service",
-    structured: "Create Facebook ad copy that targets small business owners and highlights our key benefits with a clear call-to-action",
-    enriched: "Create high-converting Facebook ad copy targeting overwhelmed small business owners aged 35-50 who struggle with time management, featuring benefit-driven headlines that emphasize specific time savings (2+ hours daily), include customer testimonials with quantified results, address common objections (price, complexity), and drive clicks with urgency-based CTAs offering limited-time trials"
-  },
-  {
-    category: "Landing Page",
-    basic: "Write a headline",
-    structured: "Write a compelling landing page headline that communicates our value proposition and motivates visitor action",
-    enriched: "Write a conversion-optimized landing page headline that immediately addresses the visitor's primary pain point, communicates our unique value proposition in under 10 words, includes power words that trigger emotional response, incorporates social proof elements, and is A/B tested against 3 variations for maximum click-through rates while maintaining brand voice consistency"
-  },
-  {
-    category: "Video Script",
-    basic: "Write a video script",
-    structured: "Write a 60-second promotional video script with clear messaging and a strong call-to-action",
-    enriched: "Write a 60-second promotional video script optimized for social media that hooks viewers in the first 3 seconds with a pattern interrupt, tells a compelling customer transformation story using the problem-agitation-solution framework, includes visual cues for engagement (text overlays, scene changes), addresses mobile viewing optimization, and ends with a multi-step call-to-action sequence"
+    category: "Customer Support",
+    basic: "Handle customer complaint",
+    structured: "Draft a professional response to a customer complaint about delayed shipping that includes empathy, solutions, and appropriate compensation",
+    enriched: "Draft an empathetic, solution-focused response to a customer complaint about delayed shipping that acknowledges their frustration, provides specific tracking updates, offers meaningful compensation (expedited shipping + discount), includes proactive steps we're taking to prevent future delays, and ends with a personal touch that rebuilds trust and demonstrates our commitment to their success"
   }
 ]
 
 const RotatingPromptExamples = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isAutoRotating, setIsAutoRotating] = useState(true)
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [isTransitioning, setIsTransitioning] = useState(false)
-  const [containerHeight, setContainerHeight] = useState(null)
-  const containerRef = useRef(null)
-  const contentRef = useRef(null)
-  const measurementTimeoutRef = useRef(null)
+  const intervalRef = useRef(null)
 
-  // Debounced height calculation function
-  const calculateOptimalHeight = useCallback(() => {
-    if (!contentRef.current) return
+  const currentExample = promptExamples[currentIndex]
 
-    // Clear any pending measurements
-    if (measurementTimeoutRef.current) {
-      clearTimeout(measurementTimeoutRef.current)
+  // Auto-advance through examples with fade transition
+  useEffect(() => {
+    if (isAutoPlaying) {
+      intervalRef.current = setInterval(() => {
+        setIsTransitioning(true)
+        setTimeout(() => {
+          setCurrentIndex(prev => (prev + 1) % promptExamples.length)
+          setIsTransitioning(false)
+        }, 150) // 150ms fade out duration
+      }, 7000) // 7 seconds per example
     }
 
-    measurementTimeoutRef.current = setTimeout(() => {
-      // Create a temporary container to measure heights of all examples
-      const tempContainer = document.createElement('div')
-      tempContainer.style.position = 'absolute'
-      tempContainer.style.visibility = 'hidden'
-      tempContainer.style.top = '-9999px'
-      tempContainer.style.left = '-9999px'
-      tempContainer.style.width = contentRef.current.offsetWidth + 'px'
-      tempContainer.style.fontFamily = window.getComputedStyle(contentRef.current).fontFamily
-      document.body.appendChild(tempContainer)
-
-      let maxHeight = 0
-
-      // Measure each example
-      promptExamples.forEach((example) => {
-        tempContainer.innerHTML = `
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4" style="width: ${contentRef.current.offsetWidth}px;">
-            <div class="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm p-4">
-              <div class="text-sm text-gray-500 mb-3 flex items-center">
-                <div class="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
-                <span class="font-medium">Basic</span>
-              </div>
-              <div class="bg-gray-50 p-4 rounded-lg text-sm font-mono text-gray-600 min-h-[120px] flex items-start leading-relaxed">
-                <span class="block w-full">"${example.basic}"</span>
-              </div>
-              <div class="mt-3 text-xs text-gray-500">
-                Raw input - what most people start with
-              </div>
-            </div>
-            <div class="bg-white/60 backdrop-blur-sm rounded-xl border border-blue-200/50 shadow-sm p-4 relative">
-              <div class="text-sm text-blue-600 mb-3 flex items-center">
-                <div class="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
-                <span class="font-medium">Structured</span>
-                <span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">FREE</span>
-              </div>
-              <div class="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg text-sm font-mono text-gray-700 border border-blue-200/50 min-h-[120px] flex items-start leading-relaxed">
-                <span class="block w-full">"${example.structured}"</span>
-              </div>
-              <div class="mt-3 text-xs text-blue-600">
-                ✨ Better structure and clarity - available to all users
-              </div>
-            </div>
-            <div class="bg-white/60 backdrop-blur-sm rounded-xl border border-purple-200/50 shadow-lg p-4 relative">
-              <div class="text-sm text-purple-600 mb-3 flex items-center">
-                <div class="w-3 h-3 bg-purple-400 rounded-full mr-2"></div>
-                <span class="font-medium">AI-Enriched</span>
-                <span class="ml-2 px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-xs rounded-full flex items-center">
-                  PRO
-                </span>
-              </div>
-              <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg text-sm font-mono text-gray-700 border border-purple-200/50 min-h-[120px] flex items-start leading-relaxed">
-                <span class="block w-full">"${example.enriched}"</span>
-              </div>
-              <div class="mt-3 text-xs text-purple-600 flex items-center">
-                Full AI optimization with context and strategy
-              </div>
-            </div>
-          </div>
-        `
-        
-        const height = tempContainer.offsetHeight
-        if (height > maxHeight) {
-          maxHeight = height
-        }
-      })
-
-      document.body.removeChild(tempContainer)
-      
-      // Add some padding for safety and smooth transitions
-      setContainerHeight(maxHeight + 32)
-    }, 150) // Debounce delay
-  }, [])
-
-  // Calculate and set the maximum height needed for all examples
-  useEffect(() => {
-    calculateOptimalHeight()
-  }, [calculateOptimalHeight])
-
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      calculateOptimalHeight()
-    }
-
-    window.addEventListener('resize', handleResize)
     return () => {
-      window.removeEventListener('resize', handleResize)
-      if (measurementTimeoutRef.current) {
-        clearTimeout(measurementTimeoutRef.current)
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
       }
     }
-  }, [calculateOptimalHeight])
+  }, [isAutoPlaying])
 
-  // Auto-rotation effect
-  useEffect(() => {
-    if (!isAutoRotating) return
-
-    const interval = setInterval(() => {
-      setIsTransitioning(true)
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % promptExamples.length)
-        setIsTransitioning(false)
-      }, 150) // Brief transition delay
-    }, 6000) // Change every 6 seconds (longer for 3 sections)
-
-    return () => clearInterval(interval)
-  }, [isAutoRotating])
-
-  const goToPrevious = () => {
-    setIsAutoRotating(false)
+  const handlePrevious = useCallback(() => {
+    setIsAutoPlaying(false)
     setIsTransitioning(true)
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev - 1 + promptExamples.length) % promptExamples.length)
+      setCurrentIndex(prev => prev === 0 ? promptExamples.length - 1 : prev - 1)
       setIsTransitioning(false)
     }, 150)
-    // Resume auto-rotation after 10 seconds
-    setTimeout(() => setIsAutoRotating(true), 10000)
-  }
+    
+    // Resume auto-play after 10 seconds
+    setTimeout(() => setIsAutoPlaying(true), 10000)
+  }, [])
 
-  const goToNext = () => {
-    setIsAutoRotating(false)
+  const handleNext = useCallback(() => {
+    setIsAutoPlaying(false)
     setIsTransitioning(true)
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % promptExamples.length)
+      setCurrentIndex(prev => (prev + 1) % promptExamples.length)
       setIsTransitioning(false)
     }, 150)
-    // Resume auto-rotation after 10 seconds
-    setTimeout(() => setIsAutoRotating(true), 10000)
-  }
+    
+    // Resume auto-play after 10 seconds
+    setTimeout(() => setIsAutoPlaying(true), 10000)
+  }, [])
 
-  const goToIndex = (index) => {
-    setIsAutoRotating(false)
+  const handleDotClick = useCallback((index) => {
+    setIsAutoPlaying(false)
     setIsTransitioning(true)
     setTimeout(() => {
       setCurrentIndex(index)
       setIsTransitioning(false)
     }, 150)
-    setTimeout(() => setIsAutoRotating(true), 10000)
-  }
+    
+    // Resume auto-play after 10 seconds
+    setTimeout(() => setIsAutoPlaying(true), 10000)
+  }, [])
 
-  const currentExample = promptExamples[currentIndex]
+  const promptVersions = [
+    {
+      title: "Basic Input",
+      subtitle: "What you start with",
+      text: currentExample.basic,
+      icon: Target,
+      bgColor: "from-gray-50 to-gray-100",
+      borderColor: "border-gray-200",
+      textColor: "text-gray-700",
+      badgeColor: "bg-gray-500",
+      step: 1
+    },
+    {
+      title: "Structured Prompt",
+      subtitle: "After initial processing",
+      text: currentExample.structured,
+      icon: Zap,
+      bgColor: "from-blue-50 to-blue-100",
+      borderColor: "border-blue-200",
+      textColor: "text-blue-800",
+      badgeColor: "bg-blue-500",
+      step: 2
+    },
+    {
+      title: "AI-Enhanced Result",
+      subtitle: "Professional optimization",
+      text: currentExample.enriched,
+      icon: Sparkles,
+      bgColor: "from-purple-50 to-purple-100",
+      borderColor: "border-purple-200",
+      textColor: "text-purple-800",
+      badgeColor: "bg-purple-500",
+      step: 3
+    }
+  ]
 
   return (
-    <div className="max-w-5xl mx-auto mb-12">
-      <div className="relative">
-        {/* Category indicator */}
-        <div className="text-center mb-6">
-          <span className={`inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full transition-opacity duration-300 ${
-            isTransitioning ? 'opacity-50' : 'opacity-100'
-          }`}>
-            {currentExample.category} Example
-          </span>
-          <p className="text-sm text-gray-600 mt-2">See how prompts evolve from basic to AI-enhanced</p>
+    <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-200/50 shadow-lg mb-12">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full text-sm font-medium text-blue-800 mb-4">
+          <Sparkles className="w-4 h-4 mr-2" />
+          See the Transformation
         </div>
+        <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+          From Simple Ideas to Professional Prompts
+        </h2>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Watch how our AI transforms basic requests into detailed, effective prompts that get better results
+        </p>
+      </div>
 
-        {/* 3-Tier Comparison with Fixed Height Container */}
-        <div 
-          ref={containerRef}
-          className="relative overflow-hidden transition-all duration-300 ease-in-out"
-          style={{ 
-            height: containerHeight ? `${containerHeight}px` : 'auto',
-            minHeight: containerHeight ? `${containerHeight}px` : '400px'
-          }}
-        >
-          <div 
-            ref={contentRef}
-            className={`grid grid-cols-1 lg:grid-cols-3 gap-4 transition-all duration-300 ${
-              isTransitioning ? 'opacity-80 scale-[0.98]' : 'opacity-100 scale-100'
-            }`}
-          >
-            
-            {/* Basic Prompt */}
-            <div className="card-secondary p-4 h-fit">
-              <div className="text-sm text-gray-500 mb-3 flex items-center">
-                <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
-                <span className="font-medium">Basic</span>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg text-sm font-mono text-gray-600 min-h-[120px] flex items-start leading-relaxed">
-                <span className="block w-full">"{currentExample.basic}"</span>
-              </div>
-              <div className="mt-3 text-xs text-gray-500">
-                Raw input - what most people start with
-              </div>
-            </div>
-
-            {/* Structured Prompt (Free) */}
-            <div className="card-accent p-4 relative h-fit">
-              <div className="text-sm text-blue-600 mb-3 flex items-center">
-                <div className="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
-                <span className="font-medium">Structured</span>
-                <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">FREE</span>
-              </div>
-              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg text-sm font-mono text-gray-700 border border-blue-200/50 min-h-[120px] flex items-start leading-relaxed">
-                <span className="block w-full">"{currentExample.structured}"</span>
-              </div>
-              <div className="mt-3 text-xs text-blue-600">
-                ✨ Better structure and clarity - available to all users
-              </div>
-            </div>
-
-            {/* AI-Enriched Prompt (Pro) */}
-            <div className="card-premium p-4 relative h-fit">
-              <div className="text-sm text-purple-600 mb-3 flex items-center">
-                <div className="w-3 h-3 bg-purple-400 rounded-full mr-2"></div>
-                <span className="font-medium">AI-Enriched</span>
-                <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-xs rounded-full flex items-center">
-                  <Crown className="w-3 h-3 mr-1" />
-                  PRO
-                </span>
-              </div>
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg text-sm font-mono text-gray-700 border border-purple-200/50 min-h-[120px] flex items-start leading-relaxed">
-                <span className="block w-full">"{currentExample.enriched}"</span>
-              </div>
-              <div className="mt-3 text-xs text-purple-600 flex items-center">
-                <Sparkles className="w-3 h-3 mr-1" />
-                Full AI optimization with context and strategy
-              </div>
-            </div>
-          </div>
+      {/* Example Category and Navigation */}
+      <div className={`flex items-center justify-between mb-8 max-w-6xl mx-auto transition-opacity duration-300 ${isTransitioning ? 'opacity-50' : 'opacity-100'}`}>
+        <div className="flex items-center space-x-4">
+          <span className="text-sm font-medium text-gray-500">Example:</span>
+          <span className="text-xl font-bold text-gray-900">{currentExample.category}</span>
         </div>
-
-        {/* Value Progression Indicator */}
-        <div className="flex justify-center mt-6">
-          <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-4 text-sm text-gray-600">
-            <span>Basic</span>
-            <div className="flex items-center">
-              <div className="w-8 h-0.5 bg-blue-300 hidden lg:block"></div>
-              <div className="w-0.5 h-8 bg-blue-300 lg:hidden"></div>
-              <ChevronRight className="w-4 h-4 text-blue-400 mx-1 hidden lg:block" />
-              <div className="w-4 h-4 text-blue-400 mx-1 lg:hidden rotate-90">
-                <ChevronRight className="w-4 h-4" />
-              </div>
-            </div>
-            <span className="text-blue-600">Structured</span>
-            <div className="flex items-center">
-              <div className="w-8 h-0.5 bg-purple-300 hidden lg:block"></div>
-              <div className="w-0.5 h-8 bg-purple-300 lg:hidden"></div>
-              <ChevronRight className="w-4 h-4 text-purple-400 mx-1 hidden lg:block" />
-              <div className="w-4 h-4 text-purple-400 mx-1 lg:hidden rotate-90">
-                <ChevronRight className="w-4 h-4" />
-              </div>
-            </div>
-            <span className="text-purple-600">AI-Enhanced</span>
-          </div>
-        </div>
-
-        {/* Navigation controls */}
-        <div className="flex items-center justify-center mt-8 space-x-4">
+        
+        {/* Subtle Navigation */}
+        <div className="flex items-center space-x-3">
           <button
-            onClick={goToPrevious}
-            className="p-2 rounded-full card-secondary transition-all duration-200 hover:scale-105"
+            onClick={handlePrevious}
+            className="p-2 rounded-full bg-white/60 hover:bg-white border border-gray-200/60 transition-all duration-200 hover:shadow-md"
             aria-label="Previous example"
           >
             <ChevronLeft className="w-4 h-4 text-gray-600" />
           </button>
-
-          {/* Dot indicators */}
+          
+          {/* Progress Dots */}
           <div className="flex space-x-2">
             {promptExamples.map((_, index) => (
               <button
                 key={index}
-                onClick={() => goToIndex(index)}
-                className={`w-2 h-2 rounded-full transition-all duration-200 hover:scale-125 ${
+                onClick={() => handleDotClick(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
                   index === currentIndex 
-                    ? 'bg-purple-600 scale-110' 
+                    ? 'bg-blue-600 w-6' 
                     : 'bg-gray-300 hover:bg-gray-400'
                 }`}
                 aria-label={`Go to example ${index + 1}`}
               />
             ))}
           </div>
-
+          
           <button
-            onClick={goToNext}
-            className="p-2 rounded-full card-secondary transition-all duration-200 hover:scale-105"
+            onClick={handleNext}
+            className="p-2 rounded-full bg-white/60 hover:bg-white border border-gray-200/60 transition-all duration-200 hover:shadow-md"
             aria-label="Next example"
           >
             <ChevronRight className="w-4 h-4 text-gray-600" />
           </button>
         </div>
+      </div>
+
+      {/* Linear Flow - Horizontal Layout */}
+      <div className="max-w-7xl mx-auto">
+        {/* Process Flow Header */}
+        <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center space-x-4 bg-white/60 rounded-full px-6 py-3 border border-gray-200/60">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+              <span className="text-sm font-medium text-gray-600">Basic</span>
+            </div>
+            <ArrowRight className="w-4 h-4 text-gray-400" />
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <span className="text-sm font-medium text-blue-600">Structured</span>
+            </div>
+            <ArrowRight className="w-4 h-4 text-gray-400" />
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+              <span className="text-sm font-medium text-purple-600">Enhanced</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Horizontal Card Layout */}
+        <div className="relative">
+          {/* Connection Lines */}
+          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-gray-300 via-blue-300 to-purple-300 transform -translate-y-1/2 z-0"></div>
+          
+          <div className={`relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 transition-opacity duration-300 ${isTransitioning ? 'opacity-50' : 'opacity-100'}`}>
+            {promptVersions.map((version, index) => (
+              <div key={version.title} className="relative">
+                {/* Card */}
+                <div className={`bg-gradient-to-br ${version.bgColor} rounded-xl border ${version.borderColor} shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col`} style={{ height: '480px' }}>
+                  {/* Step Indicator */}
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
+                    <div className={`w-8 h-8 rounded-full ${version.badgeColor} flex items-center justify-center shadow-lg border-2 border-white`}>
+                      <span className="text-white text-sm font-bold">{version.step}</span>
+                    </div>
+                  </div>
+
+                  {/* Enhancement Badge for final version - overlapping the card edge */}
+                  {index === 2 && (
+                    <div className="absolute -top-2 -right-2 z-30">
+                      <div className="inline-flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full shadow-lg">
+                        <Crown className="w-4 h-4 text-white" />
+                        <span className="text-sm text-white font-medium">Pro Enhanced</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Header */}
+                  <div className="p-6 pb-4 pt-8 flex-shrink-0">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className={`w-10 h-10 rounded-xl ${version.badgeColor} flex items-center justify-center shadow-sm`}>
+                        <version.icon className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className={`text-lg font-bold ${version.textColor}`}>{version.title}</h3>
+                        <p className="text-sm text-gray-500">{version.subtitle}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="px-6 pb-6 flex-1 flex flex-col">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-xl p-5 flex-1 flex items-start shadow-sm overflow-hidden">
+                      <div className="overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent pr-2 w-full">
+                        {index === 0 ? (
+                          // Basic prompt - centered and larger
+                          <div className="flex items-center justify-center h-full">
+                            <p className={`text-lg font-semibold ${version.textColor} text-center`}>
+                              "{version.text}"
+                            </p>
+                          </div>
+                        ) : (
+                          // Structured and Enhanced prompts - simple text
+                          <p className={`text-sm leading-relaxed ${version.textColor} font-medium`}>
+                            "{version.text}"
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Arrow indicator (desktop only) */}
+                {index < promptVersions.length - 1 && (
+                  <div className="hidden lg:block absolute top-1/2 -right-6 transform -translate-y-1/2 z-20">
+                    <div className="w-12 h-12 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center">
+                      <ArrowRight className="w-5 h-5 text-gray-600" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Key Benefits */}
+      <div className="mt-12 bg-white/50 rounded-xl p-8 max-w-5xl mx-auto">
+        <h3 className="text-xl font-bold text-gray-900 text-center mb-6">
+          Why This Transformation Matters
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <div>
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Target className="w-6 h-6 text-white" />
+            </div>
+            <h4 className="font-bold text-gray-900 mb-2">Clear Structure</h4>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Organized format that AI models understand better, leading to more accurate responses
+            </p>
+          </div>
+          <div>
+            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Zap className="w-6 h-6 text-white" />
+            </div>
+            <h4 className="font-bold text-gray-900 mb-2">Context Aware</h4>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Includes relevant details, constraints, and specifications for targeted results
+            </p>
+          </div>
+          <div>
+            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <h4 className="font-bold text-gray-900 mb-2">Optimized Results</h4>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Professional quality output that saves time and delivers better outcomes
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Call to Action */}
+      <div className="text-center mt-8">
+        <p className="text-gray-600 mb-4 text-lg">
+          Ready to transform your prompts? Start building below ↓
+        </p>
       </div>
     </div>
   )
