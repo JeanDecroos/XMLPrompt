@@ -1,9 +1,9 @@
 import express from 'express'
+import bcrypt from 'bcrypt'
 import { database } from '../config/database.js'
 import { logger } from '../utils/logger.js'
 import { authMiddleware } from '../middleware/auth.js'
-import crypto from 'crypto'
-import bcrypt from 'bcrypt'
+import { quotaMiddleware, logUsage } from '../middleware/quotaMiddleware.js'
 
 const router = express.Router()
 
@@ -11,39 +11,51 @@ const router = express.Router()
 router.get('/:shareId', async (req, res) => {
   try {
     const { shareId } = req.params
-    const password = req.headers['x-share-password']
+    const { password } = req.query
 
-    const { data: sharedPrompt, error } = await database
+    const { data: sharedPrompt, error } = await database.supabase
       .from('shared_prompts')
       .select(`
         id,
-        prompt_content,
+        prompt_id,
+        share_id,
         title,
         description,
-        created_at,
-        expires_at,
-        view_count,
+        is_public,
         password_hash,
         max_views,
-        is_active,
-        profiles!created_by(full_name, email)
+        view_count,
+        expires_at,
+        allow_download,
+        created_at,
+        prompts!inner(
+          title,
+          description,
+          raw_prompt,
+          enriched_prompt,
+          category,
+          tags,
+          selected_model,
+          created_at
+        ),
+        profiles!inner(
+          full_name,
+          email
+        )
       `)
       .eq('share_id', shareId)
-      .eq('is_active', true)
       .single()
 
     if (error || !sharedPrompt) {
       return res.status(404).json({
-        success: false,
         error: 'Shared prompt not found',
-        message: 'The shared prompt does not exist or has expired'
+        message: 'The shared prompt does not exist or has been removed'
       })
     }
 
     // Check if expired
     if (sharedPrompt.expires_at && new Date(sharedPrompt.expires_at) < new Date()) {
       return res.status(410).json({
-        success: false,
         error: 'Shared prompt expired',
         message: 'This shared prompt has expired'
       })
@@ -51,10 +63,9 @@ router.get('/:shareId', async (req, res) => {
 
     // Check view limit
     if (sharedPrompt.max_views && sharedPrompt.view_count >= sharedPrompt.max_views) {
-      return res.status(410).json({
-        success: false,
+      return res.status(429).json({
         error: 'View limit exceeded',
-        message: 'This shared prompt has reached its view limit'
+        message: 'This shared prompt has reached its maximum view limit'
       })
     }
 
@@ -62,304 +73,296 @@ router.get('/:shareId', async (req, res) => {
     if (sharedPrompt.password_hash) {
       if (!password) {
         return res.status(401).json({
-          success: false,
           error: 'Password required',
-          message: 'This shared prompt is password protected'
+          message: 'This shared prompt is password protected',
+          requiresPassword: true
         })
       }
 
-      const isValidPassword = await bcrypt.compare(password, sharedPrompt.password_hash)
-      if (!isValidPassword) {
+      const isPasswordValid = await bcrypt.compare(password, sharedPrompt.password_hash)
+      if (!isPasswordValid) {
         return res.status(403).json({
-          success: false,
           error: 'Invalid password',
-          message: 'Incorrect password provided'
+          message: 'The provided password is incorrect'
         })
       }
     }
 
     // Increment view count
-    await database
+    await database.supabase
       .from('shared_prompts')
       .update({ 
         view_count: sharedPrompt.view_count + 1,
         last_accessed_at: new Date().toISOString()
       })
-      .eq('share_id', shareId)
+      .eq('id', sharedPrompt.id)
 
+    // Return the shared prompt data
     res.json({
       success: true,
       data: {
-        id: sharedPrompt.id,
-        title: sharedPrompt.title,
-        description: sharedPrompt.description,
-        content: sharedPrompt.prompt_content,
-        author: sharedPrompt.profiles?.full_name || sharedPrompt.profiles?.email || 'Anonymous',
-        createdAt: sharedPrompt.created_at,
-        viewCount: sharedPrompt.view_count + 1
+        shareId: sharedPrompt.share_id,
+        title: sharedPrompt.title || sharedPrompt.prompts.title,
+        description: sharedPrompt.description || sharedPrompt.prompts.description,
+        prompt: {
+          raw: sharedPrompt.prompts.raw_prompt,
+          enriched: sharedPrompt.prompts.enriched_prompt,
+          category: sharedPrompt.prompts.category,
+          tags: sharedPrompt.prompts.tags,
+          model: sharedPrompt.prompts.selected_model
+        },
+        creator: {
+          name: sharedPrompt.profiles.full_name,
+          email: sharedPrompt.is_public ? sharedPrompt.profiles.email : null
+        },
+        metadata: {
+          isPublic: sharedPrompt.is_public,
+          viewCount: sharedPrompt.view_count + 1,
+          maxViews: sharedPrompt.max_views,
+          allowDownload: sharedPrompt.allow_download,
+          createdAt: sharedPrompt.created_at,
+          expiresAt: sharedPrompt.expires_at
+        }
       }
     })
   } catch (error) {
     logger.error('Error fetching shared prompt:', error)
     res.status(500).json({
-      success: false,
       error: 'Failed to fetch shared prompt',
       message: 'Could not retrieve the shared prompt'
     })
   }
 })
 
-// POST /api/v1/sharing - Create a shared prompt (requires auth)
-router.post('/', authMiddleware, async (req, res) => {
-  try {
-    const { 
-      promptId, 
-      title, 
-      description, 
-      expiresIn, 
-      isPublic = false,
-      requirePassword = false,
-      password,
-      maxViews,
-      allowDownload = true
-    } = req.body
-    const userId = req.user.id
+// POST /api/v1/sharing - Create a new share (requires auth and quota check)
+router.post('/', 
+  authMiddleware,
+  quotaMiddleware('share'),
+  async (req, res) => {
+    try {
+      const userId = req.user.id
+      const {
+        promptId,
+        title,
+        description,
+        isPublic = false,
+        password,
+        expiresIn,
+        maxViews,
+        allowDownload = true
+      } = req.body
 
-    if (!promptId) {
-      return res.status(400).json({
-        success: false,
-        error: 'Prompt ID is required',
-        message: 'Please specify which prompt to share'
-      })
-    }
-
-    if (!title || !title.trim()) {
-      return res.status(400).json({
-        success: false,
-        error: 'Title is required',
-        message: 'Please provide a title for the shared prompt'
-      })
-    }
-
-    // Get the prompt to share
-    const { data: prompt, error: promptError } = await database
-      .from('prompts')
-      .select('enriched_prompt, raw_prompt, title')
-      .eq('id', promptId)
-      .eq('user_id', userId)
-      .single()
-
-    if (promptError || !prompt) {
-      return res.status(404).json({
-        success: false,
-        error: 'Prompt not found',
-        message: 'The specified prompt does not exist'
-      })
-    }
-
-    // Generate share ID
-    const shareId = crypto.randomBytes(16).toString('hex')
-
-    // Calculate expiration date
-    let expiresAt = null
-    if (expiresIn) {
-      const expirationMs = {
-        '1h': 60 * 60 * 1000,
-        '24h': 24 * 60 * 60 * 1000,
-        '7d': 7 * 24 * 60 * 60 * 1000,
-        '30d': 30 * 24 * 60 * 60 * 1000
+      if (!promptId) {
+        return res.status(400).json({
+          error: 'Missing required field',
+          message: 'promptId is required'
+        })
       }
-      
-      if (expirationMs[expiresIn]) {
-        expiresAt = new Date(Date.now() + expirationMs[expiresIn]).toISOString()
+
+      // Verify the prompt exists and belongs to the user
+      const { data: prompt, error: promptError } = await database.supabase
+        .from('prompts')
+        .select('id, title, description, user_id')
+        .eq('id', promptId)
+        .eq('user_id', userId)
+        .single()
+
+      if (promptError || !prompt) {
+        return res.status(404).json({
+          error: 'Prompt not found',
+          message: 'The specified prompt does not exist or you do not have permission to share it'
+        })
       }
-    }
 
-    // Hash password if provided
-    let passwordHash = null
-    if (requirePassword && password) {
-      passwordHash = await bcrypt.hash(password, 10)
-    }
-
-    // Create shared prompt
-    const { data: sharedPrompt, error: shareError } = await database
-      .from('shared_prompts')
-      .insert({
-        share_id: shareId,
+      // Generate share data
+      const shareData = {
         prompt_id: promptId,
         created_by: userId,
-        prompt_content: prompt.enriched_prompt || prompt.raw_prompt,
-        title: title.trim(),
-        description: description || '',
-        expires_at: expiresAt,
+        share_id: generateShareId(),
+        title: title || prompt.title,
+        description: description || prompt.description,
         is_public: isPublic,
-        password_hash: passwordHash,
-        max_views: maxViews || null,
-        is_active: true,
-        view_count: 0,
         allow_download: allowDownload
-      })
-      .select()
-      .single()
-
-    if (shareError) {
-      throw shareError
-    }
-
-    logger.info(`Prompt shared by user ${userId}`, {
-      promptId,
-      shareId,
-      isPublic,
-      expiresAt
-    })
-
-    res.json({
-      success: true,
-      data: {
-        shareId,
-        shareUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/shared/${shareId}`,
-        expiresAt
       }
-    })
-  } catch (error) {
-    logger.error('Error creating shared prompt:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to share prompt',
-      message: 'Could not create shared prompt'
-    })
-  }
-})
 
-// GET /api/v1/sharing/my-shares - Get user's shared prompts
-router.get('/my-shares', authMiddleware, async (req, res) => {
+      // Handle password protection
+      if (password) {
+        shareData.password_hash = await bcrypt.hash(password, 10)
+      }
+
+      // Handle expiration
+      if (expiresIn) {
+        const expirationDate = new Date()
+        switch (expiresIn) {
+          case '1h':
+            expirationDate.setHours(expirationDate.getHours() + 1)
+            break
+          case '24h':
+            expirationDate.setHours(expirationDate.getHours() + 24)
+            break
+          case '7d':
+            expirationDate.setDate(expirationDate.getDate() + 7)
+            break
+          case '30d':
+            expirationDate.setDate(expirationDate.getDate() + 30)
+            break
+          default:
+            expirationDate.setDate(expirationDate.getDate() + 7) // Default to 7 days
+        }
+        shareData.expires_at = expirationDate.toISOString()
+      }
+
+      // Handle view limits
+      if (maxViews && maxViews > 0) {
+        shareData.max_views = maxViews
+      }
+
+      // Create the share
+      const { data: newShare, error: shareError } = await database.supabase
+        .from('shared_prompts')
+        .insert(shareData)
+        .select('*')
+        .single()
+
+      if (shareError) {
+        throw shareError
+      }
+
+      // Log the share creation
+      await logUsage(userId, 'share', {
+        resourceType: 'prompt',
+        resourceId: promptId,
+        success: true,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      })
+
+      logger.info('Prompt shared successfully', {
+        userId,
+        promptId,
+        shareId: newShare.share_id,
+        isPublic,
+        hasPassword: !!password,
+        expiresAt: shareData.expires_at
+      })
+
+      res.status(201).json({
+        success: true,
+        data: {
+          shareId: newShare.share_id,
+          shareUrl: `${req.protocol}://${req.get('host')}/shared/${newShare.share_id}`,
+          title: newShare.title,
+          description: newShare.description,
+          isPublic: newShare.is_public,
+          hasPassword: !!password,
+          maxViews: newShare.max_views,
+          allowDownload: newShare.allow_download,
+          expiresAt: newShare.expires_at,
+          createdAt: newShare.created_at
+        },
+        quota: req.quotaInfo ? {
+          remaining: req.quotaInfo.remaining,
+          tier: req.quotaInfo.tier
+        } : null
+      })
+    } catch (error) {
+      // Log failed share creation
+      if (req.user) {
+        await logUsage(req.user.id, 'share', {
+          resourceType: 'prompt',
+          success: false,
+          error: error.message,
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent')
+        })
+      }
+
+      logger.error('Error creating share:', error)
+      res.status(500).json({
+        error: 'Failed to create share',
+        message: 'Could not create the shared prompt'
+      })
+    }
+  }
+)
+
+// GET /api/v1/sharing - Get user's shared prompts
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id
-    const { page = 1, limit = 20 } = req.query
+    const { limit = 50, offset = 0, includeExpired = false } = req.query
 
-    const offset = (page - 1) * limit
-
-    const { data: shares, error } = await database
+    let query = database.supabase
       .from('shared_prompts')
       .select(`
         id,
         share_id,
         title,
         description,
-        created_at,
-        expires_at,
-        view_count,
         is_public,
-        is_active,
+        view_count,
         max_views,
-        last_accessed_at
+        expires_at,
+        allow_download,
+        created_at,
+        prompts!inner(
+          title,
+          category
+        )
       `)
       .eq('created_by', userId)
       .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1)
+      .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1)
+
+    // Filter out expired shares unless requested
+    if (!includeExpired) {
+      query = query.or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+    }
+
+    const { data: shares, error } = await query
 
     if (error) {
       throw error
     }
 
-    // Get total count
-    const { count } = await database
-      .from('shared_prompts')
-      .select('*', { count: 'exact', head: true })
-      .eq('created_by', userId)
+    // Calculate share statistics
+    const stats = {
+      totalShares: shares.length,
+      publicShares: shares.filter(s => s.is_public).length,
+      totalViews: shares.reduce((sum, s) => sum + s.view_count, 0),
+      expiredShares: shares.filter(s => s.expires_at && new Date(s.expires_at) < new Date()).length
+    }
 
     res.json({
       success: true,
       data: {
-        shares,
+        shares: shares.map(share => ({
+          shareId: share.share_id,
+          title: share.title || share.prompts.title,
+          description: share.description,
+          category: share.prompts.category,
+          isPublic: share.is_public,
+          viewCount: share.view_count,
+          maxViews: share.max_views,
+          allowDownload: share.allow_download,
+          expiresAt: share.expires_at,
+          isExpired: share.expires_at ? new Date(share.expires_at) < new Date() : false,
+          createdAt: share.created_at,
+          shareUrl: `${req.protocol}://${req.get('host')}/shared/${share.share_id}`
+        })),
+        stats,
         pagination: {
-          page: parseInt(page),
           limit: parseInt(limit),
-          total: count,
-          pages: Math.ceil(count / limit)
+          offset: parseInt(offset),
+          hasMore: shares.length === parseInt(limit)
         }
       }
     })
   } catch (error) {
     logger.error('Error fetching user shares:', error)
     res.status(500).json({
-      success: false,
       error: 'Failed to fetch shares',
       message: 'Could not retrieve your shared prompts'
-    })
-  }
-})
-
-// PUT /api/v1/sharing/:shareId - Update share settings
-router.put('/:shareId', authMiddleware, async (req, res) => {
-  try {
-    const { shareId } = req.params
-    const userId = req.user.id
-    const { title, description, isPublic, expiresIn, maxViews, isActive } = req.body
-
-    // Verify ownership
-    const { data: existingShare, error: fetchError } = await database
-      .from('shared_prompts')
-      .select('id')
-      .eq('share_id', shareId)
-      .eq('created_by', userId)
-      .single()
-
-    if (fetchError || !existingShare) {
-      return res.status(404).json({
-        success: false,
-        error: 'Share not found',
-        message: 'The specified share does not exist or you do not have permission to modify it'
-      })
-    }
-
-    const updateData = {}
-    if (title !== undefined) updateData.title = title
-    if (description !== undefined) updateData.description = description
-    if (isPublic !== undefined) updateData.is_public = isPublic
-    if (maxViews !== undefined) updateData.max_views = maxViews
-    if (isActive !== undefined) updateData.is_active = isActive
-
-    // Handle expiration
-    if (expiresIn !== undefined) {
-      if (expiresIn) {
-        const expirationMs = {
-          '1h': 60 * 60 * 1000,
-          '24h': 24 * 60 * 60 * 1000,
-          '7d': 7 * 24 * 60 * 60 * 1000,
-          '30d': 30 * 24 * 60 * 60 * 1000
-        }
-        
-        if (expirationMs[expiresIn]) {
-          updateData.expires_at = new Date(Date.now() + expirationMs[expiresIn]).toISOString()
-        }
-      } else {
-        updateData.expires_at = null
-      }
-    }
-
-    const { data: updatedShare, error: updateError } = await database
-      .from('shared_prompts')
-      .update(updateData)
-      .eq('share_id', shareId)
-      .eq('created_by', userId)
-      .select()
-      .single()
-
-    if (updateError) {
-      throw updateError
-    }
-
-    res.json({
-      success: true,
-      data: updatedShare
-    })
-  } catch (error) {
-    logger.error('Error updating share:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to update share',
-      message: 'Could not update the shared prompt'
     })
   }
 })
@@ -367,169 +370,135 @@ router.put('/:shareId', authMiddleware, async (req, res) => {
 // DELETE /api/v1/sharing/:shareId - Delete a share
 router.delete('/:shareId', authMiddleware, async (req, res) => {
   try {
-    const { shareId } = req.params
     const userId = req.user.id
+    const { shareId } = req.params
 
-    const { data: deletedShare, error } = await database
+    // Verify the share exists and belongs to the user
+    const { data: share, error: shareError } = await database.supabase
       .from('shared_prompts')
-      .delete()
+      .select('id, share_id, created_by')
       .eq('share_id', shareId)
       .eq('created_by', userId)
-      .select()
       .single()
 
-    if (error || !deletedShare) {
+    if (shareError || !share) {
       return res.status(404).json({
-        success: false,
         error: 'Share not found',
         message: 'The specified share does not exist or you do not have permission to delete it'
       })
     }
 
+    // Delete the share
+    const { error: deleteError } = await database.supabase
+      .from('shared_prompts')
+      .delete()
+      .eq('id', share.id)
+
+    if (deleteError) {
+      throw deleteError
+    }
+
+    logger.info('Share deleted successfully', {
+      userId,
+      shareId,
+      deletedShareId: share.id
+    })
+
     res.json({
       success: true,
-      data: { message: 'Share deleted successfully' }
+      message: 'Share deleted successfully'
     })
   } catch (error) {
     logger.error('Error deleting share:', error)
     res.status(500).json({
-      success: false,
       error: 'Failed to delete share',
       message: 'Could not delete the shared prompt'
     })
   }
 })
 
-// GET /api/v1/sharing/public - Get public prompts for discovery
+// GET /api/v1/sharing/public - Get public shares (discovery)
 router.get('/public', async (req, res) => {
   try {
-    const { page = 1, limit = 20, category, search } = req.query
-    const offset = (page - 1) * limit
+    const { limit = 20, offset = 0, category, search } = req.query
 
-    let query = database
+    let query = database.supabase
       .from('shared_prompts')
       .select(`
         share_id,
         title,
         description,
-        created_at,
         view_count,
-        profiles!created_by(full_name, email)
+        created_at,
+        prompts!inner(
+          title,
+          description,
+          category,
+          tags
+        ),
+        profiles!inner(
+          full_name
+        )
       `)
       .eq('is_public', true)
-      .eq('is_active', true)
+      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
       .order('view_count', { ascending: false })
+      .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1)
 
-    // Add search filter
-    if (search) {
-      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
-    }
-
-    // Add category filter (if implemented in prompts table)
+    // Filter by category if provided
     if (category) {
-      // This would require joining with prompts table for category
-      // For now, we'll skip this filter
+      query = query.eq('prompts.category', category)
     }
 
-    const { data: publicPrompts, error } = await query
-      .range(offset, offset + limit - 1)
+    // Search functionality
+    if (search) {
+      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%,prompts.title.ilike.%${search}%`)
+    }
+
+    const { data: publicShares, error } = await query
 
     if (error) {
       throw error
     }
 
-    // Get total count
-    let countQuery = database
-      .from('shared_prompts')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_public', true)
-      .eq('is_active', true)
-
-    if (search) {
-      countQuery = countQuery.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
-    }
-
-    const { count } = await countQuery
-
     res.json({
       success: true,
       data: {
-        prompts: publicPrompts.map(prompt => ({
-          shareId: prompt.share_id,
-          title: prompt.title,
-          description: prompt.description,
-          author: prompt.profiles?.full_name || prompt.profiles?.email || 'Anonymous',
-          createdAt: prompt.created_at,
-          viewCount: prompt.view_count
+        shares: publicShares.map(share => ({
+          shareId: share.share_id,
+          title: share.title || share.prompts.title,
+          description: share.description || share.prompts.description,
+          category: share.prompts.category,
+          tags: share.prompts.tags,
+          viewCount: share.view_count,
+          creator: share.profiles.full_name,
+          createdAt: share.created_at,
+          shareUrl: `${req.protocol}://${req.get('host')}/shared/${share.share_id}`
         })),
         pagination: {
-          page: parseInt(page),
           limit: parseInt(limit),
-          total: count,
-          pages: Math.ceil(count / limit)
+          offset: parseInt(offset),
+          hasMore: publicShares.length === parseInt(limit)
         }
       }
     })
   } catch (error) {
-    logger.error('Error fetching public prompts:', error)
+    logger.error('Error fetching public shares:', error)
     res.status(500).json({
-      success: false,
-      error: 'Failed to fetch public prompts',
-      message: 'Could not retrieve public prompts'
+      error: 'Failed to fetch public shares',
+      message: 'Could not retrieve public shared prompts'
     })
   }
 })
 
-// GET /api/v1/sharing/stats - Get sharing statistics for user
-router.get('/stats', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id
-
-    // Get total shares
-    const { count: totalShares } = await database
-      .from('shared_prompts')
-      .select('*', { count: 'exact', head: true })
-      .eq('created_by', userId)
-
-    // Get total views
-    const { data: viewData } = await database
-      .from('shared_prompts')
-      .select('view_count')
-      .eq('created_by', userId)
-
-    const totalViews = viewData?.reduce((sum, share) => sum + (share.view_count || 0), 0) || 0
-
-    // Get public shares
-    const { count: publicShares } = await database
-      .from('shared_prompts')
-      .select('*', { count: 'exact', head: true })
-      .eq('created_by', userId)
-      .eq('is_public', true)
-
-    // Get active shares
-    const { count: activeShares } = await database
-      .from('shared_prompts')
-      .select('*', { count: 'exact', head: true })
-      .eq('created_by', userId)
-      .eq('is_active', true)
-
-    res.json({
-      success: true,
-      data: {
-        totalShares: totalShares || 0,
-        totalViews: totalViews || 0,
-        publicShares: publicShares || 0,
-        activeShares: activeShares || 0
-      }
-    })
-  } catch (error) {
-    logger.error('Error fetching sharing stats:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch sharing statistics',
-      message: 'Could not retrieve sharing statistics'
-    })
+// Helper function to generate share ID
+function generateShareId() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  let result = ''
+  for (let i = 0; i < 12; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length))
   }
-})
+  return result
+}
 
 export default router 
