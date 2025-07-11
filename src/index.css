@@ -629,10 +629,14 @@
     right: 0;
   }
   
-  /* Prevent parent containers from clipping dropdown */
-  .model-selector,
-  .model-selector * {
+  /* Prevent parent containers from clipping dropdown, but allow scrolling within dropdown */
+  .model-selector {
     overflow: visible !important;
+  }
+  
+  /* Allow scrolling within dropdown content */
+  .model-selector-dropdown .overflow-y-auto {
+    overflow-y: auto !important;
   }
   
   /* Override any overflow constraints on grid containers */
@@ -683,6 +687,38 @@
     box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25) !important;
     max-height: 20rem !important;
     overflow: hidden !important;
+  }
+  
+  /* Enhanced scrolling for model list */
+  .model-selector-dropdown .max-h-64 {
+    max-height: 16rem !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+  }
+  
+  .model-selector-dropdown .max-h-64::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .model-selector-dropdown .max-h-64::-webkit-scrollbar-track {
+    background: #f8fafc;
+    border-radius: 4px;
+  }
+  
+  .model-selector-dropdown .max-h-64::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+    border: 1px solid #f8fafc;
+  }
+  
+  .model-selector-dropdown .max-h-64::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+  
+  /* Smooth scrolling behavior */
+  .model-selector-dropdown .max-h-64 {
+    scroll-behavior: smooth;
   }
   
   /* Enhanced Animations and Micro-interactions */
