@@ -5,7 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 export class PromptEnrichmentService {
   static async enrichPrompt(promptData, userToken = null, userTier = 'free') {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/prompts/enrich`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/enrichment/enhance`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ export class PromptEnrichmentService {
 
   static async getEnrichmentStatus() {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/health`)
+      const response = await fetch(`${API_BASE_URL}/health`)
       return response.ok
     } catch (error) {
       return false
@@ -181,6 +181,7 @@ export class MockPromptEnrichmentService {
 }
 
 // Export the service to use (switch between real and mock)
-export const promptEnrichmentService = import.meta.env.DEV 
-  ? MockPromptEnrichmentService 
-  : PromptEnrichmentService 
+// Use real service by default, fallback to mock only if API_URL is not set
+export const promptEnrichmentService = import.meta.env.VITE_API_URL 
+  ? PromptEnrichmentService 
+  : MockPromptEnrichmentService 

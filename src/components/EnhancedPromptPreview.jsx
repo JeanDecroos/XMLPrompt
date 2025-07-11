@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
-import { Copy, Check, Eye, Code, AlertCircle, ArrowRight, Sparkles, FileText, Settings, Zap, Save, Clock } from 'lucide-react'
+import { Copy, Check, Eye, Code, AlertCircle, ArrowRight, Sparkles, FileText, Settings, Zap, Save, Clock, Share2 } from 'lucide-react'
 import { getModelById, PROMPT_FORMATS } from '../data/aiModels'
 import { PromptService } from '../services/promptService'
+import SharePromptModal from './SharePromptModal'
+import SharingService from '../services/sharingService'
 
 const EnhancedPromptPreview = ({ 
   rawPrompt, 
@@ -17,13 +19,16 @@ const EnhancedPromptPreview = ({
   isAuthenticated,
   isPro,
   formData,
-  onOpenHistory
+  onOpenHistory,
+  savedPrompt
 }) => {
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState(hasEnrichment ? 'enriched' : 'raw')
   const [saving, setSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState(null)
   const [saveError, setSaveError] = useState(null)
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [shareLoading, setShareLoading] = useState(false)
   
   const currentModel = getModelById(selectedModel)
   
@@ -74,6 +79,36 @@ const EnhancedPromptPreview = ({
       setTimeout(() => setSaveError(null), 3000)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleShare = async (shareData) => {
+    if (!savedPrompt?.id) {
+      setSaveError('Please save the prompt first before sharing')
+      setTimeout(() => setSaveError(null), 5000)
+      return { success: false, error: 'Please save the prompt first' }
+    }
+
+    setShareLoading(true)
+    
+    try {
+      const result = await SharingService.createShare({
+        promptId: savedPrompt.id,
+        title: shareData.title,
+        description: shareData.description,
+        isPublic: shareData.isPublic,
+        requirePassword: shareData.requirePassword,
+        password: shareData.password,
+        expiresIn: shareData.expiresIn,
+        maxViews: shareData.maxViews,
+        allowDownload: shareData.allowDownload
+      })
+      
+      return result
+    } catch (error) {
+      return { success: false, error: 'Failed to create share' }
+    } finally {
+      setShareLoading(false)
     }
   }
 
@@ -137,6 +172,27 @@ const EnhancedPromptPreview = ({
                   </>
                 )}
               </button>
+
+              {isAuthenticated && savedPrompt?.id && (
+                <button
+                  onClick={() => setShowShareModal(true)}
+                  disabled={shareLoading}
+                  className="btn btn-secondary btn-sm"
+                  title="Share this prompt"
+                >
+                  {shareLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-1"></div>
+                      Sharing...
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-4 h-4 mr-1" />
+                      Share
+                    </>
+                  )}
+                </button>
+              )}
             </div>
             
             <div className="text-sm text-gray-500">
@@ -323,6 +379,14 @@ const EnhancedPromptPreview = ({
           )}
         </div>
       )}
+
+      {/* Share Modal */}
+      <SharePromptModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        prompt={savedPrompt}
+        onShare={handleShare}
+      />
     </div>
   )
 }

@@ -89,7 +89,7 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
   }, [isOpen])
 
   return (
-    <div className={compact ? "relative z-50 model-selector" : "card p-6 relative z-50 model-selector model-selector-container"}>
+    <div className={compact ? "relative z-50 model-selector" : "bg-white rounded-2xl shadow-lg border border-gray-200 p-6 relative z-50 model-selector model-selector-container"}>
       {!compact && (
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -161,7 +161,7 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
             console.log('Dropdown clicked, current isOpen:', isOpen)
             setIsOpen(!isOpen)
           }}
-          className="relative w-full bg-white border border-gray-200 rounded-lg px-4 py-3 cursor-pointer hover:border-primary-300 hover:shadow-sm transition-all duration-200"
+          className="relative w-full bg-white border border-gray-300 rounded-lg px-4 py-3 cursor-pointer hover:border-blue-400 hover:shadow-md transition-all duration-200 shadow-sm"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -200,14 +200,14 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
             }}
           >
             {/* Simple Provider Filter */}
-            <div className="p-3 bg-gray-50 border-b border-gray-100">
+            <div className="p-3 bg-white border-b border-gray-200">
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setSelectedProvider('all')}
                   className={`px-3 py-1.5 text-sm rounded font-medium transition-colors ${
                     selectedProvider === 'all' 
-                      ? 'bg-primary-600 text-white' 
-                      : 'bg-white text-gray-600 hover:bg-gray-100'
+                      ? 'bg-blue-600 text-white shadow-sm' 
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
                   }`}
                 >
                   All
@@ -218,8 +218,8 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
                     onClick={() => setSelectedProvider(provider)}
                     className={`px-3 py-1.5 text-sm rounded font-medium transition-colors ${
                       selectedProvider === provider 
-                        ? 'bg-primary-600 text-white' 
-                        : 'bg-white text-gray-600 hover:bg-gray-100'
+                        ? 'bg-blue-600 text-white shadow-sm' 
+                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
                     }`}
                   >
                     {provider}
@@ -285,12 +285,12 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
 
       {/* Simple Summary */}
       {currentModel && (
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-          <div className="text-sm text-gray-600">
+        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+          <div className="text-sm text-gray-700">
             <strong className="text-gray-900">{currentModel.name}</strong> supports up to{' '}
-            <strong className="text-gray-900">{currentModel.contextWindow?.toLocaleString()}</strong> tokens
+            <strong className="text-blue-700">{currentModel.contextWindow?.toLocaleString()}</strong> tokens
             {currentModel.features?.multimodal && (
-              <span className="text-blue-600">• Multimodal</span>
+              <span className="text-blue-600 font-medium">• Multimodal</span>
             )}
           </div>
         </div>

@@ -10,7 +10,22 @@
     "preview": "vite preview",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "fix-db": "node scripts/fixDatabaseSchema.js",
-    "grant-pro": "node scripts/grantProAccess.js"
+    "grant-pro": "node scripts/grantProAccess.js",
+    "test-mcp": "node scripts/testMCPConnection.js",
+    "analyze-db": "node scripts/analyzeDatabaseFull.js",
+    "create-sample-data": "node scripts/createSampleData.js",
+    "create-sample-simple": "node scripts/createSampleDataSimple.js",
+    "mcp-ready": "node scripts/createSampleDataWorking.js",
+    "analyze-improvements": "node scripts/databaseImprovementAnalysis.js",
+    "add-indexes": "node scripts/addEssentialIndexes.js",
+    "setup-monitoring": "node scripts/setupMonitoring.js",
+    "execute-db-improvements": "node scripts/executeDbImprovements.js",
+    "test-rpc-functions": "node scripts/testRpcFunctions.js",
+    "demonstrate-mcp-power": "node scripts/demonstrateMcpPower.js",
+    "apply-full-db-improvements": "node scripts/applyFullDatabaseImprovements.js",
+    "enhance-api-security": "node scripts/enhanceApiSecurity.js",
+    "test-performance": "node scripts/testPerformanceImprovements.js",
+    "verify-improvements": "node scripts/verifyDatabaseImprovements.js"
   },
   "dependencies": {
     "@supabase/auth-ui-react": "^0.4.7",
