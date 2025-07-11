@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Wand2, Menu, X, User, LogIn, UserPlus, Crown, ChevronDown, LogOut, Sparkles, Settings, HelpCircle, BookOpen } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import AuthModal from './AuthModal'
@@ -7,6 +8,8 @@ import { isAuthEnabled } from '../lib/supabase'
 
 const Header = () => {
   const { user, isAuthenticated, isPro, signOut } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authModalMode, setAuthModalMode] = useState('signin')
@@ -40,7 +43,7 @@ const Header = () => {
             
             {/* Enhanced Logo & Brand */}
             <div className="flex items-center">
-            <a href="#" className="flex items-center space-x-3 hover-lift py-3">
+            <Link to="/" className="flex items-center space-x-3 hover-lift py-3">
               <div className="relative">
                 <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-purple-700 rounded-xl shadow-lg hover:shadow-glow transition-all duration-300">
                   <Wand2 className="w-5 h-5 text-white" />
@@ -50,7 +53,7 @@ const Header = () => {
                 <h1 className="text-lg font-bold text-gradient">PromptCraft AI</h1>
                   <p className="text-xs text-gray-500 hidden sm:block">Professional AI Prompts</p>
               </div>
-            </a>
+            </Link>
             </div>
 
             {/* Enhanced Desktop Navigation */}
@@ -88,15 +91,15 @@ const Header = () => {
                 </div>
 
                 {/* Documentation */}
-                <a href="#docs" className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-lg hover:bg-white/60">
+                <Link to="/docs" className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-lg hover:bg-white/60">
                   <BookOpen className="w-4 h-4 mr-1" />
                   Docs
-                </a>
+                </Link>
 
                 {/* Pricing */}
-                <a href="#pricing" className="px-3 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-lg hover:bg-white/60">
+                <Link to="/pricing" className="px-3 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-lg hover:bg-white/60">
                   Pricing
-                </a>
+                </Link>
               </div>
             </nav>
 
@@ -213,12 +216,12 @@ const Header = () => {
           {isMenuOpen && (
             <div className="md:hidden border-t border-white/20 py-4 space-y-3">
               <div className="space-y-2">
-                <a href="#docs" className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-all duration-200 font-medium">
+                <Link to="/docs" className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-all duration-200 font-medium">
                   📖 Documentation
-                </a>
-                <a href="#pricing" className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-all duration-200 font-medium">
+                </Link>
+                <Link to="/pricing" className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-all duration-200 font-medium">
                   💰 Pricing
-                </a>
+                </Link>
                 <button 
                   onClick={() => setShowQuickHelp(!showQuickHelp)}
                   className="block w-full text-left px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-all duration-200 font-medium"
