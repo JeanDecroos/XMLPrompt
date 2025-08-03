@@ -47,7 +47,7 @@ app.get('/api/health', (req, res) => {
 // Main prompt enrichment endpoint
 app.post('/api/prompts/enrich', authenticateToken, async (req, res) => {
   try {
-    const { task, context, requirements, role, style, output, userTier } = req.body
+    const { task, context, requirements, role, style, output, userTier, enrichmentLevel } = req.body
     const isAuthenticated = !!req.user
     
     // Enhanced Pro status checking with multiple fallbacks
@@ -83,7 +83,8 @@ app.post('/api/prompts/enrich', authenticateToken, async (req, res) => {
       style,
       output,
       isPro,
-      isAuthenticated
+      isAuthenticated,
+      enrichmentLevel
     })
 
     const startTime = Date.now()
@@ -140,8 +141,43 @@ app.post('/api/prompts/enrich', authenticateToken, async (req, res) => {
   }
 })
 
+// Generate enrichment instruction based on scale
+function generateEnrichmentInstruction(level = 50) {
+  const instructions = {
+    0: "Only fix grammar, spelling, and basic clarity issues. Do not add any new meaning, concepts, or interpretations beyond what is explicitly provided.",
+    5: "Make minimal language improvements for better readability. Correct grammar and improve sentence flow while preserving exact original meaning.",
+    10: "Optimize language clarity and basic structure. Make minor word choices improvements without adding new concepts or interpretations.",
+    15: "Enhance readability and flow with slightly better word choices. Maintain strict adherence to original intent with no conceptual additions.",
+    20: "Improve language quality and sentence structure. Add minimal formatting improvements while staying completely faithful to original meaning.",
+    25: "Enhance clarity and flow with improved structure. Make minor organizational improvements without introducing new concepts or context.",
+    30: "Improve prompt structure and language quality. Add basic formatting and organization while maintaining original scope and intent.",
+    35: "Enhance language and add minimal structural improvements. Introduce very light organizational changes without expanding meaning.",
+    40: "Improve clarity, flow, and organization. Add slight structural enhancements and minor formatting improvements to original content.",
+    45: "Enhance language quality and structure with light improvements. Begin introducing minimal contextual clarity without adding new concepts.",
+    50: "Enhance for clarity, tone, and slight conceptual enrichment. Introduce minor inferred details if they improve the prompt while keeping close to original intent.",
+    55: "Add moderate enhancements to clarity and structure. Introduce light contextual improvements and minor inferred details that support the original intent.",
+    60: "Enhance with moderate conceptual improvements. Add relevant context and minor expansions that naturally extend the original request.",
+    65: "Apply moderate creative enhancements. Add contextual details and light creative interpretations that align with the original purpose.",
+    70: "Enhance with creative improvements and expanded context. Add relevant details and moderate creative interpretations while maintaining core intent.",
+    75: "Significantly enhance with creative improvements, adding relevant context and inferred meaning. Expand concepts naturally while maintaining core intent.",
+    80: "Apply substantial creative enhancements. Add significant context, creative interpretations, and expanded concepts that build upon the original request.",
+    85: "Enhance creatively with substantial additions. Add extensive context, creative interpretations, and expanded scope while staying generally aligned with intent.",
+    90: "Apply high levels of creative enhancement. Add substantial new context, creative interpretations, and expanded concepts. Some creative liberties may be taken.",
+    95: "Enhance with extensive creative freedom. Add substantial new ideas, expanded context, and creative interpretations. Minor inaccuracies may be introduced for creative enhancement.",
+    100: "Enhance with maximum creative freedom. Add extensive new ideas, substantial context, and creative interpretations. Note: At this level, some inaccuracies or assumptions may be introduced in favor of creative enhancement."
+  }
+  
+  // Find the exact level or closest one
+  const availableLevels = Object.keys(instructions).map(Number).sort((a, b) => a - b)
+  const closestLevel = availableLevels.reduce((prev, curr) => 
+    Math.abs(curr - level) < Math.abs(prev - level) ? curr : prev
+  )
+  
+  return instructions[closestLevel]
+}
+
 // Build the enrichment prompt for GPT
-function buildEnrichmentPrompt({ task, context, requirements, role, style, output, isPro, isAuthenticated }) {
+function buildEnrichmentPrompt({ task, context, requirements, role, style, output, isPro, isAuthenticated, enrichmentLevel }) {
   let prompt = `Please enhance this prompt for Claude AI by creating an optimized XML structure:
 
 ORIGINAL PROMPT DATA:
@@ -153,10 +189,14 @@ ORIGINAL PROMPT DATA:
   if (style && isPro) prompt += `\n- Style: ${style}`
   if (output && isPro) prompt += `\n- Output Format: ${output}`
 
+  const enrichmentInstruction = generateEnrichmentInstruction(enrichmentLevel || 50)
+  
   prompt += `\n\nPLEASE PROVIDE:
 1. An enhanced XML prompt with proper structure and tags
 2. A list of specific improvements made
 3. A quality score from 1-10
+
+ENRICHMENT INSTRUCTION: ${enrichmentInstruction}
 
 ENHANCEMENT LEVEL: ${isPro ? 'PROFESSIONAL' : isAuthenticated ? 'STANDARD' : 'BASIC'}
 

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Sparkles, Target, Zap, Settings } from 'lucide-react'
 import { getEnrichmentOptions } from '../utils/promptEnricher'
+import EnrichmentScaleBar from './EnrichmentScaleBar'
 
 const EnrichmentOptions = ({ enrichmentData, onChange, isEnriching }) => {
   const { tones } = getEnrichmentOptions()
@@ -48,6 +49,13 @@ const EnrichmentOptions = ({ enrichmentData, onChange, isEnriching }) => {
       </div>
 
       <div className="space-y-4">
+        {/* Enrichment Scale Bar */}
+        <EnrichmentScaleBar
+          value={enrichmentData.enrichmentLevel || 50}
+          onChange={(value) => onChange('enrichmentLevel', value)}
+          disabled={isEnriching}
+        />
+
         {/* Tone Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">

@@ -18,7 +18,8 @@ export class PromptEnrichmentService {
           role: promptData.role,
           style: promptData.style,
           output: promptData.output,
-          userTier: userTier
+          userTier: userTier,
+          enrichmentLevel: promptData.enrichmentLevel || 50
         })
       })
 
@@ -73,6 +74,15 @@ export class PromptEnrichmentService {
     }
   }
 
+  static async enhancePrompt(enrichmentRequest) {
+    // Handle the different calling pattern used by some components
+    const { formData, userContext } = enrichmentRequest
+    const userToken = userContext?.token || null
+    const userTier = userContext?.tier || 'free'
+    
+    return this.enrichPrompt(formData, userToken, userTier)
+  }
+
   static async getEnrichmentStatus() {
     try {
       const response = await fetch(`${API_BASE_URL}/health`)
@@ -89,8 +99,9 @@ export class MockPromptEnrichmentService {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1500))
     
-    const { task, context, requirements, role, style, output } = promptData
+    const { task, context, requirements, role, style, output, enrichmentLevel } = promptData
     const isPro = !!userToken
+    const level = enrichmentLevel || 50
     
     // Generate enhanced XML
     let xml = '<prompt>\n'
@@ -100,20 +111,18 @@ export class MockPromptEnrichmentService {
     }
     
     if (task) {
-      const enhancedTask = isPro ? this.enhanceTask(task) : task
+      const enhancedTask = level > 25 ? this.enhanceTask(task, level) : task
       xml += `  <task>\n    ${enhancedTask}\n  </task>\n`
     }
     
     if (context) {
-      const enhancedContext = isPro ? this.enhanceContext(context) : context
+      const enhancedContext = level > 25 ? this.enhanceContext(context, level) : context
       xml += `  <context>\n    ${enhancedContext}\n  </context>\n`
     }
     
-    if (requirements && isPro) {
-      const enhancedReq = this.enhanceRequirements(requirements)
+    if (requirements) {
+      const enhancedReq = level > 35 ? this.enhanceRequirements(requirements, level) : requirements
       xml += `  <requirements>\n    ${enhancedReq}\n  </requirements>\n`
-    } else if (requirements) {
-      xml += `  <requirements>\n    ${requirements}\n  </requirements>\n`
     }
     
     if (style && isPro) {
@@ -129,52 +138,176 @@ export class MockPromptEnrichmentService {
     const improvements = []
     let qualityScore = 7
     
-    if (isPro) {
-      improvements.push(
-        'Enhanced task clarity and specificity',
-        'Improved context with relevant details',
-        'Optimized requirements structure',
-        'Added professional styling guidelines',
-        'Structured output format specified'
-      )
-      qualityScore = 9.2
-    } else {
-      improvements.push(
-        'Basic XML structure applied',
-        'Essential elements organized'
-      )
+    // Base improvements
+    improvements.push('Basic XML structure applied', 'Essential elements organized')
+    
+    if (level >= 5) {
+      improvements.push('Grammar and spelling corrections')
+      qualityScore = 7.2
     }
     
-    return {
-      success: true,
-      data: {
-        enrichedPrompt: xml,
-        improvements,
-        qualityScore,
-        isEnriched: isPro,
-        processingTime: '1.2s',
-        tokensUsed: isPro ? 145 : 45
-      }
+    if (level >= 15) {
+      improvements.push('Enhanced language clarity')
+      qualityScore = 7.4
     }
+    
+    if (level >= 25) {
+      improvements.push('Improved sentence structure and flow')
+      qualityScore = 7.6
+    }
+    
+    if (level >= 35) {
+      improvements.push('Better organization and formatting')
+      qualityScore = 7.8
+    }
+    
+    if (level >= 45) {
+      improvements.push('Enhanced clarity with minimal context')
+      qualityScore = 8.0
+    }
+    
+    if (level >= 55) {
+      improvements.push('Added contextual improvements')
+      qualityScore = 8.2
+    }
+    
+    if (level >= 65) {
+      improvements.push('Creative enhancements applied')
+      qualityScore = 8.4
+    }
+    
+    if (level >= 75) {
+      improvements.push('Significant creative improvements')
+      qualityScore = 8.6
+    }
+    
+    if (level >= 85) {
+      improvements.push('Substantial creative additions')
+      qualityScore = 8.8
+    }
+    
+    if (level >= 95) {
+      improvements.push('Maximum creative freedom applied')
+      qualityScore = 9.0
+    }
+    
+    if (level === 100) {
+      improvements.push('Full creative enhancement (may include inaccuracies)')
+      qualityScore = 9.2
+    }
+    
+    if (isPro) {
+      improvements.push('Pro-tier optimizations applied')
+      qualityScore = Math.min(qualityScore + 0.3, 10)
+    }
+    
+          return {
+        success: true,
+        data: {
+          enrichedPrompt: xml,
+          improvements,
+          qualityScore,
+          isEnriched: level > 0,
+          processingTime: `${(0.8 + (level * 0.01)).toFixed(1)}s`,
+          tokensUsed: Math.ceil(45 + (level * 2.5)),
+          enrichmentLevel: level,
+          riskLevel: level <= 15 ? 'Safe' : level <= 50 ? 'Low' : level <= 85 ? 'Medium' : 'High'
+        }
+      }
   }
   
-  static enhanceTask(task) {
-    // Add more specific language and structure
-    return task
-      .replace(/create/gi, 'develop and implement')
-      .replace(/make/gi, 'construct')
-      .replace(/write/gi, 'compose and structure')
-      + '\n\nEnsure the output is comprehensive, actionable, and aligned with best practices.'
+  static enhanceTask(task, level = 50) {
+    let enhanced = task
+    
+    if (level >= 15) {
+      // Basic language improvements
+      enhanced = enhanced
+        .replace(/\b(create|make|write|do|get)\b/gi, (match) => {
+          const replacements = {
+            'create': 'develop',
+            'make': 'build', 
+            'write': 'compose',
+            'do': 'execute',
+            'get': 'obtain'
+          }
+          return replacements[match.toLowerCase()] || match
+        })
+    }
+    
+    if (level >= 35) {
+      // Better structure and clarity
+      enhanced = enhanced
+        .replace(/\b(create|develop)\b/gi, 'develop and implement')
+        .replace(/\b(make|build)\b/gi, 'construct')
+        .replace(/\b(write|compose)\b/gi, 'compose and structure')
+    }
+    
+    if (level >= 55) {
+      // Add contextual improvements
+      enhanced += '\n\nConsider relevant context and current best practices.'
+    }
+    
+    if (level >= 75) {
+      // Creative enhancement - add comprehensive guidance
+      enhanced += '\n\nEnsure the output is comprehensive, actionable, and aligned with industry standards.'
+    }
+    
+    if (level >= 90) {
+      // High creativity - may add assumptions
+      enhanced += '\n\nFeel free to make reasonable assumptions about requirements and add creative enhancements that improve the overall quality.'
+    }
+    
+    return enhanced
   }
   
-  static enhanceContext(context) {
-    return context + '\n\nConsider the broader implications, potential edge cases, and stakeholder perspectives when addressing this task.'
+  static enhanceContext(context, level = 50) {
+    let enhanced = context
+    
+    if (level >= 35) {
+      enhanced += '\n\nConsider the current environment and requirements.'
+    }
+    
+    if (level >= 55) {
+      enhanced += '\n\nConsider relevant background information and current best practices.'
+    }
+    
+    if (level >= 75) {
+      enhanced += '\n\nConsider the broader implications, potential edge cases, and stakeholder perspectives when addressing this task.'
+    }
+    
+    if (level >= 90) {
+      enhanced += '\n\nFeel free to infer additional context that would be helpful for completing this task effectively.'
+    }
+    
+    return enhanced
   }
   
-  static enhanceRequirements(requirements) {
-    return requirements + '\n\nPrioritize requirements by importance and feasibility. Include success criteria and measurable outcomes.'
+  static enhanceRequirements(requirements, level = 50) {
+    let enhanced = requirements
+    
+    if (level >= 45) {
+      enhanced += '\n\nOrganize requirements by priority and feasibility.'
+    }
+    
+    if (level >= 65) {
+      enhanced += '\n\nInclude success criteria and measurable outcomes.'
+    }
+    
+    if (level >= 85) {
+      enhanced += '\n\nConsider potential constraints, dependencies, and alternative approaches.'
+    }
+    
+    return enhanced
   }
   
+  static async enhancePrompt(enrichmentRequest) {
+    // Handle the different calling pattern used by some components
+    const { formData, userContext } = enrichmentRequest
+    const userToken = userContext?.token || null
+    
+    return this.enrichPrompt(formData, userToken)
+  }
+
   static async getEnrichmentStatus() {
     return true // Mock service is always available
   }

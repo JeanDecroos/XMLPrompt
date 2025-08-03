@@ -254,7 +254,7 @@ const SimplifiedPromptGenerator = () => {
             style={{
               left: `${-100 + Math.sin(activeSection * 0.2) * 80}px`,
               top: `${50 + Math.cos(activeSection * 0.15) * 60}px`,
-              transform: `rotate(${activeSection * 8}deg) scale(${0.8 + Math.sin(activeSection * 0.3) * 0.3})`,
+              transform: `rotate(${activeSection * 8}deg) scale(${Math.max(0.1, 0.8 + Math.sin(activeSection * 0.3) * 0.2)})`,
               borderRadius: '60% 40% 70% 30%',
               filter: 'blur(60px)'
             }}
@@ -290,7 +290,7 @@ const SimplifiedPromptGenerator = () => {
             style={{
               left: `${100 + Math.sin(activeSection * 0.3) * 150}px`,
               bottom: `${150 + Math.cos(activeSection * 0.2) * 100}px`,
-              transform: `rotate(${activeSection * 5 + Math.sin(activeSection * 0.5) * 15}deg) scaleY(${0.6 + Math.sin(activeSection * 0.4) * 0.4})`,
+              transform: `rotate(${activeSection * 5 + Math.sin(activeSection * 0.5) * 15}deg) scaleY(${Math.max(0.1, 0.6 + Math.sin(activeSection * 0.4) * 0.3)})`,
               borderRadius: '100px',
               filter: 'blur(40px)'
             }}
@@ -308,7 +308,7 @@ const SimplifiedPromptGenerator = () => {
             style={{
               right: `${50 + Math.sin(activeSection * 0.35) * 120}px`,
               bottom: `${80 + Math.cos(activeSection * 0.28) * 60}px`,
-              transform: `rotate(${activeSection * 20}deg) scale(${0.7 + Math.cos(activeSection * 0.6) * 0.4})`,
+              transform: `rotate(${activeSection * 20}deg) scale(${Math.max(0.1, 0.7 + Math.cos(activeSection * 0.6) * 0.3)})`,
               borderRadius: '50%',
               filter: 'blur(50px)'
             }}
@@ -335,7 +335,7 @@ const SimplifiedPromptGenerator = () => {
                 transform: `translate(
                   ${Math.sin(i * 0.8 + activeSection * 0.4) * 40}px, 
                   ${Math.cos(i * 0.6 + activeSection * 0.3) * 30}px
-                ) scale(${0.5 + Math.sin(i * 0.5 + activeSection * 0.8) * 0.5})`,
+                ) scale(${Math.max(0.1, 0.5 + Math.sin(i * 0.5 + activeSection * 0.8) * 0.4)})`,
                 opacity: 0.3 + Math.sin(i * 0.7 + activeSection * 0.5) * 0.4,
                 filter: `blur(${0.5 + Math.sin(i * 0.3) * 1}px)`,
                 animationDelay: `${i * 200}ms`
@@ -601,7 +601,7 @@ const SimplifiedPromptGenerator = () => {
                 key={`dot-${i}`}
                 cx={150 + (i * 73) % 1000 + Math.sin(activeSection * (0.5 + i * 0.1)) * 60}
                 cy={200 + (i * 47) % 400 + Math.cos(activeSection * (0.7 + i * 0.15)) * 50}
-                r={1 + Math.sin(i + activeSection * 2) * 1.5}
+                r={Math.max(0.1, 1 + Math.sin(i + activeSection * 2) * 0.8)}
                 fill={
                   activeSection === 1 
                     ? `rgba(37, 99, 235, ${0.2 + Math.sin(i * 2 + activeSection) * 0.1})` 
