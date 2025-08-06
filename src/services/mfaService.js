@@ -342,25 +342,11 @@ Note: Each code can only be used once. Generate new codes if you run out.`
         url: 'https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2'
       },
       {
-        name: 'Authy',
-        platforms: ['iOS', 'Android', 'Desktop'],
-        description: 'Cross-platform with cloud backup',
-        icon: '📱',
-        url: 'https://authy.com/'
-      },
-      {
         name: 'Microsoft Authenticator',
         platforms: ['iOS', 'Android'],
         description: 'Microsoft\'s authenticator app',
         icon: '🪟',
         url: 'https://www.microsoft.com/en-us/account/authenticator'
-      },
-      {
-        name: '1Password',
-        platforms: ['iOS', 'Android', 'Desktop'],
-        description: 'Password manager with TOTP support',
-        icon: '🔑',
-        url: 'https://1password.com/'
       }
     ]
   }
