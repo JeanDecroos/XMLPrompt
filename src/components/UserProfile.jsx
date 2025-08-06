@@ -1,19 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { getUnlockedAchievements, getXP, getLevel, getXPProgress, ACHIEVEMENTS } from '../data/achievements'
 import { 
-  User, Flame, Award, ChevronRight, Crown, Settings, CreditCard, 
+  User, Settings, CreditCard, 
   BarChart3, Shield, Download, Calendar, Zap, Edit3, Camera,
-  CheckCircle, AlertCircle, RefreshCw, LogOut, Bell, Globe
+  CheckCircle, AlertCircle, RefreshCw, LogOut, Bell, Globe, ChevronRight
 } from 'lucide-react'
-
-const ROLE_ICONS = {
-  developer: '💻',
-  storyteller: '📖',
-  researcher: '🔬',
-  marketer: '📈',
-  designer: '🎨',
-}
 
 export default function UserProfile({ stats }) {
   const { user, signOut } = useAuth()
@@ -27,8 +18,6 @@ export default function UserProfile({ stats }) {
   // Fallback stats for demo/testing
   const demoStats = {
     promptsCreated: 12,
-    rolesExplored: ['developer', 'storyteller', 'researcher'],
-    streak: 4,
     promptsShared: 2,
     tokensUsed: 15420,
     modelsUsed: ['claude-3-5-sonnet', 'gpt-4o', 'gemini-2.5-pro'],
@@ -40,11 +29,6 @@ export default function UserProfile({ stats }) {
   }
   const s = stats || demoStats
 
-  const xp = getXP(s)
-  const level = getLevel(xp)
-  const xpProgress = getXPProgress(xp)
-  const unlocked = getUnlockedAchievements(s)
-
   const handleSaveProfile = () => {
     // TODO: Save profile changes to database
     setIsEditing(false)
@@ -53,7 +37,6 @@ export default function UserProfile({ stats }) {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
     { id: 'usage', label: 'Usage', icon: BarChart3 },
-    { id: 'achievements', label: 'Achievements', icon: Award },
     { id: 'settings', label: 'Settings', icon: Settings },
   ]
 
@@ -99,26 +82,6 @@ export default function UserProfile({ stats }) {
         </button>
       </div>
 
-      {/* Level & Progress */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-2">
-            <Crown className="w-5 h-5 text-purple-600" />
-            <span className="font-semibold text-gray-900">Level {level}</span>
-          </div>
-          <span className="text-sm text-gray-600">{xp} XP</span>
-        </div>
-        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div
-            className="h-2 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full transition-all duration-500"
-            style={{ width: `${xpProgress * 100}%` }}
-          />
-        </div>
-        <div className="text-xs text-gray-500 mt-1">
-          {100 - Math.floor(xpProgress * 100)} XP to next level
-        </div>
-      </div>
-
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-4">
         <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
@@ -130,34 +93,20 @@ export default function UserProfile({ stats }) {
           <div className="text-xs text-gray-600">Shared</div>
         </div>
         <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
-          <div className="text-2xl font-bold text-gray-900">{s.streak}</div>
-          <div className="text-xs text-gray-600">Day Streak</div>
+          <div className="text-2xl font-bold text-gray-900">{s.modelsUsed.length}</div>
+          <div className="text-xs text-gray-600">Models Used</div>
         </div>
       </div>
 
-      {/* Recent Achievements */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-gray-900">Recent Achievements</h3>
-          <button className="text-sm text-blue-600 hover:underline">View All</button>
-        </div>
-        <div className="space-y-2">
-          {unlocked.slice(0, 3).map(achievement => (
-            <div key={achievement.id} className="flex items-center space-x-3 p-2 bg-yellow-50 rounded-lg">
-              <span className="text-lg">{achievement.icon}</span>
-              <div>
-                <div className="font-medium text-gray-900">{achievement.name}</div>
-                <div className="text-xs text-gray-600">{achievement.description}</div>
-              </div>
-            </div>
-          ))}
-          {unlocked.length === 0 && (
-            <div className="text-center py-4 text-gray-500">
-              <Award className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-              <div className="text-sm">No achievements yet</div>
-              <div className="text-xs">Start creating prompts to earn achievements!</div>
-            </div>
-          )}
+      {/* Account Status */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
+        <h3 className="font-semibold text-gray-900 mb-2">Account Status</h3>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <span className="text-sm text-gray-700">Active</span>
+          </div>
+          <span className="text-sm text-gray-600">Free Plan</span>
         </div>
       </div>
     </div>
@@ -211,58 +160,6 @@ export default function UserProfile({ stats }) {
               style={{ width: `${Math.min((s.tokensUsed / 4000) * 100, 100)}%` }}
             />
           </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const renderAchievements = () => (
-    <div className="space-y-6">
-      {/* Achievement Progress */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <h3 className="font-semibold text-gray-900 mb-3">Achievement Progress</h3>
-        <div className="space-y-3">
-          {ACHIEVEMENTS.map(achievement => {
-            const isUnlocked = achievement.check(s)
-            return (
-              <div key={achievement.id} className="flex items-center space-x-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  isUnlocked ? 'bg-yellow-100' : 'bg-gray-100'
-                }`}>
-                  <span className="text-sm">{achievement.icon}</span>
-                </div>
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900">{achievement.name}</div>
-                  <div className="text-xs text-gray-600">{achievement.description}</div>
-                </div>
-                {isUnlocked ? (
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                ) : (
-                  <div className="w-5 h-5 border-2 border-gray-300 rounded-full" />
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Role Exploration */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <h3 className="font-semibold text-gray-900 mb-3">Role Exploration</h3>
-        <div className="flex flex-wrap gap-2">
-          {Object.entries(ROLE_ICONS).map(([role, icon]) => (
-            <div
-              key={role}
-              className={`p-2 rounded-lg border ${
-                s.rolesExplored.includes(role)
-                  ? 'bg-blue-50 border-blue-200'
-                  : 'bg-gray-50 border-gray-200'
-              }`}
-            >
-              <div className="text-lg">{icon}</div>
-              <div className="text-xs text-gray-600 mt-1 capitalize">{role}</div>
-            </div>
-          ))}
         </div>
       </div>
     </div>
@@ -381,7 +278,6 @@ export default function UserProfile({ stats }) {
       <div className="bg-gray-50 rounded-lg p-6">
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'usage' && renderUsage()}
-        {activeTab === 'achievements' && renderAchievements()}
         {activeTab === 'settings' && renderSettings()}
       </div>
     </div>
