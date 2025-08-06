@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Download, X, FileText, Calendar, CheckCircle } from 'lucide-react'
 
 const ExportDataModal = ({ isOpen, onClose }) => {
@@ -11,6 +11,23 @@ const ExportDataModal = ({ isOpen, onClose }) => {
   const [format, setFormat] = useState('json')
   const [isExporting, setIsExporting] = useState(false)
   const [exportComplete, setExportComplete] = useState(false)
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscKey)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscKey)
+    }
+  }, [isOpen, onClose])
 
   const handleToggle = (key) => {
     setSelectedData(prev => ({

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Globe, X, Shield, Eye, EyeOff } from 'lucide-react'
 
 const PrivacyModal = ({ isOpen, onClose }) => {
@@ -9,6 +9,23 @@ const PrivacyModal = ({ isOpen, onClose }) => {
     thirdPartySharing: false,
     searchVisibility: true
   })
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscKey)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscKey)
+    }
+  }, [isOpen, onClose])
 
   const handleToggle = (key) => {
     setSettings(prev => ({

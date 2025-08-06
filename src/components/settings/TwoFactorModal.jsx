@@ -24,6 +24,23 @@ const TwoFactorModal = ({ isOpen, onClose }) => {
     }
   }, [isOpen, user])
 
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscKey)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscKey)
+    }
+  }, [isOpen, onClose])
+
   const load2FAStatus = async () => {
     setLoading(true)
     setError(null)

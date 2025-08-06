@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Download, X, FileText, Calendar, DollarSign, CheckCircle } from 'lucide-react'
 
 const BillingHistoryModal = ({ isOpen, onClose }) => {
@@ -88,6 +88,23 @@ const BillingHistoryModal = ({ isOpen, onClose }) => {
       day: 'numeric'
     })
   }
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscKey)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscKey)
+    }
+  }, [isOpen, onClose])
 
   const handleDownloadInvoice = (invoice) => {
     // TODO: Implement actual invoice download
