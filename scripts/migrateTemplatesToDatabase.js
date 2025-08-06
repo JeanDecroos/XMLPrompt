@@ -3,7 +3,16 @@
  * Migrates existing template data from frontend to database
  */
 
-import { supabase } from '../backend/src/config/supabase.js'
+import { createClient } from '@supabase/supabase-js'
+import dotenv from 'dotenv'
+
+// Load environment variables
+dotenv.config({ path: '.env.local' })
+
+const supabaseUrl = process.env.VITE_SUPABASE_URL
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
 import { templates as frontendTemplates, templateCategories as frontendCategories, templateTags as frontendTags } from '../src/data/templates.js'
 
 async function migrateTemplatesToDatabase() {
