@@ -27,6 +27,7 @@ import { validationMiddleware } from './middleware/validation.js'
 import healthRoutes from './routes/health.js'
 import authRoutes from './routes/auth.js'
 import promptRoutes from './routes/prompts.js'
+import templatesRoutes from './routes/templates.js'
 import enrichmentRoutes from './routes/enrichment.js'
 import sharingRoutes from './routes/sharing.js'
 import analyticsRoutes from './routes/analytics.js'
@@ -167,6 +168,7 @@ apiRouter.use('/webhooks', webhookRoutes)
 
 // Protected routes (auth required)
 apiRouter.use('/prompts', authMiddleware, promptRoutes)
+apiRouter.use('/templates', templatesRoutes) // Public access with optional auth
 apiRouter.use('/enrichment', enrichmentRoutes) // Temporarily allow without auth for testing
 apiRouter.use('/sharing', sharingRoutes) // Some endpoints public, some protected
 apiRouter.use('/analytics', authMiddleware, analyticsRoutes)
