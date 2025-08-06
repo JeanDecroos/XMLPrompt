@@ -21,15 +21,7 @@ import {
   X
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { 
-  templates, 
-  templateCategories, 
-  templateTags, 
-  searchTemplates, 
-  getTemplatesByCategory, 
-  getTemplatesByTag,
-  getPopularTags 
-} from '../data/templates'
+import { supabase } from '../lib/supabase'
 
 const TemplateLibrary = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -39,60 +31,128 @@ const TemplateLibrary = () => {
   const [sortBy, setSortBy] = useState('popular') // 'popular', 'recent', 'rating'
   const [showTagSuggestions, setShowTagSuggestions] = useState(false)
   const [popularTags, setPopularTags] = useState([])
+  const [templates, setTemplates] = useState([])
+  const [categories, setCategories] = useState([])
+  const [tags, setTags] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  // Get popular tags on component mount
+  // Load data from database
   useEffect(() => {
-    setPopularTags(getPopularTags(15))
+    loadData()
   }, [])
 
-  // Enhanced filtering logic
-  const getFilteredTemplates = () => {
-    let filtered = templates
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = searchTemplates(searchTerm)
+  const loadData = async () => {
+    try {
+      setLoading(true)
+      
+      // Load categories
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('template_categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order')
+      
+      if (categoriesError) {
+        console.error('Error loading categories:', categoriesError)
+      } else {
+        setCategories(categoriesData)
+      }
+      
+      // Load tags
+      const { data: tagsData, error: tagsError } = await supabase
+        .from('template_tags')
+        .select('*')
+        .eq('is_active', true)
+        .order('usage_count', { ascending: false })
+        .limit(20)
+      
+      if (tagsError) {
+        console.error('Error loading tags:', tagsError)
+      } else {
+        setTags(tagsData)
+        setPopularTags(tagsData.slice(0, 15))
+      }
+      
+      // Load templates
+      await loadTemplates()
+      
+    } catch (error) {
+      console.error('Error loading data:', error)
+    } finally {
+      setLoading(false)
     }
-
-    // Filter by category
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(template => template.category === selectedCategory)
-    }
-
-    // Filter by selected tags
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter(template => 
-        selectedTags.every(selectedTag => 
-          template.tags.some(tag => tag.toLowerCase().includes(selectedTag.toLowerCase()))
-        )
-      )
-    }
-
-    return filtered
   }
 
-  const filteredTemplates = getFilteredTemplates()
+  const loadTemplates = async () => {
+    try {
+      let query = supabase
+        .from('templates')
+        .select(`
+          *,
+          category:template_categories(name, icon, color),
+          tags:template_tags_junction(
+            tag:template_tags(name, description, category)
+          )
+        `)
+        .eq('status', 'active')
 
-  // Get category data with counts
-  const categories = templateCategories.map(category => ({
-    ...category,
-    count: category.id === 'all' 
-      ? templates.length 
-      : templates.filter(t => t.category === category.id).length
-  }))
+      // Apply search
+      if (searchTerm) {
+        query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,preview_text.ilike.%${searchTerm}%`)
+      }
 
-  const sortedTemplates = [...filteredTemplates].sort((a, b) => {
-    switch (sortBy) {
-      case 'popular':
-        return b.usage - a.usage
-      case 'recent':
-        return new Date(b.lastUpdated) - new Date(a.lastUpdated)
-      case 'rating':
-        return b.rating - a.rating
-      default:
-        return 0
+      // Apply category filter
+      if (selectedCategory !== 'all') {
+        query = query.eq('category_id', selectedCategory)
+      }
+
+      // Apply sorting
+      switch (sortBy) {
+        case 'popular':
+          query = query.order('usage_count', { ascending: false })
+          break
+        case 'recent':
+          query = query.order('created_at', { ascending: false })
+          break
+        case 'rating':
+          query = query.order('rating_average', { ascending: false })
+          break
+        default:
+          query = query.order('usage_count', { ascending: false })
+      }
+
+      const { data: templatesData, error: templatesError } = await query
+
+      if (templatesError) {
+        console.error('Error loading templates:', templatesError)
+      } else {
+        // Filter by selected tags in application layer
+        let filteredTemplates = templatesData
+        if (selectedTags.length > 0) {
+          filteredTemplates = templatesData.filter(template => 
+            selectedTags.every(selectedTag => 
+              template.tags.some(tagRef => 
+                tagRef.tag.name.toLowerCase().includes(selectedTag.toLowerCase())
+              )
+            )
+          )
+        }
+        setTemplates(filteredTemplates)
+      }
+    } catch (error) {
+      console.error('Error loading templates:', error)
     }
-  })
+  }
+
+  // Reload templates when filters change
+  useEffect(() => {
+    if (!loading) {
+      loadTemplates()
+    }
+  }, [searchTerm, selectedCategory, sortBy, selectedTags])
+
+  // Templates are already sorted by the database query
+  const sortedTemplates = templates
 
   // Helper function to get icon component
   const getIconComponent = (iconName) => {
@@ -116,10 +176,10 @@ const TemplateLibrary = () => {
     
     // Auto-suggest tags based on search
     if (value.length > 2) {
-      const matchingTags = templateTags.filter(tag => 
-        tag.toLowerCase().includes(value.toLowerCase())
+      const matchingTags = tags.filter(tag => 
+        tag.name.toLowerCase().includes(value.toLowerCase())
       )
-      if (matchingTags.length > 0 && !selectedTags.includes(matchingTags[0])) {
+      if (matchingTags.length > 0 && !selectedTags.includes(matchingTags[0].name)) {
         // Could show tag suggestions here
       }
     }
@@ -131,14 +191,32 @@ const TemplateLibrary = () => {
     const templateData = {
       id: template.id,
       title: template.title,
-      template: template.template,
+      template: template.template_data,
       timestamp: new Date().toISOString()
     }
     
     localStorage.setItem('selectedTemplate', JSON.stringify(templateData))
     
+    // Track template usage
+    trackTemplateUsage(template.id, 'use')
+    
     // Navigate to main page
     window.location.href = '/'
+  }
+
+  // Track template usage
+  const trackTemplateUsage = async (templateId, actionType) => {
+    try {
+      await supabase
+        .from('template_usage')
+        .insert({
+          template_id: templateId,
+          action_type: actionType,
+          source_page: 'template-library'
+        })
+    } catch (error) {
+      console.error('Error tracking template usage:', error)
+    }
   }
 
   const TemplateCard = ({ template }) => (
@@ -160,12 +238,12 @@ const TemplateLibrary = () => {
 
         {/* Tags */}
         <div className="flex flex-wrap gap-1 mb-4">
-          {template.tags.slice(0, 4).map(tag => (
-            <span key={tag} className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-xs">
-              {tag}
+          {template.tags?.slice(0, 4).map(tagRef => (
+            <span key={tagRef.tag.id} className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-xs">
+              {tagRef.tag.name}
             </span>
           ))}
-          {template.tags.length > 4 && (
+          {template.tags?.length > 4 && (
             <span className="bg-gray-100 text-gray-500 px-2 py-1 rounded-md text-xs">
               +{template.tags.length - 4} more
             </span>
@@ -179,17 +257,17 @@ const TemplateLibrary = () => {
 
         {/* Stats */}
         <div className="flex items-center justify-between text-sm text-gray-500">
-          <div className="flex items-center space-x-4">
-            <span className="flex items-center">
-              <Clock className="w-4 h-4 mr-1" />
-              {template.usage} uses
-            </span>
-            <span className="flex items-center">
-              <Star className="w-4 h-4 mr-1 text-yellow-500" />
-              {template.rating}
-            </span>
-          </div>
-          <span className="text-xs">by {template.author}</span>
+                         <div className="flex items-center space-x-4">
+                 <span className="flex items-center">
+                   <Clock className="w-4 h-4 mr-1" />
+                   {template.usage_count} uses
+                 </span>
+                 <span className="flex items-center">
+                   <Star className="w-4 h-4 mr-1 text-yellow-500" />
+                   {template.rating_average}
+                 </span>
+               </div>
+               <span className="text-xs">by {template.author_name}</span>
         </div>
       </div>
 
@@ -377,18 +455,18 @@ const TemplateLibrary = () => {
           </div>
         </div>
 
-        {/* Results */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">
-              {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''} found
-            </h2>
-            <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-              <Plus className="w-4 h-4" />
-              <span>Create Template</span>
-            </button>
-          </div>
-        </div>
+                     {/* Results */}
+             <div className="mb-6">
+               <div className="flex items-center justify-between">
+                 <h2 className="text-xl font-semibold text-gray-900">
+                   {loading ? 'Loading...' : `${sortedTemplates.length} template${sortedTemplates.length !== 1 ? 's' : ''} found`}
+                 </h2>
+                 <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                   <Plus className="w-4 h-4" />
+                   <span>Create Template</span>
+                 </button>
+               </div>
+             </div>
 
         {/* Templates Grid */}
         {viewMode === 'grid' ? (
@@ -441,25 +519,37 @@ const TemplateLibrary = () => {
           </div>
         )}
 
-        {/* Empty State */}
-        {filteredTemplates.length === 0 && (
-          <div className="text-center py-12">
-            <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No templates found</h3>
-            <p className="text-gray-500 mb-4">
-              Try adjusting your search terms or category filters
-            </p>
-            <button
-              onClick={() => {
-                setSearchTerm('')
-                setSelectedCategory('all')
-              }}
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Clear filters
-            </button>
-          </div>
-        )}
+                       {/* Empty State */}
+               {!loading && sortedTemplates.length === 0 && (
+                 <div className="text-center py-12">
+                   <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                   <h3 className="text-lg font-medium text-gray-900 mb-2">No templates found</h3>
+                   <p className="text-gray-500 mb-4">
+                     Try adjusting your search terms or category filters
+                   </p>
+                   <button
+                     onClick={() => {
+                       setSearchTerm('')
+                       setSelectedCategory('all')
+                       setSelectedTags([])
+                     }}
+                     className="text-blue-600 hover:text-blue-700 font-medium"
+                   >
+                     Clear filters
+                   </button>
+                 </div>
+               )}
+
+               {/* Loading State */}
+               {loading && (
+                 <div className="text-center py-12">
+                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                   <h3 className="text-lg font-medium text-gray-900 mb-2">Loading templates...</h3>
+                   <p className="text-gray-500">
+                     Fetching the latest templates from the database
+                   </p>
+                 </div>
+               )}
       </div>
     </div>
   )
