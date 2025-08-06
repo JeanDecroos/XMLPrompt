@@ -7,7 +7,6 @@ import PricingSection from './components/PricingSection'
 import Footer from './components/Footer'
 import HelpPage from './components/HelpPage'
 import DocsPage from './components/DocsPage'
-import TemplateLibrary from './components/TemplateLibrary'
 import UserProfile from './components/UserProfile'
 import './index.css'
 
@@ -23,7 +22,6 @@ function App() {
               <Route path="/help" element={<HelpPage />} />
               <Route path="/docs" element={<DocsPage />} />
               <Route path="/pricing" element={<PricingSection />} />
-              <Route path="/templates" element={<TemplateLibrary />} />
               <Route path="/profile" element={<UserProfile />} />
             </Routes>
           </main>
