@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { 
   BookOpen, 
   Search, 
@@ -14,115 +14,72 @@ import {
   Plus,
   Tag,
   Users,
-  Zap
+  Zap,
+  BarChart3,
+  GraduationCap,
+  Palette,
+  X
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { 
+  templates, 
+  templateCategories, 
+  templateTags, 
+  searchTemplates, 
+  getTemplatesByCategory, 
+  getTemplatesByTag,
+  getPopularTags 
+} from '../data/templates'
 
 const TemplateLibrary = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [selectedTags, setSelectedTags] = useState([])
   const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
   const [sortBy, setSortBy] = useState('popular') // 'popular', 'recent', 'rating'
+  const [showTagSuggestions, setShowTagSuggestions] = useState(false)
+  const [popularTags, setPopularTags] = useState([])
 
-  // Mock template data for WIP
-  const mockTemplates = [
-    {
-      id: 'marketing-email',
-      title: 'Marketing Email Generator',
-      description: 'Create compelling marketing emails for product launches and campaigns',
-      category: 'marketing',
-      tags: ['email', 'marketing', 'sales'],
-      usage: 1247,
-      rating: 4.8,
-      tier: 'free',
-      author: 'PromptCraft Team',
-      lastUpdated: '2024-01-15',
-      preview: 'Generate a marketing email for {product} targeting {audience} with {goal}...'
-    },
-    {
-      id: 'code-documentation',
-      title: 'Code Documentation Assistant',
-      description: 'Generate comprehensive documentation for code functions and APIs',
-      category: 'development',
-      tags: ['code', 'documentation', 'api'],
-      usage: 892,
-      rating: 4.9,
-      tier: 'pro',
-      author: 'Dev Team',
-      lastUpdated: '2024-01-10',
-      preview: 'Document this {language} function with parameters, return values, and examples...'
-    },
-    {
-      id: 'content-strategy',
-      title: 'Content Strategy Planner',
-      description: 'Plan content strategy for social media campaigns and content marketing',
-      category: 'content',
-      tags: ['content', 'strategy', 'social-media'],
-      usage: 567,
-      rating: 4.7,
-      tier: 'free',
-      author: 'Content Team',
-      lastUpdated: '2024-01-12',
-      preview: 'Create a {duration} content calendar for {platform} focusing on {theme}...'
-    },
-    {
-      id: 'data-analysis',
-      title: 'Data Analysis Framework',
-      description: 'Comprehensive data analysis and insights generation',
-      category: 'analytics',
-      tags: ['data', 'analysis', 'insights'],
-      usage: 445,
-      rating: 4.6,
-      tier: 'pro',
-      author: 'Analytics Team',
-      lastUpdated: '2024-01-08',
-      preview: 'Analyze this dataset and provide insights on {metrics} with {visualization}...'
-    },
-    {
-      id: 'customer-support',
-      title: 'Customer Support Response',
-      description: 'Professional customer support response templates',
-      category: 'support',
-      tags: ['support', 'customer-service', 'communication'],
-      usage: 334,
-      rating: 4.5,
-      tier: 'free',
-      author: 'Support Team',
-      lastUpdated: '2024-01-14',
-      preview: 'Draft a professional response to customer {issue} with {tone} and {solution}...'
-    },
-    {
-      id: 'business-plan',
-      title: 'Business Plan Generator',
-      description: 'Create comprehensive business plans and strategies',
-      category: 'business',
-      tags: ['business', 'planning', 'strategy'],
-      usage: 223,
-      rating: 4.4,
-      tier: 'pro',
-      author: 'Business Team',
-      lastUpdated: '2024-01-06',
-      preview: 'Develop a business plan for {industry} startup with {funding} and {timeline}...'
+  // Get popular tags on component mount
+  useEffect(() => {
+    setPopularTags(getPopularTags(15))
+  }, [])
+
+  // Enhanced filtering logic
+  const getFilteredTemplates = () => {
+    let filtered = templates
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = searchTemplates(searchTerm)
     }
-  ]
 
-  const categories = [
-    { id: 'all', name: 'All Templates', icon: Grid, count: mockTemplates.length },
-    { id: 'marketing', name: 'Marketing', icon: TrendingUp, count: mockTemplates.filter(t => t.category === 'marketing').length },
-    { id: 'development', name: 'Development', icon: Zap, count: mockTemplates.filter(t => t.category === 'development').length },
-    { id: 'content', name: 'Content', icon: BookOpen, count: mockTemplates.filter(t => t.category === 'content').length },
-    { id: 'analytics', name: 'Analytics', icon: TrendingUp, count: mockTemplates.filter(t => t.category === 'analytics').length },
-    { id: 'support', name: 'Support', icon: Users, count: mockTemplates.filter(t => t.category === 'support').length },
-    { id: 'business', name: 'Business', icon: Crown, count: mockTemplates.filter(t => t.category === 'business').length }
-  ]
+    // Filter by category
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(template => template.category === selectedCategory)
+    }
 
-  const filteredTemplates = mockTemplates.filter(template => {
-    const matchesSearch = template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         template.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-    const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
+    // Filter by selected tags
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter(template => 
+        selectedTags.every(selectedTag => 
+          template.tags.some(tag => tag.toLowerCase().includes(selectedTag.toLowerCase()))
+        )
+      )
+    }
+
+    return filtered
+  }
+
+  const filteredTemplates = getFilteredTemplates()
+
+  // Get category data with counts
+  const categories = templateCategories.map(category => ({
+    ...category,
+    count: category.id === 'all' 
+      ? templates.length 
+      : templates.filter(t => t.category === category.id).length
+  }))
 
   const sortedTemplates = [...filteredTemplates].sort((a, b) => {
     switch (sortBy) {
@@ -136,6 +93,53 @@ const TemplateLibrary = () => {
         return 0
     }
   })
+
+  // Helper function to get icon component
+  const getIconComponent = (iconName) => {
+    const iconMap = {
+      'Grid': Grid,
+      'TrendingUp': TrendingUp,
+      'Zap': Zap,
+      'BookOpen': BookOpen,
+      'BarChart3': BarChart3,
+      'Users': Users,
+      'Crown': Crown,
+      'GraduationCap': GraduationCap,
+      'Palette': Palette
+    }
+    return iconMap[iconName] || Grid
+  }
+
+  // Enhanced search with tag suggestions
+  const handleSearchChange = (value) => {
+    setSearchTerm(value)
+    
+    // Auto-suggest tags based on search
+    if (value.length > 2) {
+      const matchingTags = templateTags.filter(tag => 
+        tag.toLowerCase().includes(value.toLowerCase())
+      )
+      if (matchingTags.length > 0 && !selectedTags.includes(matchingTags[0])) {
+        // Could show tag suggestions here
+      }
+    }
+  }
+
+  // Handle template usage
+  const handleUseTemplate = (template) => {
+    // Store template data in localStorage for the main prompt generator to pick up
+    const templateData = {
+      id: template.id,
+      title: template.title,
+      template: template.template,
+      timestamp: new Date().toISOString()
+    }
+    
+    localStorage.setItem('selectedTemplate', JSON.stringify(templateData))
+    
+    // Navigate to main page
+    window.location.href = '/'
+  }
 
   const TemplateCard = ({ template }) => (
     <div className="bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 overflow-hidden">
@@ -156,11 +160,16 @@ const TemplateLibrary = () => {
 
         {/* Tags */}
         <div className="flex flex-wrap gap-1 mb-4">
-          {template.tags.map(tag => (
+          {template.tags.slice(0, 4).map(tag => (
             <span key={tag} className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-xs">
               {tag}
             </span>
           ))}
+          {template.tags.length > 4 && (
+            <span className="bg-gray-100 text-gray-500 px-2 py-1 rounded-md text-xs">
+              +{template.tags.length - 4} more
+            </span>
+          )}
         </div>
 
         {/* Preview */}
@@ -186,7 +195,10 @@ const TemplateLibrary = () => {
 
       {/* Actions */}
       <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
-        <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+        <button 
+          onClick={() => handleUseTemplate(template)}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        >
           Use Template
         </button>
       </div>
@@ -228,9 +240,9 @@ const TemplateLibrary = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search templates..."
+                placeholder="Search templates, tags, or authors..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -273,21 +285,92 @@ const TemplateLibrary = () => {
           {/* Categories */}
           <div className="mt-6">
             <div className="flex flex-wrap gap-2">
-              {categories.map(category => (
+              {categories.map(category => {
+                const IconComponent = getIconComponent(category.icon)
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                      selectedCategory === category.id
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    <IconComponent className="w-4 h-4" />
+                    <span>{category.name}</span>
+                    <span className="bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full text-xs">
+                      {category.count}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Selected Tags */}
+          {selectedTags.length > 0 && (
+            <div className="mt-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <Tag className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">Selected Tags:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedTags.map(tag => (
+                  <div
+                    key={tag}
+                    className="flex items-center space-x-1 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
+                  >
+                    <span>{tag}</span>
+                    <button
+                      onClick={() => setSelectedTags(selectedTags.filter(t => t !== tag))}
+                      className="ml-1 hover:bg-blue-200 rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
                 <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                    selectedCategory === category.id
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  onClick={() => setSelectedTags([])}
+                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                >
+                  Clear all
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Popular Tags */}
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-2">
+                <TrendingUp className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">Popular Tags:</span>
+              </div>
+              <button
+                onClick={() => setShowTagSuggestions(!showTagSuggestions)}
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              >
+                {showTagSuggestions ? 'Hide' : 'Show all'}
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {popularTags.slice(0, showTagSuggestions ? popularTags.length : 8).map(({ tag, count }) => (
+                <button
+                  key={tag}
+                  onClick={() => {
+                    if (!selectedTags.includes(tag)) {
+                      setSelectedTags([...selectedTags, tag])
+                    }
+                  }}
+                  disabled={selectedTags.includes(tag)}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                    selectedTags.includes(tag)
+                      ? 'bg-blue-100 text-blue-700 cursor-not-allowed'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-700'
                   }`}
                 >
-                  <category.icon className="w-4 h-4" />
-                  <span>{category.name}</span>
-                  <span className="bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full text-xs">
-                    {category.count}
-                  </span>
+                  {tag} ({count})
                 </button>
               ))}
             </div>
