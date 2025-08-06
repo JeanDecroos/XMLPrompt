@@ -120,6 +120,14 @@ const Header = () => {
                           </p>
                         </div>
                         
+                        <Link 
+                          to="/profile"
+                          className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50/80 flex items-center"
+                        >
+                          <User className="w-4 h-4 mr-2" />
+                          Profile
+                        </Link>
+
                         <button 
                           onClick={() => setShowSubscriptionStatus(!showSubscriptionStatus)} 
                           className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50/80 flex items-center"
@@ -209,6 +217,13 @@ const Header = () => {
                         <p className="text-xs text-gray-500">{isPro ? 'Pro Member' : 'Free User'}</p>
                       </div>
                     </div>
+                    <Link 
+                      to="/profile"
+                      className="btn btn-secondary btn-sm flex items-center justify-center"
+                    >
+                      <User className="w-4 h-4 mr-1" />
+                      Profile
+                    </Link>
                     <button 
                       onClick={() => setShowSubscriptionStatus(!showSubscriptionStatus)}
                       className="btn btn-secondary btn-sm"
