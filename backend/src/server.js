@@ -35,6 +35,7 @@ import apiKeyRoutes from './routes/apiKeys.js'
 import adminRoutes from './routes/admin.js'
 import webhookRoutes from './routes/webhooks.js'
 import quotaRoutes from './routes/quota.js'
+import mfaRoutes from './routes/mfa.js'
 
 // Job queue imports
 import { initializeJobQueues, stopJobQueues } from './jobs/index.js'
@@ -174,6 +175,7 @@ apiRouter.use('/users', authMiddleware, userRoutes)
 apiRouter.use('/api-keys', authMiddleware, apiKeyRoutes)
 apiRouter.use('/quota', quotaRoutes) // Quota routes with auth middleware applied internally
 apiRouter.use('/admin', authMiddleware, adminRoutes)
+apiRouter.use('/mfa', mfaRoutes) // MFA routes with auth middleware applied internally
 
 // Mount API routes
 app.use(`/api/${config.app.apiVersion}`, apiRouter)
