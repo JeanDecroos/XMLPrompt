@@ -1,0 +1,378 @@
+import { supabase } from '../lib/supabase'
+
+class UserSettingsService {
+  /**
+   * Get all user settings for the current user
+   */
+  static async getUserSettings() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase.rpc('get_user_settings', {
+        user_id: user.id
+      })
+
+      if (error) {
+        console.error('Error fetching user settings:', error)
+        throw error
+      }
+
+      return data || {}
+    } catch (error) {
+      console.error('Failed to get user settings:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Update notification settings
+   */
+  static async updateNotificationSettings(settings) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase.rpc('update_user_notification_settings', {
+        user_id: user.id,
+        settings: settings
+      })
+
+      if (error) {
+        console.error('Error updating notification settings:', error)
+        throw error
+      }
+
+      return data
+    } catch (error) {
+      console.error('Failed to update notification settings:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Update privacy settings
+   */
+  static async updatePrivacySettings(settings) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase.rpc('update_user_privacy_settings', {
+        user_id: user.id,
+        settings: settings
+      })
+
+      if (error) {
+        console.error('Error updating privacy settings:', error)
+        throw error
+      }
+
+      return data
+    } catch (error) {
+      console.error('Failed to update privacy settings:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Update security settings (2FA)
+   */
+  static async updateSecuritySettings(settings) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          security_two_factor_enabled: settings.twoFactorEnabled,
+          security_two_factor_secret: settings.twoFactorSecret,
+          security_backup_codes: settings.backupCodes,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+        .select()
+
+      if (error) {
+        console.error('Error updating security settings:', error)
+        throw error
+      }
+
+      return data[0]
+    } catch (error) {
+      console.error('Failed to update security settings:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Update payment methods
+   */
+  static async updatePaymentMethods(paymentMethods, defaultMethodId = null) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          payment_methods: paymentMethods,
+          payment_default_method_id: defaultMethodId,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+        .select()
+
+      if (error) {
+        console.error('Error updating payment methods:', error)
+        throw error
+      }
+
+      return data[0]
+    } catch (error) {
+      console.error('Failed to update payment methods:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Update billing history
+   */
+  static async updateBillingHistory(billingHistory) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          billing_history: billingHistory,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+        .select()
+
+      if (error) {
+        console.error('Error updating billing history:', error)
+        throw error
+      }
+
+      return data[0]
+    } catch (error) {
+      console.error('Failed to update billing history:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Update general preferences
+   */
+  static async updatePreferences(preferences) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          preferences_timezone: preferences.timezone,
+          preferences_language: preferences.language,
+          preferences_theme: preferences.theme,
+          preferences_email_frequency: preferences.emailFrequency,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+        .select()
+
+      if (error) {
+        console.error('Error updating preferences:', error)
+        throw error
+      }
+
+      return data[0]
+    } catch (error) {
+      console.error('Failed to update preferences:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Update export preferences
+   */
+  static async updateExportPreferences(exportPreferences) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          export_preferences: exportPreferences,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+        .select()
+
+      if (error) {
+        console.error('Error updating export preferences:', error)
+        throw error
+      }
+
+      return data[0]
+    } catch (error) {
+      console.error('Failed to update export preferences:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Update login history
+   */
+  static async updateLoginHistory(loginEntry) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      // Get current login history
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('security_login_history, security_last_login_at')
+        .eq('id', user.id)
+        .single()
+
+      const currentHistory = currentProfile?.security_login_history || []
+      const updatedHistory = [loginEntry, ...currentHistory].slice(0, 50) // Keep last 50 entries
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          security_login_history: updatedHistory,
+          security_last_login_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+        .select()
+
+      if (error) {
+        console.error('Error updating login history:', error)
+        throw error
+      }
+
+      return data[0]
+    } catch (error) {
+      console.error('Failed to update login history:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Get login history
+   */
+  static async getLoginHistory() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('security_login_history, security_last_login_at')
+        .eq('id', user.id)
+        .single()
+
+      if (error) {
+        console.error('Error fetching login history:', error)
+        throw error
+      }
+
+      return {
+        loginHistory: data?.security_login_history || [],
+        lastLoginAt: data?.security_last_login_at
+      }
+    } catch (error) {
+      console.error('Failed to get login history:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Get payment methods
+   */
+  static async getPaymentMethods() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('payment_methods, payment_default_method_id')
+        .eq('id', user.id)
+        .single()
+
+      if (error) {
+        console.error('Error fetching payment methods:', error)
+        throw error
+      }
+
+      return {
+        paymentMethods: data?.payment_methods || [],
+        defaultMethodId: data?.payment_default_method_id
+      }
+    } catch (error) {
+      console.error('Failed to get payment methods:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Get billing history
+   */
+  static async getBillingHistory() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('billing_history')
+        .eq('id', user.id)
+        .single()
+
+      if (error) {
+        console.error('Error fetching billing history:', error)
+        throw error
+      }
+
+      return data?.billing_history || []
+    } catch (error) {
+      console.error('Failed to get billing history:', error)
+      throw error
+    }
+  }
+}
+
+export default UserSettingsService 

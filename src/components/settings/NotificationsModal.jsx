@@ -1,15 +1,43 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Bell, X, Check, AlertCircle } from 'lucide-react'
+import UserSettingsService from '../../services/userSettingsService'
 
 const NotificationsModal = ({ isOpen, onClose }) => {
   const [settings, setSettings] = useState({
-    emailNotifications: true,
+    email: true,
     promptReminders: true,
     usageAlerts: false,
     securityAlerts: true,
     marketingEmails: false,
     weeklyDigest: true
   })
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
+
+  // Load settings from database on mount
+  useEffect(() => {
+    if (isOpen) {
+      loadSettings()
+    }
+  }, [isOpen])
+
+  const loadSettings = async () => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const userSettings = await UserSettingsService.getUserSettings()
+      if (userSettings.notifications) {
+        setSettings(userSettings.notifications)
+      }
+    } catch (err) {
+      console.error('Failed to load notification settings:', err)
+      setError('Failed to load settings. Using defaults.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleToggle = (key) => {
     setSettings(prev => ({
@@ -18,10 +46,20 @@ const NotificationsModal = ({ isOpen, onClose }) => {
     }))
   }
 
-  const handleSave = () => {
-    // TODO: Save notification settings to backend
-    console.log('Saving notification settings:', settings)
-    onClose()
+  const handleSave = async () => {
+    setSaving(true)
+    setError(null)
+    
+    try {
+      await UserSettingsService.updateNotificationSettings(settings)
+      console.log('Notification settings saved successfully')
+      onClose()
+    } catch (err) {
+      console.error('Failed to save notification settings:', err)
+      setError('Failed to save settings. Please try again.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (!isOpen) return null
@@ -61,13 +99,14 @@ const NotificationsModal = ({ isOpen, onClose }) => {
                     <div className="text-sm text-gray-600">Receive notifications via email</div>
                   </div>
                   <button
-                    onClick={() => handleToggle('emailNotifications')}
+                    onClick={() => handleToggle('email')}
+                    disabled={loading}
                     className={`w-12 h-6 rounded-full transition-colors ${
-                      settings.emailNotifications ? 'bg-blue-600' : 'bg-gray-300'
-                    }`}
+                      settings.email ? 'bg-blue-600' : 'bg-gray-300'
+                    } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <div className={`w-4 h-4 bg-white rounded-full transition-transform ${
-                      settings.emailNotifications ? 'translate-x-6' : 'translate-x-1'
+                      settings.email ? 'translate-x-6' : 'translate-x-1'
                     }`} />
                   </button>
                 </div>
@@ -160,19 +199,38 @@ const NotificationsModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <AlertCircle className="w-4 h-4 text-red-600" />
+                <span className="text-sm text-red-700">{error}</span>
+              </div>
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex space-x-3 mt-8">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              disabled={saving}
+              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              disabled={saving || loading}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              Save Changes
+              {saving ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </button>
           </div>
         </div>
