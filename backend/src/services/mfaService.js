@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import QRCode from 'qrcode'
 import { supabase } from '../config/database.js'
 import logger from '../utils/logger.js'
 
@@ -20,6 +21,28 @@ class MFAService {
     const encodedAccount = encodeURIComponent(account)
     const url = `otpauth://totp/${encodedIssuer}:${encodedAccount}?secret=${secret}&issuer=${encodedIssuer}&algorithm=SHA1&digits=6&period=30`
     return url
+  }
+
+  /**
+   * Generate QR code data URL
+   */
+  static async generateQRCodeDataURL(issuer, account, secret) {
+    try {
+      const otpauthUrl = this.generateQRCodeURL(issuer, account, secret)
+      const qrCodeDataURL = await QRCode.toDataURL(otpauthUrl, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      })
+      return qrCodeDataURL
+    } catch (error) {
+      logger.error('Error generating QR code:', error)
+      // Fallback to placeholder
+      return `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==`
+    }
   }
 
   /**

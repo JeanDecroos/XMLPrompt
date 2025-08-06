@@ -22,8 +22,8 @@ router.post('/generate-secret',
       // Generate TOTP secret
       const secret = MFAService.generateTOTPSecret()
       
-      // Generate QR code URL
-      const qrCodeUrl = MFAService.generateQRCodeURL('Promptr', user.email, secret)
+      // Generate QR code data URL
+      const qrCodeDataURL = await MFAService.generateQRCodeDataURL('Promptr', user.email, secret)
       
       // Generate backup codes
       const backupCodes = MFAService.generateBackupCodes()
@@ -32,7 +32,7 @@ router.post('/generate-secret',
         success: true,
         data: {
           secret,
-          qrCodeUrl,
+          qrCodeUrl: qrCodeDataURL,
           backupCodes
         }
       })

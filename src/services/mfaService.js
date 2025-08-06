@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import UserSettingsService from './userSettingsService'
+import QRCode from 'qrcode'
 
 class MFAService {
   /**
@@ -17,11 +18,11 @@ class MFAService {
       
       // For now, generate a mock secret (in production, this would be from backend)
       const mockSecret = this.generateMockSecret()
-      const qrCodeUrl = this.generateQRCodeURL(email, mockSecret)
+      const qrCodeDataURL = await this.generateQRCodeDataURL(email, mockSecret)
       
       return {
         secret: mockSecret,
-        qrCodeUrl: qrCodeUrl,
+        qrCodeUrl: qrCodeDataURL,
         backupCodes: this.generateBackupCodes()
       }
     } catch (error) {
@@ -208,10 +209,29 @@ class MFAService {
     const issuer = 'Promptr'
     const account = email
     const url = `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(account)}?secret=${secret}&issuer=${encodeURIComponent(issuer)}&algorithm=SHA1&digits=6&period=30`
-    
-    // For development, return a placeholder QR code
-    // In production, this would generate an actual QR code image
-    return `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==`
+    return url
+  }
+
+  /**
+   * Generate QR code data URL
+   */
+  static async generateQRCodeDataURL(email, secret) {
+    try {
+      const otpauthUrl = this.generateQRCodeURL(email, secret)
+      const qrCodeDataURL = await QRCode.toDataURL(otpauthUrl, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      })
+      return qrCodeDataURL
+    } catch (error) {
+      console.error('Error generating QR code:', error)
+      // Fallback to placeholder
+      return `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==`
+    }
   }
 
   /**
@@ -238,6 +258,13 @@ class MFAService {
    */
   static validateBackupCode(code) {
     return /^[A-Z0-9]{8}$/.test(code)
+  }
+
+  /**
+   * Validate QR code data URL
+   */
+  static validateQRCodeDataURL(dataURL) {
+    return dataURL && dataURL.startsWith('data:image/png;base64,') && dataURL.length > 100
   }
 
   /**
@@ -274,6 +301,32 @@ Note: Each code can only be used once. Generate new codes if you run out.`
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+  }
+
+  /**
+   * Download QR code as PNG file
+   */
+  static async downloadQRCode(email, secret) {
+    try {
+      const qrCodeDataURL = await this.generateQRCodeDataURL(email, secret)
+      
+      // Convert data URL to blob
+      const response = await fetch(qrCodeDataURL)
+      const blob = await response.blob()
+      
+      // Create download link
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `promptr-qr-code-${email}.png`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error downloading QR code:', error)
+      throw error
+    }
   }
 
   /**

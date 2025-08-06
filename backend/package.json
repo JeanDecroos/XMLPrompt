@@ -1,7 +1,7 @@
 {
   "name": "promptr-backend",
   "version": "2.0.0",
-      "description": "Promptr Backend API - Production-ready backend for prompt engineering platform",
+  "description": "Promptr Backend API - Production-ready backend for prompt engineering platform",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
@@ -55,6 +55,7 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.7",
     "openai": "^4.24.1",
+    "qrcode": "^1.5.4",
     "sharp": "^0.33.1",
     "stripe": "^14.9.0",
     "swagger-jsdoc": "^6.2.8",
@@ -92,16 +93,16 @@
     "openai",
     "anthropic"
   ],
-      "author": "Promptr Team",
+  "author": "Promptr Team",
   "license": "MIT",
   "repository": {
     "type": "git",
-          "url": "https://github.com/your-org/promptr-backend.git"
+    "url": "https://github.com/your-org/promptr-backend.git"
   },
   "bugs": {
-          "url": "https://github.com/your-org/promptr-backend/issues"
+    "url": "https://github.com/your-org/promptr-backend/issues"
   },
-      "homepage": "https://promptr.com",
+  "homepage": "https://promptr.com",
   "lint-staged": {
     "*.js": [
       "eslint --fix",

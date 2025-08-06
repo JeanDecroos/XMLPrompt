@@ -15,6 +15,7 @@ const TwoFactorModal = ({ isOpen, onClose }) => {
   const [error, setError] = useState(null)
   const [showSecret, setShowSecret] = useState(false)
   const [showBackupCodes, setShowBackupCodes] = useState(false)
+  const [qrCodeLoading, setQrCodeLoading] = useState(false)
 
   // Load 2FA status on mount
   useEffect(() => {
@@ -45,13 +46,19 @@ const TwoFactorModal = ({ isOpen, onClose }) => {
     
     try {
       const { secret: newSecret, qrCodeUrl, backupCodes: newBackupCodes } = await MFAService.generateTOTPSecret(user.id, user.email)
+      
+      // Validate QR code generation
+      if (!MFAService.validateQRCodeDataURL(qrCodeUrl)) {
+        throw new Error('Failed to generate valid QR code')
+      }
+      
       setSecret(newSecret)
       setQrCode(qrCodeUrl)
       setBackupCodes(newBackupCodes)
       setStep('setup')
     } catch (err) {
       console.error('Failed to generate TOTP secret:', err)
-      setError('Failed to generate setup codes')
+      setError('Failed to generate setup codes. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -113,6 +120,20 @@ const TwoFactorModal = ({ isOpen, onClose }) => {
 
   const handleDownloadBackupCodes = () => {
     MFAService.downloadBackupCodes(backupCodes, user.email)
+  }
+
+  const handleDownloadQRCode = async () => {
+    setQrCodeLoading(true)
+    setError(null)
+    
+    try {
+      await MFAService.downloadQRCode(user.email, secret)
+    } catch (error) {
+      console.error('Failed to download QR code:', error)
+      setError('Failed to download QR code')
+    } finally {
+      setQrCodeLoading(false)
+    }
   }
 
   if (!isOpen) return null
@@ -193,6 +214,27 @@ const TwoFactorModal = ({ isOpen, onClose }) => {
       <div className="text-center">
         <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg">
           <img src={qrCode} alt="QR Code" className="w-48 h-48" />
+        </div>
+        
+        {/* Download QR Code Button */}
+        <div className="mt-3">
+          <button
+            onClick={handleDownloadQRCode}
+            disabled={qrCodeLoading}
+            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 mx-auto"
+          >
+            {qrCodeLoading ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>Generating...</span>
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                <span>Download QR Code</span>
+              </>
+            )}
+          </button>
         </div>
         
         {/* Secret Key */}
