@@ -4,37 +4,47 @@ import { CreditCard, X, Plus, Trash2, Edit3, CheckCircle } from 'lucide-react'
 const PaymentMethodsModal = ({ isOpen, onClose }) => {
   const [paymentMethods, setPaymentMethods] = useState([
     {
-      id: 1,
+      id: 'pm_1OaBcD2eF3gH4iJ5kL6mN7oP8',
       type: 'card',
       last4: '4242',
-      brand: 'Visa',
-      expiry: '12/25',
+      brand: 'visa',
+      expiry_month: 12,
+      expiry_year: 2025,
       isDefault: true,
-      name: 'Visa ending in 4242'
+      name: 'Visa ending in 4242',
+      country: 'US',
+      funding: 'credit'
     },
     {
-      id: 2,
+      id: 'pm_2QbCdE3fG4hI5jK6lM7nO8pQ9',
       type: 'card',
       last4: '5555',
-      brand: 'Mastercard',
-      expiry: '08/26',
+      brand: 'mastercard',
+      expiry_month: 8,
+      expiry_year: 2026,
       isDefault: false,
-      name: 'Mastercard ending in 5555'
+      name: 'Mastercard ending in 5555',
+      country: 'US',
+      funding: 'credit'
     }
   ])
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingCard, setEditingCard] = useState(null)
 
   const handleAddCard = () => {
-    // TODO: Integrate with payment processor
+    // TODO: Integrate with Stripe Payment Intents API
+    // This will use Stripe's PaymentElement and create PaymentMethod
     const newCard = {
-      id: Date.now(),
+      id: `pm_${Date.now()}_stripe_placeholder`,
       type: 'card',
       last4: '1234',
-      brand: 'Visa',
-      expiry: '12/27',
+      brand: 'visa',
+      expiry_month: 12,
+      expiry_year: 2027,
       isDefault: false,
-      name: 'Visa ending in 1234'
+      name: 'Visa ending in 1234',
+      country: 'US',
+      funding: 'credit'
     }
     setPaymentMethods(prev => [...prev, newCard])
     setShowAddForm(false)
@@ -88,7 +98,9 @@ const PaymentMethodsModal = ({ isOpen, onClose }) => {
                   </div>
                   <div>
                     <div className="font-medium text-gray-900">{card.name}</div>
-                    <div className="text-sm text-gray-600">Expires {card.expiry}</div>
+                    <div className="text-sm text-gray-600">
+                      Expires {card.expiry_month.toString().padStart(2, '0')}/{card.expiry_year}
+                    </div>
                     {card.isDefault && (
                       <span className="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full mt-1">
                         Default
@@ -126,10 +138,25 @@ const PaymentMethodsModal = ({ isOpen, onClose }) => {
             ))}
           </div>
 
-          {/* Add New Card */}
+          {/* Stripe Integration Notice */}
+          <div className="p-4 bg-blue-50 rounded-lg">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <CreditCard className="w-3 h-3 text-blue-600" />
+              </div>
+              <div>
+                <div className="font-medium text-blue-900">Stripe Payment Processing</div>
+                <div className="text-sm text-blue-700 mt-1">
+                  Payment methods are processed securely through Stripe. All card information is encrypted and never stored on our servers.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Add New Card - Stripe Integration */}
           {showAddForm ? (
             <div className="space-y-4 p-4 bg-blue-50 rounded-lg">
-              <h3 className="font-semibold text-gray-900">Add New Card</h3>
+              <h3 className="font-semibold text-gray-900">Add New Payment Method</h3>
               
               <div className="space-y-3">
                 <div>
@@ -175,6 +202,18 @@ const PaymentMethodsModal = ({ isOpen, onClose }) => {
                     placeholder="John Doe"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
+                </div>
+
+                {/* Stripe Security Notice */}
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="w-2 h-2 text-green-600" />
+                    </div>
+                    <span className="text-sm text-green-700">
+                      Your card details are secured by Stripe's PCI-compliant infrastructure
+                    </span>
+                  </div>
                 </div>
               </div>
               

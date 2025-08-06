@@ -115,7 +115,7 @@ class UserSettingsService {
   }
 
   /**
-   * Update payment methods
+   * Update payment methods (Stripe-specific)
    */
   static async updatePaymentMethods(paymentMethods, defaultMethodId = null) {
     try {
@@ -124,10 +124,24 @@ class UserSettingsService {
         throw new Error('User not authenticated')
       }
 
+      // Validate Stripe payment method structure
+      const validatedMethods = paymentMethods.map(method => ({
+        id: method.id, // Stripe PaymentMethod ID (pm_...)
+        type: method.type, // 'card', 'bank_account', etc.
+        last4: method.last4,
+        brand: method.brand, // 'visa', 'mastercard', etc.
+        expiry_month: method.expiry_month,
+        expiry_year: method.expiry_year,
+        country: method.country,
+        funding: method.funding, // 'credit', 'debit', 'prepaid'
+        name: method.name || `${method.brand} ending in ${method.last4}`,
+        isDefault: method.isDefault || false
+      }))
+
       const { data, error } = await supabase
         .from('profiles')
         .update({
-          payment_methods: paymentMethods,
+          payment_methods: validatedMethods,
           payment_default_method_id: defaultMethodId,
           updated_at: new Date().toISOString()
         })

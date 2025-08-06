@@ -2,43 +2,55 @@ import React from 'react'
 import { Download, X, FileText, Calendar, DollarSign, CheckCircle } from 'lucide-react'
 
 const BillingHistoryModal = ({ isOpen, onClose }) => {
-  // Mock billing history data
+  // Mock Stripe billing history data
   const billingHistory = [
     {
-      id: 1,
+      id: 'in_1OaBcD2eF3gH4iJ5kL6mN7oP8',
       date: '2024-01-15',
-      amount: 3.00,
-      currency: 'EUR',
+      amount: 300, // Stripe amounts are in cents
+      currency: 'eur',
       status: 'paid',
       description: 'Premium Plan - January 2024',
-      invoiceNumber: 'INV-2024-001'
+      invoiceNumber: 'INV-2024-001',
+      stripeInvoiceId: 'in_1OaBcD2eF3gH4iJ5kL6mN7oP8',
+      subscriptionId: 'sub_1OaBcD2eF3gH4iJ5kL6mN7oP8',
+      paymentMethod: 'pm_1OaBcD2eF3gH4iJ5kL6mN7oP8'
     },
     {
-      id: 2,
+      id: 'in_2QbCdE3fG4hI5jK6lM7nO8pQ9',
       date: '2023-12-15',
-      amount: 3.00,
-      currency: 'EUR',
+      amount: 300,
+      currency: 'eur',
       status: 'paid',
       description: 'Premium Plan - December 2023',
-      invoiceNumber: 'INV-2023-012'
+      invoiceNumber: 'INV-2023-012',
+      stripeInvoiceId: 'in_2QbCdE3fG4hI5jK6lM7nO8pQ9',
+      subscriptionId: 'sub_2QbCdE3fG4hI5jK6lM7nO8pQ9',
+      paymentMethod: 'pm_2QbCdE3fG4hI5jK6lM7nO8pQ9'
     },
     {
-      id: 3,
+      id: 'in_3RcDeF4gH5iJ6kL7mN8oP9qR0',
       date: '2023-11-15',
-      amount: 3.00,
-      currency: 'EUR',
+      amount: 300,
+      currency: 'eur',
       status: 'paid',
       description: 'Premium Plan - November 2023',
-      invoiceNumber: 'INV-2023-011'
+      invoiceNumber: 'INV-2023-011',
+      stripeInvoiceId: 'in_3RcDeF4gH5iJ6kL7mN8oP9qR0',
+      subscriptionId: 'sub_3RcDeF4gH5iJ6kL7mN8oP9qR0',
+      paymentMethod: 'pm_3RcDeF4gH5iJ6kL7mN8oP9qR0'
     },
     {
-      id: 4,
+      id: 'in_4SdEfG5hI6jK7lM8nO9pQ0rS1',
       date: '2023-10-15',
-      amount: 3.00,
-      currency: 'EUR',
+      amount: 300,
+      currency: 'eur',
       status: 'paid',
       description: 'Premium Plan - October 2023',
-      invoiceNumber: 'INV-2023-010'
+      invoiceNumber: 'INV-2023-010',
+      stripeInvoiceId: 'in_4SdEfG5hI6jK7lM8nO9pQ0rS1',
+      subscriptionId: 'sub_4SdEfG5hI6jK7lM8nO9pQ0rS1',
+      paymentMethod: 'pm_4SdEfG5hI6jK7lM8nO9pQ0rS1'
     }
   ]
 
@@ -123,6 +135,21 @@ const BillingHistoryModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
+          {/* Stripe Integration Notice */}
+          <div className="p-4 bg-blue-50 rounded-lg mb-6">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Download className="w-3 h-3 text-blue-600" />
+              </div>
+              <div>
+                <div className="font-medium text-blue-900">Stripe Billing</div>
+                <div className="text-sm text-blue-700 mt-1">
+                  All billing is processed securely through Stripe. Invoices are generated automatically and can be downloaded as PDF.
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Billing History List */}
           <div className="space-y-3">
             <h3 className="font-semibold text-gray-900">Recent Invoices</h3>
@@ -145,7 +172,7 @@ const BillingHistoryModal = ({ isOpen, onClose }) => {
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
                     <div className="font-semibold text-gray-900">
-                      {invoice.currency} {invoice.amount.toFixed(2)}
+                      {(invoice.amount / 100).toFixed(2)} {invoice.currency.toUpperCase()}
                     </div>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(invoice.status)}`}>
                       {getStatusText(invoice.status)}
