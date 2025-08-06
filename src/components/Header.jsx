@@ -59,6 +59,12 @@ const Header = () => {
             {/* Simplified Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-2">
               <div className="flex items-center space-x-1">
+                {/* Templates */}
+                <Link to="/templates" className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50 flex items-center space-x-1">
+                  <BookOpen className="w-4 h-4" />
+                  <span>Templates</span>
+                </Link>
+
                 {/* Help */}
                 <Link to="/help" className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50">
                   Help
@@ -181,6 +187,9 @@ const Header = () => {
           {isMenuOpen && (
             <div className="md:hidden border-t border-white/20 py-4 space-y-3">
               <div className="space-y-2">
+                <Link to="/templates" className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-all duration-200 font-medium">
+                  📚 Templates
+                </Link>
                 <Link to="/docs" className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-all duration-200 font-medium">
                   📖 Documentation
                 </Link>
