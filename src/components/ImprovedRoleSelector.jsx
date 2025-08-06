@@ -209,7 +209,9 @@ const ImprovedRoleSelector = ({
         {viewMode === 'goals' && !selectedGoal && (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <Sparkles className="w-12 h-12 text-blue-500 mx-auto mb-3" />
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-promptr-900 rounded-2xl mb-3 mx-auto shadow-sm">
+                <img src="/logos/PromptrLogo.png" alt="Promptr Logo" className="w-8 h-8" />
+              </div>
               <h4 className="text-lg font-medium text-gray-900 mb-2">What's your goal?</h4>
               <p className="text-gray-600">Choose what you want to accomplish to see relevant roles</p>
             </div>

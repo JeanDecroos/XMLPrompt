@@ -45,8 +45,8 @@ const Header = () => {
             <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-4 group transition-all duration-200">
               <div className="relative">
-                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-sm group-hover:shadow-md transition-all duration-200">
-                  <Wand2 className="w-6 h-6 text-white" />
+                <div className="flex items-center justify-center w-12 h-12 bg-promptr-900 rounded-2xl shadow-sm group-hover:shadow-md transition-all duration-200">
+                  <img src="/logos/PromptrLogo.png" alt="Promptr Logo" className="w-6 h-6" />
                 </div>
               </div>
               <div>

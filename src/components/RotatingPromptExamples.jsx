@@ -315,8 +315,8 @@ const RotatingPromptExamples = () => {
             </p>
           </div>
           <div>
-            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <Sparkles className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-promptr-900 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <img src="/logos/PromptrLogo.png" alt="Promptr Logo" className="w-6 h-6" />
             </div>
             <h4 className="font-bold text-gray-900 mb-2">Optimized Results</h4>
             <p className="text-sm text-gray-600 leading-relaxed">

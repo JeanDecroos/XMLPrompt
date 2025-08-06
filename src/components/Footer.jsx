@@ -9,8 +9,8 @@ const Footer = () => {
           {/* Simplified Brand Section */}
           <div className="md:col-span-1">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-purple-700 rounded-xl">
-                <Wand2 className="w-5 h-5 text-white" />
+              <div className="flex items-center justify-center w-10 h-10 bg-promptr-900 rounded-xl">
+                <img src="/logos/PromptrLogo.png" alt="Promptr Logo" className="w-5 h-5" />
               </div>
               <h3 className="text-lg font-bold text-gradient">Promptr</h3>
             </div>

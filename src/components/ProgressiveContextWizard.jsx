@@ -474,7 +474,9 @@ const ProgressiveContextWizard = ({
                   <Check className="w-3 h-3 text-white" />
                 </div>
                 <ChevronRight className="w-4 h-4 text-gray-400 mr-2" />
-                <Sparkles className="w-12 h-12 text-blue-500" />
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-promptr-900 rounded-2xl shadow-sm">
+                  <img src="/logos/PromptrLogo.png" alt="Promptr Logo" className="w-8 h-8" />
+                </div>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-1">Perfect! Let's add some details</h3>
               <p className="text-gray-600 text-sm">These optional details will make your prompt even better</p>
