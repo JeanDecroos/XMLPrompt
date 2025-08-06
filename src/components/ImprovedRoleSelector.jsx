@@ -1,7 +1,22 @@
 import React, { useState, useEffect } from 'react'
-import { Search, User, ChevronRight, Check, Sparkles, Target, ArrowLeft, Grid, List } from 'lucide-react'
+import { Search, User, ChevronRight, Check, Sparkles, Target, ArrowLeft, Grid, List, Info } from 'lucide-react'
 import { roles, getRolesByCategory } from '../data/roles'
 import { userGoals, getRolesForGoal, getGoalById } from '../data/userGoals'
+
+// Tooltip component for enhanced UX
+const Tooltip = ({ children, content, visible }) => (
+  <div className="relative">
+    {children}
+    {visible && (
+      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50">
+        <div className="bg-gray-900 text-white text-xs rounded-lg py-2 px-3 max-w-xs text-center shadow-xl border border-gray-700">
+          {content}
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+        </div>
+      </div>
+    )}
+  </div>
+)
 
 const ImprovedRoleSelector = ({ 
   selectedRole, 
@@ -15,6 +30,7 @@ const ImprovedRoleSelector = ({
   const [viewMode, setViewMode] = useState('goals') // 'goals', 'categories', 'search'
   const [selectedGoal, setSelectedGoal] = useState(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [hoveredTooltip, setHoveredTooltip] = useState(null)
 
   // Filter roles based on search and category
   const filteredRoles = React.useMemo(() => {
@@ -73,9 +89,23 @@ const ImprovedRoleSelector = ({
     }, 200)
   }
 
-  // Handle role selection
+  // Handle role selection with enhanced animation
   const handleRoleSelect = (role) => {
-    onRoleChange(role.name)
+    setIsTransitioning(true)
+    
+    // Add role selection animation
+    const selectedCard = document.querySelector(`[data-role-id="${role.id}"]`)
+    if (selectedCard) {
+      selectedCard.classList.add('role-selected')
+      setTimeout(() => {
+        selectedCard.classList.remove('role-selected')
+      }, 600)
+    }
+    
+    setTimeout(() => {
+      onRoleChange(role.name)
+      setIsTransitioning(false)
+    }, 300) // Slightly longer delay to show the bounce animation
   }
 
   // Go back to goals view
@@ -143,31 +173,21 @@ const ImprovedRoleSelector = ({
           </div>
         </div>
         
-        {/* View Mode Toggle */}
-        <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
+        {/* Show Popular Goals Button - Header Position */}
+        {(viewMode === 'search' || viewMode === 'categories') && (
           <button
-            onClick={() => setViewMode('goals')}
-            className={`flex items-center space-x-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              viewMode === 'goals' 
-                ? 'bg-white text-gray-900 shadow-sm' 
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
+            onClick={() => {
+              setSearchTerm('')
+              setViewMode('goals')
+              setSelectedCategory('all')
+            }}
+            className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200 bg-blue-50/50"
           >
-            <Target className="w-4 h-4" />
-            <span>Goals</span>
+            <Sparkles className="w-4 h-4" />
+            <span>Show Popular Goals</span>
           </button>
-          <button
-            onClick={() => setViewMode('categories')}
-            className={`flex items-center space-x-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              viewMode === 'categories' 
-                ? 'bg-white text-gray-900 shadow-sm' 
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            <Grid className="w-4 h-4" />
-            <span>All</span>
-          </button>
-        </div>
+        )}
+
       </div>
 
       {/* Search Bar */}
@@ -187,46 +207,117 @@ const ImprovedRoleSelector = ({
         
         {/* Goals View */}
         {viewMode === 'goals' && !selectedGoal && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="text-center mb-6">
               <Sparkles className="w-12 h-12 text-blue-500 mx-auto mb-3" />
               <h4 className="text-lg font-medium text-gray-900 mb-2">What's your goal?</h4>
               <p className="text-gray-600">Choose what you want to accomplish to see relevant roles</p>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {userGoals.map((goal) => (
-                <button
-                  key={goal.id}
-                  onClick={() => handleGoalSelect(goal.id)}
-                  className="goal-card-improved group"
-                >
-                  <div className="flex flex-col items-center space-y-3 p-4">
-                    <div className={`w-12 h-12 rounded-xl ${goal.color} flex items-center justify-center text-white text-xl shadow-lg group-hover:scale-110 transition-transform`}>
-                      {goal.icon}
+            {/* Popular Goals First - Progressive Disclosure */}
+            <div className="space-y-4">
+              <div>
+                <h5 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                  <Target className="w-4 h-4 mr-2 text-blue-500" />
+                  Popular Goals
+                </h5>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {userGoals.slice(0, 4).map((goal, index) => (
+                    <Tooltip
+                      key={goal.id}
+                      content={`Perfect for: ${goal.examples?.join(', ') || 'General professional tasks'}`}
+                      visible={hoveredTooltip === `goal-${goal.id}`}
+                    >
+                      <button
+                        onClick={() => handleGoalSelect(goal.id)}
+                        onMouseEnter={() => setHoveredTooltip(`goal-${goal.id}`)}
+                        onMouseLeave={() => setHoveredTooltip(null)}
+                        className="w-full goal-card-improved group relative overflow-hidden"
+                        style={{ 
+                          animationDelay: `${index * 100}ms`,
+                          animation: 'fadeInUp 0.6s ease-out forwards'
+                        }}
+                      >
+                        {/* Hover glow effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                        
+                        <div className="relative flex flex-col items-center space-y-3 p-4">
+                          <div className={`w-12 h-12 rounded-xl ${goal.color} flex items-center justify-center text-white text-xl shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300 group-hover:animate-pulse`}>
+                            {goal.icon}
+                          </div>
+                          <div className="text-center">
+                            <div className="flex items-center justify-center space-x-1">
+                              <h5 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
+                                {goal.title}
+                              </h5>
+                              <Info className="w-3 h-3 text-gray-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all duration-200" />
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1 line-clamp-2 group-hover:text-gray-600 transition-colors duration-200">
+                              {goal.description}
+                            </p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-200" />
+                        </div>
+                      </button>
+                    </Tooltip>
+                  ))}
+                </div>
+              </div>
+              
+              {/* More Goals - Progressive Disclosure */}
+              {userGoals.length > 4 && (
+                <div className="pt-4 border-t border-gray-100">
+                  <details className="group">
+                    <summary className="flex items-center justify-center cursor-pointer text-sm text-blue-600 hover:text-blue-700 font-medium py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors list-none">
+                      <span>More goals</span>
+                      <ChevronRight className="w-4 h-4 ml-2 group-open:rotate-90 transition-transform" />
+                    </summary>
+                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {userGoals.slice(4).map((goal, index) => (
+                        <Tooltip
+                          key={goal.id}
+                          content={`Perfect for: ${goal.examples?.join(', ') || 'General professional tasks'}`}
+                          visible={hoveredTooltip === `goal-extended-${goal.id}`}
+                        >
+                          <button
+                            onClick={() => handleGoalSelect(goal.id)}
+                            onMouseEnter={() => setHoveredTooltip(`goal-extended-${goal.id}`)}
+                            onMouseLeave={() => setHoveredTooltip(null)}
+                            className="w-full goal-card-improved group relative overflow-hidden"
+                            style={{ 
+                              animationDelay: `${(index + 4) * 100}ms`,
+                              animation: 'fadeInUp 0.6s ease-out forwards'
+                            }}
+                          >
+                            {/* Hover glow effect */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                            
+                            <div className="relative flex flex-col items-center space-y-3 p-4">
+                              <div className={`w-12 h-12 rounded-xl ${goal.color} flex items-center justify-center text-white text-xl shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300 group-hover:animate-pulse`}>
+                                {goal.icon}
+                              </div>
+                              <div className="text-center">
+                                <div className="flex items-center justify-center space-x-1">
+                                  <h5 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
+                                    {goal.title}
+                                  </h5>
+                                  <Info className="w-3 h-3 text-gray-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all duration-200" />
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1 line-clamp-2 group-hover:text-gray-600 transition-colors duration-200">
+                                  {goal.description}
+                                </p>
+                              </div>
+                              <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-200" />
+                            </div>
+                          </button>
+                        </Tooltip>
+                      ))}
                     </div>
-                    <div className="text-center">
-                      <h5 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
-                        {goal.title}
-                      </h5>
-                      <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                        {goal.description}
-                      </p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                  </div>
-                </button>
-              ))}
+                  </details>
+                </div>
+              )}
             </div>
-            
-            <div className="text-center pt-4 border-t border-gray-100">
-              <button
-                onClick={handleShowAllRoles}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-              >
-                View all roles instead →
-              </button>
-            </div>
+
           </div>
         )}
 
@@ -269,6 +360,16 @@ const ImprovedRoleSelector = ({
         {/* Categories/All Roles View */}
         {(viewMode === 'categories' || viewMode === 'search') && (
           <div className="space-y-6">
+            {/* Search Results Count */}
+            {viewMode === 'search' && searchTerm && (
+              <div className="flex items-center space-x-2 mb-4">
+                <Target className="w-4 h-4 text-blue-500" />
+                <span className="text-sm text-gray-600">
+                  Showing {filteredRoles.length} role{filteredRoles.length !== 1 ? 's' : ''} for "{searchTerm}"
+                </span>
+              </div>
+            )}
+
             {/* Category Filter */}
             {viewMode === 'categories' && (
               <div className="flex flex-wrap gap-2">
@@ -354,6 +455,7 @@ const RoleCard = ({ role, isSelected, onSelect, showDescription = true }) => {
   return (
     <button
       onClick={onSelect}
+      data-role-id={role.id}
       className={`role-card-improved w-full text-left transition-all duration-200 ${
         isSelected ? 'selected' : ''
       }`}

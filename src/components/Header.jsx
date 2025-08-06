@@ -37,89 +37,55 @@ const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 glass-effect border-b border-white/20 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
             
             {/* Enhanced Logo & Brand */}
             <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-3 hover-lift py-3">
+            <Link to="/" className="flex items-center space-x-4 group transition-all duration-200">
               <div className="relative">
-                <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-purple-700 rounded-xl shadow-lg hover:shadow-glow transition-all duration-300">
-                  <Wand2 className="w-5 h-5 text-white" />
+                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-sm group-hover:shadow-md transition-all duration-200">
+                  <Wand2 className="w-6 h-6 text-white" />
                 </div>
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gradient">PromptCraft AI</h1>
-                  <p className="text-xs text-gray-500 hidden sm:block">Professional AI Prompts</p>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">PromptCraft</h1>
+                <p className="text-sm text-gray-500 font-medium hidden sm:block">AI Prompt Builder</p>
               </div>
             </Link>
             </div>
 
-            {/* Enhanced Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-1">
-              <div className="flex items-center space-x-4">
-                {/* Quick Help */}
-                <div className="relative">
-                  <button
-                    onClick={() => setShowQuickHelp(!showQuickHelp)}
-                    className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-lg hover:bg-white/60"
-                  >
-                    <HelpCircle className="w-4 h-4 mr-1" />
-                    Help
-                  </button>
-                  
-                  {showQuickHelp && (
-                    <div className="absolute top-full right-0 mt-2 w-80 bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl border border-gray-200/60 py-2 z-50">
-                      <div className="px-3 py-2 border-b border-gray-100/60">
-                        <p className="text-sm font-semibold text-gray-900">Quick Help</p>
-                      </div>
-                      {quickHelpItems.map((item, index) => (
-                        <button
-                          key={index}
-                          className="w-full text-left px-3 py-3 text-sm text-gray-700 hover:bg-gray-50/80 flex items-center border-b border-gray-50 last:border-b-0"
-                        >
-                          <span className="mr-3 text-lg">{item.icon}</span>
-                          <div>
-                            <div className="font-medium">{item.title}</div>
-                            <div className="text-xs text-gray-500">{item.description}</div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+            {/* Simplified Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-2">
+              <div className="flex items-center space-x-1">
+                {/* Help */}
+                <Link to="/help" className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50">
+                  Help
+                </Link>
 
                 {/* Documentation */}
-                <Link to="/docs" className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-lg hover:bg-white/60">
-                  <BookOpen className="w-4 h-4 mr-1" />
+                <Link to="/docs" className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50">
                   Docs
                 </Link>
 
                 {/* Pricing */}
-                <Link to="/pricing" className="px-3 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-lg hover:bg-white/60">
+                <Link to="/pricing" className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50">
                   Pricing
                 </Link>
               </div>
             </nav>
 
-            {/* Enhanced User Actions */}
-            <div className="flex items-center space-x-3">
-              {/* Progress Indicator for Authenticated Users */}
-              {isAuthEnabled && isAuthenticated && (
-                <div className="hidden sm:flex items-center space-x-2 px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full border border-blue-200/60">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-blue-700 font-medium">Active Session</span>
-                </div>
-              )}
+            {/* User Actions */}
+            <div className="flex items-center space-x-4">
 
               {isAuthEnabled && isAuthenticated ? (
                 <>
                   {/* Pro Badge */}
                   {isPro && (
-                    <div className="hidden sm:flex items-center space-x-2 px-3 py-1 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full border border-purple-200/60">
+                    <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-full border border-purple-200">
                       <Crown className="w-4 h-4 text-purple-600" />
-                      <span className="text-sm text-purple-700 font-semibold">Pro</span>
+                      <span className="text-sm text-purple-700 font-medium">Pro</span>
                     </div>
                   )}
 
@@ -187,16 +153,15 @@ const Header = () => {
                 <div className="hidden md:flex items-center space-x-3">
                   <button 
                     onClick={() => openAuthModal('signin')} 
-                    className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-lg hover:bg-white/60"
+                    className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50"
                   >
                     Sign In
                   </button>
                   <button 
                     onClick={() => openAuthModal('signup')} 
-                    className="btn btn-premium btn-md flex items-center"
+                    className="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-sm hover:shadow-md"
                   >
-                    <Sparkles className="w-4 h-4 mr-1" />
-                    Get Started Free
+                    Get Started
                   </button>
                 </div>
               )}

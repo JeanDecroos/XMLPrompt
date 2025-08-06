@@ -13,14 +13,14 @@ const PricingSection = () => {
       'AI-powered prompt enhancement',
       'Advanced optimization suggestions',
       'Priority model recommendations',
-      'Prompt history & template library',
-      'Performance analytics',
-      'Priority support'
+      'Prompt history & saving',
+      'Enhanced usage limits',
+      'Premium AI models'
     ]
   }
 
   return (
-    <section id="pricing" className="py-16 bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/20">
+    <section id="pricing" className="py-16 bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">
@@ -33,9 +33,9 @@ const PricingSection = () => {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto pt-12" style={{overflow: 'visible'}}>
           {/* Free Plan */}
-          <div className="card-secondary p-8 relative">
+          <div className="card-secondary p-8 relative h-full flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-2xl font-bold text-gray-900">Free Plan</h3>
@@ -58,6 +58,9 @@ const PricingSection = () => {
               ))}
             </div>
 
+            {/* Spacer to match Premium Plan height */}
+            <div className="flex-grow"></div>
+            
             <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-6">
               <div className="flex items-center justify-center space-x-2">
                 <Check className="w-4 h-4 text-green-600" />
@@ -67,12 +70,12 @@ const PricingSection = () => {
           </div>
 
           {/* Premium Plan */}
-          <div className="card-premium p-8 pt-12 relative transform scale-105 overflow-visible">
+          <div className="card-premium p-8 pt-12 relative h-full flex flex-col overflow-visible" style={{contain: 'none'}}>
             {/* Popular Badge - floating on top of card */}
-            <div className="absolute left-1/2 -top-6 -translate-x-1/2 z-10">
+            <div className="absolute left-1/2 -top-3 -translate-x-1/2 z-10">
               <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center space-x-1 shadow-lg">
                 <Sparkles className="w-4 h-4" />
-                <span>Save 34% – Limited-time launch pricing</span>
+                <span>Save 70% – Limited-time launch pricing</span>
               </div>
             </div>
 
@@ -86,8 +89,8 @@ const PricingSection = () => {
               </div>
               <div className="text-right">
                 <div className="flex items-baseline space-x-1">
-                  <span className="text-lg text-gray-500 line-through">$29</span>
-                  <div className="text-3xl font-bold text-gray-900">$19</div>
+                  <span className="text-lg text-gray-500 line-through">10 EUR</span>
+                  <div className="text-3xl font-bold text-gray-900">3 EUR</div>
                 </div>
                 <div className="text-sm text-gray-500">/ month</div>
               </div>

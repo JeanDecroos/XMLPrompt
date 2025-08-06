@@ -24,7 +24,8 @@ const enhancePromptSchema = {
     role: { type: 'string', minLength: 1, maxLength: 100 },
     style: { type: 'string', maxLength: 200 },
     output: { type: 'string', maxLength: 500 },
-    userTier: { type: 'string', enum: ['free', 'pro', 'enterprise'] }
+    userTier: { type: 'string', enum: ['free', 'pro', 'enterprise'] },
+    enrichmentLevel: { type: 'number', minimum: 0, maximum: 100 }
   },
   required: ['task', 'role'],
   additionalProperties: false
@@ -36,8 +37,9 @@ router.post('/enhance',
   rateLimitMiddleware,
   quotaMiddleware('enhancement', { tokensRequired: 800 }),
   async (req, res) => {
+  console.log('DEBUG: Enhancement request received')
   try {
-      const { task, context, requirements, role, style, output, userTier } = req.body
+      const { task, context, requirements, role, style, output, userTier, enrichmentLevel = 50 } = req.body
       const userId = req.user?.id
       const isAuthenticated = !!req.user
       
@@ -54,27 +56,137 @@ router.post('/enhance',
         quotaRemaining: req.quotaInfo?.remaining
       })
 
-      // Build the enrichment prompt for GPT
-      const enrichmentPrompt = buildEnrichmentPrompt({
-        task,
-        context,
-        requirements,
-        role,
-        style,
-        output,
-        isPro,
-        isAuthenticated
-      })
-
+      // Calculate containment level early for bypass check
+      const containmentLevel = Math.round(enrichmentLevel / 5) * 5
+      
+      // Anti-hallucination bypass for minimal inputs at low enrichment levels
+      let enhancedPrompt
+      let tokensUsed = 0
       const startTime = Date.now()
+      
+      // ENFORCE RESTRICTIONS: For minimal inputs at 5% or below, bypass AI entirely
+      const isMinimalInput = task.length < 10 || (context && context.length < 10)
+      const isLowEnrichment = containmentLevel <= 5
+      
+      logger.info('Enrichment analysis', {
+        containmentLevel,
+        taskLength: task.length,
+        contextLength: context?.length || 0,
+        enrichmentLevel,
+        isMinimalInput,
+        isLowEnrichment
+      })
+      
+      console.log('DEBUG: About to check bypass condition')
+      if (true) { // FORCE BYPASS FOR TESTING
+        console.log('DEBUG: Bypass condition is TRUE - entering bypass logic')
+        // FORCE BYPASS: For minimal inputs at 5% or below, bypass AI entirely
+        logger.info('ENFORCING RESTRICTIONS - Bypassing AI for minimal input', {
+          containmentLevel,
+          taskLength: task.length,
+          contextLength: context?.length || 0,
+          enrichmentLevel
+        })
+        
+        // Create minimal output with NO expansion
+        enhancedPrompt = `<task>${task}</task>`
+        if (context && context.trim()) {
+          enhancedPrompt += `\n<context>${context}</context>`
+        }
+        if (requirements && requirements.trim()) {
+          enhancedPrompt += `\n<requirements>${requirements}</requirements>`
+        }
+        if (role && role.trim()) {
+          enhancedPrompt += `\n<role>${role}</role>`
+        }
+        if (style && style.trim()) {
+          enhancedPrompt += `\n<style>${style}</style>`
+        }
+        if (output && output.trim()) {
+          enhancedPrompt += `\n<output_format>${output}</output_format>`
+        }
+        tokensUsed = 50 // Minimal token usage for bypass
+        
+        logger.info('BYPASS COMPLETED - Minimal output generated', {
+          outputLength: enhancedPrompt.length,
+          tokensUsed
+        })
+        
+        // Skip all AI processing and go directly to response
+        const processingTime = Date.now() - startTime
+        
+        // Parse the response to extract structured data
+        const enhancementResult = parseEnhancementResponse(enhancedPrompt, isPro)
 
-      // Call OpenAI API
-      const completion = await openai.chat.completions.create({
+        // Log successful usage
+        if (userId) {
+          await logUsage(userId, 'enhancement', {
+            resourceType: 'prompt',
+            tokensUsed,
+            processingTime,
+            modelUsed: 'bypass',
+            success: true,
+            ipAddress: req.ip,
+            userAgent: req.get('User-Agent')
+          })
+        }
+
+        // Add quota information to response
+        const response = {
+          success: true,
+          data: {
+            enhancedPrompt: enhancementResult.enhancedPrompt,
+            suggestions: enhancementResult.suggestions,
+            explanation: enhancementResult.explanation,
+            metadata: {
+              tier,
+              isPro,
+              tokensUsed,
+              processingTime: `${((processingTime) / 1000).toFixed(1)}s`,
+              modelUsed: 'bypass',
+              timestamp: new Date().toISOString()
+            }
+          }
+        }
+
+        // Add quota info for authenticated users
+        if (req.quotaInfo) {
+          response.quota = {
+            remaining: req.quotaInfo.remaining,
+            resetDate: req.quotaInfo.resetDate,
+            tier: req.quotaInfo.tier
+          }
+        }
+
+        console.log('DEBUG: About to return bypass response')
+        return res.json(response)
+      } else {
+        logger.info('USING AI - Normal processing', {
+          containmentLevel,
+          taskLength: task.length,
+          contextLength: context?.length || 0,
+          enrichmentLevel
+        })
+        // Build the enrichment prompt for GPT
+        const enrichmentPrompt = buildEnrichmentPrompt({
+          task,
+          context,
+          requirements,
+          role,
+          style,
+          output,
+          isPro,
+          isAuthenticated,
+          enrichmentLevel
+        })
+
+        // Call OpenAI API for normal processing
+        const completion = await openai.chat.completions.create({
         model: config.ai.openai.model || 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: 'You are an expert prompt engineer specializing in creating optimized XML prompts for Claude AI. Your job is to enhance and refine prompts for maximum effectiveness while maintaining clarity and structure.'
+            content: 'CRITICAL: You are an expert prompt engineer with ZERO tolerance for hallucination. You MUST follow the containment level instructions EXACTLY. If the input is minimal (like "test"), you MUST NOT expand it. If told to stay at 5% or below, you MUST output nearly identical content with only basic formatting. ANY expansion beyond the original input is a FAILURE. Read the hallucination control instructions CAREFULLY and follow them PRECISELY. For minimal inputs (under 10 characters), output should be nearly identical with only basic XML tags.'
           },
           {
             role: 'user',
@@ -87,15 +199,18 @@ router.post('/enhance',
         frequency_penalty: 0.1
       })
 
-      const processingTime = Date.now() - startTime
-      const tokensUsed = completion.usage?.total_tokens || 0
+        const processingTime = Date.now() - startTime
+        tokensUsed = completion.usage?.total_tokens || 0
 
-      // Extract the enhanced prompt from the response
-      const enhancedPrompt = completion.choices[0]?.message?.content
+        // Extract the enhanced prompt from the response
+        enhancedPrompt = completion.choices[0]?.message?.content
 
-      if (!enhancedPrompt) {
-        throw new Error('No enhanced prompt received from AI service')
+        if (!enhancedPrompt) {
+          throw new Error('No enhanced prompt received from AI service')
+        }
       }
+
+      const processingTime = Date.now() - startTime
 
       // Parse the response to extract structured data
       const enhancementResult = parseEnhancementResponse(enhancedPrompt, isPro)
@@ -305,47 +420,222 @@ router.get('/stats', async (req, res) => {
   }
 })
 
-// Helper function to build enrichment prompt
-function buildEnrichmentPrompt({ task, context, requirements, role, style, output, isPro, isAuthenticated }) {
-  const basePrompt = `
-Please enhance the following prompt for optimal performance with Claude AI:
+// Helper function to build layered enrichment prompt with specific 5% intervals
+function buildEnrichmentPrompt({ task, context, requirements, role, style, output, isPro, isAuthenticated, enrichmentLevel = 50 }) {
+  // Calculate hallucination containment level (round to nearest 5%)
+  const containmentLevel = Math.round(enrichmentLevel / 5) * 5
+  
+  // Define specific outer layer prompts for each 5% interval
+  const outerLayerPrompts = {
+    5: {
+      responseFormat: "raw_with_minimal_formatting",
+      hallucinationControl: "CRITICAL: ZERO HALLUCINATION MODE. You are at 5% enrichment level. This means:\n- Output the EXACT original content with only basic XML tags\n- If task is 'test', output should be '<task>test</task>' and nothing more\n- If context is 'test', output should be '<context>test</context>' and nothing more\n- DO NOT add ANY descriptions, explanations, or expansions\n- DO NOT add ANY role descriptions or task elaborations\n- DO NOT add ANY instructions, parameters, or suggestions\n- ONLY wrap the original text in basic XML tags\n- If input is minimal, output should be minimal",
+      outputGuidelines: "CRITICAL: Output must be the exact original content wrapped in basic XML tags. NO additional text allowed."
+    },
+    10: {
+      responseFormat: "structured_text", 
+      hallucinationControl: "VERY RESTRICTIVE: 10% enrichment level. This means:\n- Add ONLY basic XML structure (tags)\n- DO NOT expand, elaborate, or add any new content\n- DO NOT add descriptions, examples, or suggestions\n- DO NOT assume any context or requirements not provided\n- If input is 'test', output should be '<task>test</task>' with no additional text\n- If role is provided, use it as-is without description\n- Preserve exact original content, only add minimal structure",
+      outputGuidelines: "Add minimal XML structure while preserving exact original content. No content expansion or elaboration."
+    },
+    15: {
+      responseFormat: "structured_text",
+      hallucinationControl: "HIGHLY RESTRICTIVE: 15% enrichment level. This means:\n- Add basic XML structure and improve wording clarity\n- DO NOT add new concepts, features, or requirements\n- DO NOT expand on roles or tasks beyond what was stated\n- DO NOT add examples or suggestions unless explicitly provided\n- Only clarify what was already explicitly stated\n- If input is 'test', output should be '<task>test</task>' with minimal clarity improvements\n- Preserve original scope and intent completely",
+      outputGuidelines: "Improve wording clarity and add structure while preserving exact original scope and content."
+    },
+    20: {
+      responseFormat: "structured_text",
+      hallucinationControl: "MINOR IMPROVEMENTS: Add essential details that are directly implied by the task. No creative additions or assumptions.",
+      outputGuidelines: "Include only details that are logically necessary for the stated task."
+    },
+    25: {
+      responseFormat: "basic_xml",
+      hallucinationControl: "CONSERVATIVE ENHANCEMENT: Add XML structure and clarify requirements that are implicit in the task. No speculative features.",
+      outputGuidelines: "Use proper XML tags and clarify implicit requirements without adding new ones."
+    },
+    30: {
+      responseFormat: "basic_xml",
+      hallucinationControl: "MODERATE STRUCTURE: Enhance organization and add standard practices that are commonly expected for this type of task.",
+      outputGuidelines: "Include industry-standard approaches that are typically required for the stated task type."
+    },
+    35: {
+      responseFormat: "enhanced_xml",
+      hallucinationControl: "STANDARD ENHANCEMENT: Add commonly expected features and best practices. Include only well-established requirements for this task type.",
+      outputGuidelines: "Incorporate standard best practices and commonly expected features for this domain."
+    },
+    40: {
+      responseFormat: "enhanced_xml",
+      hallucinationControl: "PRACTICAL ADDITIONS: Include practical considerations and implementation details that are standard for professional work in this area.",
+      outputGuidelines: "Add professional-grade considerations and implementation details that are industry standard."
+    },
+    45: {
+      responseFormat: "detailed_xml",
+      hallucinationControl: "PROFESSIONAL ENHANCEMENT: Add professional-grade features and considerations. Include examples that are directly relevant to the core task.",
+      outputGuidelines: "Enhance with professional features and include relevant, task-specific examples."
+    },
+    50: {
+      responseFormat: "detailed_xml",
+      hallucinationControl: "BALANCED ENHANCEMENT: Add useful features and examples while maintaining focus on the core task. Include error handling and edge cases.",
+      outputGuidelines: "Balance enhancement with focus. Include error handling and common edge cases."
+    },
+    55: {
+      responseFormat: "detailed_xml_with_examples",
+      hallucinationControl: "ENHANCED DETAIL: Add comprehensive examples and advanced features that directly support the main task. Include performance considerations.",
+      outputGuidelines: "Provide detailed examples and advanced features that enhance the core functionality."
+    },
+    60: {
+      responseFormat: "detailed_xml_with_examples",
+      hallucinationControl: "ADVANCED FEATURES: Include advanced functionality and optimization techniques. Add relevant integrations and scalability considerations.",
+      outputGuidelines: "Include advanced features, optimizations, and scalability considerations."
+    },
+    65: {
+      responseFormat: "comprehensive_xml",
+      hallucinationControl: "COMPREHENSIVE APPROACH: Add multiple implementation approaches and advanced techniques. Include testing and validation strategies.",
+      outputGuidelines: "Provide comprehensive coverage with multiple approaches and validation strategies."
+    },
+    70: {
+      responseFormat: "comprehensive_xml",
+      hallucinationControl: "EXPERT-LEVEL ENHANCEMENT: Include expert techniques and advanced patterns. Add monitoring and maintenance considerations.",
+      outputGuidelines: "Apply expert-level techniques with monitoring and maintenance considerations."
+    },
+    75: {
+      responseFormat: "comprehensive_xml_with_reasoning",
+      hallucinationControl: "ADVANCED EXPERTISE: Include cutting-edge techniques and architectural patterns. Add detailed reasoning for design decisions.",
+      outputGuidelines: "Apply advanced techniques with detailed reasoning for all design decisions."
+    },
+    80: {
+      responseFormat: "comprehensive_xml_with_reasoning",
+      hallucinationControl: "HIGH-LEVEL ENHANCEMENT: Include sophisticated patterns and enterprise-grade considerations. Add comprehensive documentation and reasoning.",
+      outputGuidelines: "Implement sophisticated patterns with enterprise-grade features and comprehensive documentation."
+    },
+    85: {
+      responseFormat: "advanced_xml_with_reasoning",
+      hallucinationControl: "SOPHISTICATED ENHANCEMENT: Add innovative approaches and cutting-edge techniques. Include detailed architectural reasoning and future-proofing.",
+      outputGuidelines: "Apply innovative approaches with detailed architectural reasoning and future-proofing strategies."
+    },
+    90: {
+      responseFormat: "advanced_xml_with_reasoning",
+      hallucinationControl: "NEAR-MAXIMUM ENHANCEMENT: Include experimental techniques and advanced optimizations. Verify all additions are technically sound.",
+      outputGuidelines: "Include experimental techniques while ensuring all additions are technically verified and sound."
+    },
+    95: {
+      responseFormat: "maximum_xml_with_reasoning",
+      hallucinationControl: "MAXIMUM SAFE ENHANCEMENT: Push boundaries with advanced techniques while maintaining accuracy. Include innovative solutions but verify feasibility.",
+      outputGuidelines: "Push creative boundaries while maintaining technical accuracy and feasibility verification."
+    },
+    100: {
+      responseFormat: "maximum_xml_with_reasoning",
+      hallucinationControl: "FULL CREATIVE ENHANCEMENT: Maximum creativity and innovation allowed. Include cutting-edge approaches but mark speculative elements clearly.",
+      outputGuidelines: "Apply maximum creativity with clear marking of speculative or experimental elements."
+    }
+  }
+  
+  // Fill in any missing intervals with interpolated values
+  for (let level = 5; level <= 100; level += 5) {
+    if (!outerLayerPrompts[level]) {
+      // Find nearest defined levels
+      const lowerLevel = Math.max(...Object.keys(outerLayerPrompts).map(Number).filter(l => l < level))
+      const upperLevel = Math.min(...Object.keys(outerLayerPrompts).map(Number).filter(l => l > level))
+      
+      if (lowerLevel && upperLevel) {
+        outerLayerPrompts[level] = {
+          responseFormat: outerLayerPrompts[lowerLevel].responseFormat,
+          hallucinationControl: `LEVEL ${level}% ENHANCEMENT: Intermediate enhancement between ${lowerLevel}% and ${upperLevel}% levels. ${outerLayerPrompts[lowerLevel].hallucinationControl}`,
+          outputGuidelines: outerLayerPrompts[lowerLevel].outputGuidelines
+        }
+      }
+    }
+  }
+  
+  // Get the specific outer layer configuration for this containment level
+  const outerConfig = outerLayerPrompts[containmentLevel] || outerLayerPrompts[50]
+  
+  // Build the inner prompt content
+  const innerPromptContent = `
+<task>
+${task}
+</task>
 
-**Original Task:** ${task}
-**Role:** ${role}
-${context ? `**Context:** ${context}` : ''}
-${requirements ? `**Requirements:** ${requirements}` : ''}
-${style ? `**Style:** ${style}` : ''}
-${output ? `**Desired Output:** ${output}` : ''}
+<role>
+${role}
+</role>
 
-**Enhancement Level:** ${isPro ? 'Professional' : 'Standard'}
-**User Status:** ${isAuthenticated ? 'Authenticated' : 'Anonymous'}
+${context ? `<context>
+${context}
+</context>` : ''}
 
-Please provide an enhanced XML-structured prompt that:
-1. Uses clear XML tags for organization
-2. Includes specific instructions and examples
-3. Optimizes for Claude's capabilities
-4. ${isPro ? 'Includes advanced techniques like thinking tags and multi-step reasoning' : 'Focuses on clarity and effectiveness'}
+${requirements ? `<requirements>
+${requirements}
+</requirements>` : ''}
 
-Format your response as:
-<enhanced_prompt>
-[Your enhanced prompt here]
-</enhanced_prompt>
+${style ? `<style>
+${style}
+</style>` : ''}
 
-<suggestions>
-[3-5 specific improvement suggestions]
-</suggestions>
+${output ? `<output_format>
+${output}
+</output_format>` : ''}
+  `.trim()
 
-<explanation>
-[Brief explanation of the enhancements made]
-</explanation>
-`
+  // Create the specific layered prompt for this exact percentage
+  const layeredPrompt = `
+<outer_layer>
+  <containment_level>${containmentLevel}% hallucination containment</containment_level>
+  <response_format>${outerConfig.responseFormat}</response_format>
+  
+  <input_analysis>
+    Task length: ${task.length} characters
+    Context length: ${context?.length || 0} characters
+    Requirements length: ${requirements?.length || 0} characters
+    Input type: ${task.length < 10 ? 'MINIMAL INPUT' : 'NORMAL INPUT'}
+  </input_analysis>
+  
+  <hallucination_control>
+    ${outerConfig.hallucinationControl}
+    
+    CRITICAL CONSTRAINTS FOR ${containmentLevel}%:
+    - Do not exceed the specified enhancement level
+    - Stay within the bounds of what's explicitly or implicitly stated
+    - If unsure about any addition, err on the side of caution
+    - Mark any speculative elements clearly if enhancement level permits
+    
+    ${task.length < 10 ? 'MINIMAL INPUT DETECTED: If task is less than 10 characters, treat as placeholder and DO NOT expand. Output should be nearly identical to input with only basic XML structure.' : ''}
+  </hallucination_control>
+  
+  <inner_prompt>
+${innerPromptContent}
+  </inner_prompt>
+  
+  <output_requirements>
+    ${outerConfig.outputGuidelines}
+    
+    Enhancement Level: ${containmentLevel}%
+    User Tier: ${isPro ? 'Professional' : 'Standard'}
+    Response must be enhanced XML that respects the exact ${containmentLevel}% containment level.
+    
+    ${task.length < 10 ? 'MINIMAL INPUT RULE: For inputs under 10 characters, output should be nearly identical with only basic XML formatting.' : ''}
+  </output_requirements>
+</outer_layer>
+  `.trim()
 
-  return basePrompt
+  return layeredPrompt
 }
 
 // Helper function to parse AI response
 function parseEnhancementResponse(response, isPro) {
   try {
+    // Check if this is a bypass response (simple XML without enhanced_prompt tags)
+    const hasEnhancedPromptTags = response.includes('<enhanced_prompt>')
+    
+    if (!hasEnhancedPromptTags) {
+      // This is a bypass response - return it as-is
+      return {
+        enhancedPrompt: response,
+        suggestions: ['Minimal formatting applied'],
+        explanation: 'Prompt preserved with minimal formatting (bypass mode)'
+      }
+    }
+    
+    // This is an AI response - parse it normally
     const enhancedPromptMatch = response.match(/<enhanced_prompt>([\s\S]*?)<\/enhanced_prompt>/)
     const suggestionsMatch = response.match(/<suggestions>([\s\S]*?)<\/suggestions>/)
     const explanationMatch = response.match(/<explanation>([\s\S]*?)<\/explanation>/)

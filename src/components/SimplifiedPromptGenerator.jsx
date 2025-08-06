@@ -1,739 +1,363 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { Target, Wand2, Sparkles, Settings, FileText, Eye, Check, RefreshCw, ChevronRight } from 'lucide-react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { Target, Wand2, Sparkles, Settings, FileText, Eye, Check, RefreshCw, ChevronRight, AlertCircle, X } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { isAuthEnabled } from '../lib/supabase'
-import ModelSelector from './ModelSelector'
-import ImprovedRoleSelector from './ImprovedRoleSelector'
-import EnhancedPromptPreview from './EnhancedPromptPreview'
 import RotatingPromptExamples from './RotatingPromptExamples'
+import EnhancedPromptPreview from './EnhancedPromptPreview'
+import ModelSelector from './ModelSelector'
+import EnrichmentOptions from './EnrichmentOptions'
+import ImprovedRoleSelector from './ImprovedRoleSelector'
 import { promptEnrichmentService } from '../services/promptEnrichment'
 import { UniversalPromptGenerator } from '../utils/universalPromptGenerator'
 
-const DEFAULT_MODEL = 'gpt-4'
+const DEFAULT_MODEL = 'gpt-4o'
 
 const SimplifiedPromptGenerator = () => {
   const { user, session, isAuthenticated, isPro } = useAuth()
-  
-  // Form state
   const [formData, setFormData] = useState({
     role: '',
     task: '',
     context: '',
     requirements: '',
-    style: '',
-    output: ''
+    format: ''
   })
   
-  // UI state
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
-  const [showAdvanced, setShowAdvanced] = useState(false)
-  const [activeSection, setActiveSection] = useState(0)
-  const [showProgressBar, setShowProgressBar] = useState(false)
-  const [scrollOffset, setScrollOffset] = useState(0)
-  const [isScrolling, setIsScrolling] = useState(false)
-  const [error, setError] = useState(null)
-  
-  // Prompt state
+  const [enrichmentLevel, setEnrichmentLevel] = useState(3) // Default to Balanced
   const [rawPrompt, setRawPrompt] = useState('')
   const [enrichedPrompt, setEnrichedPrompt] = useState('')
   const [enrichmentResult, setEnrichmentResult] = useState(null)
-  const [isEnriching, setIsEnriching] = useState(false)
-  const [hasEnrichment, setHasEnrichment] = useState(false)
-  
-  // Refs for scrolling
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [activeSection, setActiveSection] = useState(1)
+  const [showProgressBar, setShowProgressBar] = useState(false)
+  const [isScrolling, setIsScrolling] = useState(false)
+  const [scrollOffset, setScrollOffset] = useState(0)
+  const [showAdvanced, setShowAdvanced] = useState(true)
+  const [errorNotification, setErrorNotification] = useState(null)
+  const [hasEnhancedCurrentInputs, setHasEnhancedCurrentInputs] = useState(false)
+
+  // Generate model recommendation based on user context
+  const getModelRecommendation = () => {
+    const role = formData.role?.toLowerCase() || ''
+    const task = formData.task?.toLowerCase() || ''
+    
+    // Simple recommendation logic based on role and task complexity
+    if (role.includes('developer') || role.includes('engineer') || task.includes('code') || task.includes('technical')) {
+      return {
+        primary: {
+          model: { name: "Claude-3.5-Sonnet" },
+          reasoning: "Excellent for technical tasks and code generation with strong reasoning capabilities",
+          confidence: 0.9
+        },
+        alternatives: [
+          {
+            model: { name: "GPT-4o" },
+            score: 0.85,
+            reasoning: "Great alternative for complex technical problem-solving"
+          }
+        ]
+      }
+    } else if (role.includes('writer') || role.includes('content') || role.includes('marketing') || task.includes('writing') || task.includes('content')) {
+      return {
+        primary: {
+          model: { name: "GPT-4o" },
+          reasoning: "Superior for creative writing, marketing content, and natural language generation",
+          confidence: 0.85
+        },
+        alternatives: [
+          {
+            model: { name: "Claude-3.5-Sonnet" },
+            score: 0.80,
+            reasoning: "Excellent alternative with thoughtful, nuanced writing style"
+          }
+        ]
+      }
+    } else if (role.includes('analyst') || role.includes('research') || task.includes('analysis') || task.includes('data')) {
+      return {
+        primary: {
+          model: { name: "Claude-3.5-Sonnet" },
+          reasoning: "Exceptional analytical thinking and structured reasoning for complex analysis",
+          confidence: 0.88
+        },
+        alternatives: [
+          {
+            model: { name: "GPT-4o" },
+            score: 0.82,
+            reasoning: "Strong analytical capabilities with broad knowledge base"
+          }
+        ]
+      }
+    } else {
+      // Default recommendation for general use
+      return {
+        primary: {
+          model: { name: "GPT-4o" },
+          reasoning: "Well-balanced model suitable for most general tasks and conversations",
+          confidence: 0.75
+        },
+        alternatives: [
+          {
+            model: { name: "Claude-3.5-Sonnet" },
+            score: 0.70,
+            reasoning: "Great for tasks requiring detailed reasoning and analysis"
+          }
+        ]
+      }
+    }
+  }
+
+  // Refs for sections
   const contextSectionRef = useRef(null)
   const configureSectionRef = useRef(null)
-  const resultSectionRef = useRef(null)
-  
-  // Generate raw prompt
-  useEffect(() => {
-    if (formData.role && formData.task) {
-      const result = UniversalPromptGenerator.generatePrompt(formData, selectedModel)
-      setRawPrompt(result.prompt)
-    } else {
-      setRawPrompt('')
-    }
-  }, [formData, selectedModel])
+  const debounceTimeoutRef = useRef(null)
   
   // Validation
   const validation = {
-    isValid: formData.role && formData.task.trim().length > 0,
+    isValid: formData.role && formData.task && selectedModel,
     errors: []
   }
-  
-  // Step completion logic
-  const stepCompletion = {
-    1: formData.role && formData.task.trim().length > 0,
-    2: validation.isValid && selectedModel,
-    3: validation.isValid && (rawPrompt || enrichedPrompt)
-  }
-  
-  // Scroll detection for active section
-  useEffect(() => {
-    let scrollTimeout
-    
-    const handleScroll = () => {
-      const sections = [
-        { ref: contextSectionRef, id: 1 },
-        { ref: configureSectionRef, id: 2 },
-        { ref: resultSectionRef, id: 3 }
-      ]
-      
-      const scrollPosition = window.scrollY + 200
-      let currentSection = 0
-      
-      // Track scroll offset and scrolling state
-      setScrollOffset(window.scrollY)
-      setIsScrolling(true)
-      
-      // Clear existing timeout
-      clearTimeout(scrollTimeout)
-      
-      // Set scrolling to false after scroll stops
-      scrollTimeout = setTimeout(() => {
-        setIsScrolling(false)
-      }, 150)
-      
-      // Check if we've reached the prompt builder section
-      if (contextSectionRef.current) {
-        const rect = contextSectionRef.current.getBoundingClientRect()
-        const absoluteTop = rect.top + window.scrollY
-        
-        if (scrollPosition >= absoluteTop - 100) {
-          setShowProgressBar(true)
-        } else {
-          setShowProgressBar(false)
-        }
+
+  // Debounced prompt generation function
+  const generateRawPrompt = useCallback(() => {
+    if (validation.isValid) {
+      try {
+        const result = UniversalPromptGenerator.generatePrompt(formData, selectedModel)
+        setRawPrompt(result.prompt)
+      } catch (error) {
+        console.error('Error generating prompt:', error)
+        setRawPrompt('')
       }
-      
-      // Determine active section
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const section = sections[i]
-        if (section.ref.current) {
-          const rect = section.ref.current.getBoundingClientRect()
-          const absoluteTop = rect.top + window.scrollY
-          
-          if (scrollPosition >= absoluteTop) {
-            currentSection = section.id
-            break
-          }
-        }
-      }
-      
-      setActiveSection(currentSection)
+    } else {
+      setRawPrompt('')
     }
+  }, [formData, selectedModel, validation.isValid])
+
+  // Update raw prompt when form data changes (debounced)
+  useEffect(() => {
+    // Clear existing timeout
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current)
+    }
+
+    // Set new timeout for debounced execution
+    debounceTimeoutRef.current = setTimeout(() => {
+      generateRawPrompt()
+    }, 300)
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current)
+      }
+    }
+  }, [generateRawPrompt])
+  
+  // Watch for form changes to re-enable enhance button
+  useEffect(() => {
+    setHasEnhancedCurrentInputs(false)
+  }, [formData.role, formData.task, formData.context, formData.requirements, formData.format, enrichmentLevel, selectedModel])
+
+
+
+
+  // Section detection with throttling
+  useEffect(() => {
+    let throttleTimeout = null
+    const sections = [
+      { ref: contextSectionRef, id: 1 },
+      { ref: configureSectionRef, id: 2 }
+    ]
     
-    window.addEventListener('scroll', handleScroll)
-    handleScroll() // Initial check
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Throttle updates to improve performance
+        if (throttleTimeout) return
+        
+        throttleTimeout = setTimeout(() => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const section = sections.find(s => s.ref.current === entry.target)
+              if (section) {
+                setActiveSection(section.id)
+              }
+            }
+          })
+          throttleTimeout = null
+        }, 100)
+      },
+      { threshold: 0.3, rootMargin: '-100px 0px -100px 0px' }
+    )
+
+    sections.forEach(section => {
+      if (section.ref.current) {
+        observer.observe(section.ref.current)
+      }
+    })
     
     return () => {
-      window.removeEventListener('scroll', handleScroll)
-      clearTimeout(scrollTimeout)
+      observer.disconnect()
+      if (throttleTimeout) {
+        clearTimeout(throttleTimeout)
+      }
     }
   }, [])
   
-  // Handle form changes
   const handleFormChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
   
-  // Handle model selection
-  const handleModelChange = (modelId) => {
-    setSelectedModel(modelId)
-  }
-  
-  // Handle enrichment
-  const handleEnrichment = async () => {
-    if (!validation.isValid || !rawPrompt) return
-    
-    setIsEnriching(true)
-    setError(null)
-    
-    try {
-      const userToken = session?.access_token
-      const result = await promptEnrichmentService.enrichPrompt(formData, userToken)
-      
-      if (result.success) {
-        setEnrichedPrompt(result.data.enrichedPrompt)
-        setEnrichmentResult(result.data)
-        setHasEnrichment(true)
-      } else {
-        setEnrichedPrompt(result.fallback?.enrichedPrompt || rawPrompt)
-        setEnrichmentResult(result.fallback)
-        setHasEnrichment(false)
-      }
-    } catch (error) {
-      console.error('Enhancement failed:', error)
-      setEnrichedPrompt(rawPrompt)
-      setHasEnrichment(false)
-    } finally {
-      setIsEnriching(false)
+  const handleWorkflowComplete = () => {
+    if (configureSectionRef.current) {
+      configureSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
-  }
-  
-  // Handle reset
-  const handleReset = () => {
-    setFormData({
-      role: '',
-      task: '',
-      context: '',
-      requirements: '',
-      style: '',
-      output: ''
-    })
-    setSelectedModel(DEFAULT_MODEL)
-    setRawPrompt('')
-    setEnrichedPrompt('')
-    setHasEnrichment(false)
-    setEnrichmentResult(null)
-    setError(null)
   }
 
-  // Scroll to section
-  const scrollToSection = (sectionNumber) => {
-    const refs = [contextSectionRef, configureSectionRef, resultSectionRef]
-    const targetRef = refs[sectionNumber - 1]
+  const generatePrompt = async () => {
+    if (!validation.isValid) return
+
+    setIsGenerating(true)
+    setErrorNotification(null) // Clear any existing errors
     
-    if (targetRef.current) {
-      targetRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start',
-        inline: 'nearest'
+    try {
+      // Prepare prompt data for the enrichment service
+      const promptData = {
+        ...formData,
+        enrichmentLevel: enrichmentLevel
+      }
+      
+      // Get user token if available
+      const userToken = session?.access_token || null
+      const userTier = isPro ? 'pro' : 'free'
+      
+      // Call the real enrichment API
+      console.log('Calling enrichment API with enhancement level:', enrichmentLevel)
+      const result = await promptEnrichmentService.enrichPrompt(
+        promptData,
+        userToken,
+        userTier
+      )
+      
+      if (result.success) {
+        setEnrichedPrompt(result.data.enhancedPrompt)
+        setEnrichmentResult(result.data)
+        setHasEnhancedCurrentInputs(true) // Mark that current inputs have been enhanced
+        
+        // Force scroll to ensure the result is visible
+        setTimeout(() => {
+          if (configureSectionRef.current) {
+            const rightPanel = configureSectionRef.current.querySelector('.bg-white.rounded-xl.shadow-md.border.border-gray-200.overflow-hidden')
+            if (rightPanel) {
+              rightPanel.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }
+          }
+        }, 100)
+      } else {
+        throw new Error(result.error || 'Enhancement failed')
+      }
+    } catch (error) {
+      console.error('Error enriching prompt:', error)
+      setEnrichedPrompt(rawPrompt)
+      setEnrichmentResult(null)
+      
+      // Show user-friendly error notification
+      setErrorNotification({
+        title: 'Enhancement Failed',
+        message: 'We encountered an issue while enhancing your prompt. The basic version is still available to copy.',
+        type: 'error'
       })
+      
+      // Auto-hide error after 8 seconds
+      setTimeout(() => setErrorNotification(null), 8000)
+    } finally {
+      setIsGenerating(false)
     }
   }
-  
+
+  const scrollToSection = (sectionId) => {
+    const refs = {
+      1: contextSectionRef,
+      2: configureSectionRef
+    }
+    
+    const ref = refs[sectionId]
+    if (ref?.current) {
+      ref.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
+  // Steps for progress indicator
   const steps = [
     {
       id: 1,
-      title: 'Define Your Context',
-      description: 'Choose your role and describe your task',
-      icon: Target,
-      completed: stepCompletion[1]
+      completed: formData.role && formData.task
     },
     {
       id: 2,
-      title: 'Configure & Enhance',
-      description: 'Select AI model and enhance your prompt',
-      icon: Wand2,
-      completed: stepCompletion[2]
-    },
-    {
-      id: 3,
-      title: 'Get Your Prompt',
-      description: 'Copy and use your optimized prompt',
-      icon: Sparkles,
-      completed: stepCompletion[3]
+      completed: selectedModel && (formData.role && formData.task)
     }
   ]
   
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Dynamic Flowing Background */}
-      <div className="fixed inset-0 z-0 overflow-hidden">
-        {/* Multi-layered gradient base with smooth transitions */}
-        <div className={`absolute inset-0 transition-all duration-[3000ms] ease-in-out ${
-          activeSection === 1 
-            ? 'bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-white' 
-            : activeSection === 2
-            ? 'bg-gradient-to-br from-purple-50/80 via-pink-50/60 to-white'
-            : 'bg-gradient-to-br from-emerald-50/80 via-green-50/60 to-white'
-        }`}></div>
-        
-        {/* Elegant floating elements */}
-        <div className="absolute inset-0">
-          {/* Soft gradient cloud 1 */}
-          <div 
-            className={`absolute w-[500px] h-[300px] transition-all duration-[6000ms] ease-out opacity-15 ${
-              activeSection === 1 
-                ? 'bg-gradient-to-br from-blue-200/20 via-blue-100/10 to-transparent' 
-                : activeSection === 2
-                ? 'bg-gradient-to-br from-purple-200/20 via-purple-100/10 to-transparent'
-                : 'bg-gradient-to-br from-emerald-200/20 via-emerald-100/10 to-transparent'
-            }`}
-            style={{
-              left: `${-100 + Math.sin(activeSection * 0.2) * 80}px`,
-              top: `${50 + Math.cos(activeSection * 0.15) * 60}px`,
-              transform: `rotate(${activeSection * 8}deg) scale(${Math.max(0.1, 0.8 + Math.sin(activeSection * 0.3) * 0.2)})`,
-              borderRadius: '60% 40% 70% 30%',
-              filter: 'blur(60px)'
-            }}
-          ></div>
-          
-          {/* Soft gradient cloud 2 */}
-          <div 
-            className={`absolute w-[400px] h-[400px] transition-all duration-[7000ms] ease-out opacity-12 ${
-              activeSection === 1 
-                ? 'bg-gradient-to-tl from-indigo-200/18 via-indigo-100/8 to-transparent' 
-                : activeSection === 2
-                ? 'bg-gradient-to-tl from-pink-200/18 via-pink-100/8 to-transparent'
-                : 'bg-gradient-to-tl from-teal-200/18 via-teal-100/8 to-transparent'
-            }`}
-            style={{
-              right: `${-80 + Math.cos(activeSection * 0.25) * 100}px`,
-              top: `${200 + Math.sin(activeSection * 0.18) * 80}px`,
-              transform: `rotate(${-activeSection * 12}deg) scale(${0.9 + Math.cos(activeSection * 0.4) * 0.2})`,
-              borderRadius: '45% 55% 35% 65%',
-              filter: 'blur(80px)'
-            }}
-          ></div>
-          
-          {/* Flowing ribbon element */}
-          <div 
-            className={`absolute w-[600px] h-[120px] transition-all duration-[8000ms] ease-out opacity-8 ${
-              activeSection === 1 
-                ? 'bg-gradient-to-r from-transparent via-blue-200/15 to-transparent' 
-                : activeSection === 2
-                ? 'bg-gradient-to-r from-transparent via-purple-200/15 to-transparent'
-                : 'bg-gradient-to-r from-transparent via-emerald-200/15 to-transparent'
-            }`}
-            style={{
-              left: `${100 + Math.sin(activeSection * 0.3) * 150}px`,
-              bottom: `${150 + Math.cos(activeSection * 0.2) * 100}px`,
-              transform: `rotate(${activeSection * 5 + Math.sin(activeSection * 0.5) * 15}deg) scaleY(${Math.max(0.1, 0.6 + Math.sin(activeSection * 0.4) * 0.3)})`,
-              borderRadius: '100px',
-              filter: 'blur(40px)'
-            }}
-          ></div>
-          
-          {/* Elegant ellipse */}
-          <div 
-            className={`absolute w-[350px] h-[200px] transition-all duration-[5500ms] ease-out opacity-10 ${
-              activeSection === 1 
-                ? 'bg-gradient-to-br from-cyan-200/12 via-blue-100/6 to-transparent' 
-                : activeSection === 2
-                ? 'bg-gradient-to-br from-violet-200/12 via-purple-100/6 to-transparent'
-                : 'bg-gradient-to-br from-green-200/12 via-emerald-100/6 to-transparent'
-            }`}
-            style={{
-              right: `${50 + Math.sin(activeSection * 0.35) * 120}px`,
-              bottom: `${80 + Math.cos(activeSection * 0.28) * 60}px`,
-              transform: `rotate(${activeSection * 20}deg) scale(${Math.max(0.1, 0.7 + Math.cos(activeSection * 0.6) * 0.3)})`,
-              borderRadius: '50%',
-              filter: 'blur(50px)'
-            }}
-          ></div>
-        </div>
-        
-        {/* Elegant floating dots */}
-        <div className="absolute inset-0">
-          {[...Array(12)].map((_, i) => (
-            <div
-              key={i}
-              className={`absolute rounded-full transition-all duration-[3000ms] ease-out ${
-                i % 4 === 0 ? 'w-1 h-1' : i % 4 === 1 ? 'w-1.5 h-1.5' : i % 4 === 2 ? 'w-2 h-2' : 'w-0.5 h-0.5'
-              } ${
-                activeSection === 1 
-                  ? 'bg-blue-300/25' 
-                  : activeSection === 2
-                  ? 'bg-purple-300/25'
-                  : 'bg-emerald-300/25'
-              }`}
-              style={{
-                left: `${15 + (i * 6)}%`,
-                top: `${20 + (i * 5.5)}%`,
-                transform: `translate(
-                  ${Math.sin(i * 0.8 + activeSection * 0.4) * 40}px, 
-                  ${Math.cos(i * 0.6 + activeSection * 0.3) * 30}px
-                ) scale(${Math.max(0.1, 0.5 + Math.sin(i * 0.5 + activeSection * 0.8) * 0.4)})`,
-                opacity: 0.3 + Math.sin(i * 0.7 + activeSection * 0.5) * 0.4,
-                filter: `blur(${0.5 + Math.sin(i * 0.3) * 1}px)`,
-                animationDelay: `${i * 200}ms`
-              }}
-            ></div>
-          ))}
-        </div>
-
-        {/* Groovy abstract figures - only move when scrolling */}
-        <div className="absolute inset-0">
-          {/* Groovy blob 1 - morphing abstract shape */}
-          <div 
-            className={`absolute w-32 h-40 transition-all duration-[2000ms] ease-out opacity-8 ${
-              activeSection === 1 
-                ? 'bg-gradient-to-br from-blue-300/12 to-indigo-200/8' 
-                : activeSection === 2
-                ? 'bg-gradient-to-br from-purple-300/12 to-pink-200/8'
-                : 'bg-gradient-to-br from-emerald-300/12 to-green-200/8'
-            }`}
-            style={{
-              left: `${15 + (isScrolling ? Math.sin(scrollOffset * 0.002) * 25 : 0)}%`,
-              top: `${25 + (isScrolling ? Math.cos(scrollOffset * 0.003) * 20 : 0)}%`,
-              transform: `rotate(${isScrolling ? scrollOffset * 0.1 + Math.sin(scrollOffset * 0.005) * 30 : 0}deg) 
-                         scale(${0.8 + (isScrolling ? Math.cos(scrollOffset * 0.004) * 0.3 : 0)})
-                         skew(${isScrolling ? Math.sin(scrollOffset * 0.006) * 15 : 0}deg, ${isScrolling ? Math.cos(scrollOffset * 0.004) * 10 : 0}deg)`,
-              borderRadius: `${Math.sin(scrollOffset * 0.008) * 30 + 70}% ${Math.cos(scrollOffset * 0.007) * 25 + 55}% ${Math.sin(scrollOffset * 0.009) * 35 + 45}% ${Math.cos(scrollOffset * 0.006) * 30 + 65}%`,
-              filter: `blur(${12 + (isScrolling ? Math.sin(scrollOffset * 0.005) * 8 : 0)}px)`,
-              clipPath: `polygon(
-                ${Math.sin(scrollOffset * 0.005) * 15 + 35}% ${Math.cos(scrollOffset * 0.004) * 12 + 15}%, 
-                ${Math.cos(scrollOffset * 0.006) * 20 + 75}% ${Math.sin(scrollOffset * 0.005) * 15 + 25}%, 
-                ${Math.sin(scrollOffset * 0.007) * 25 + 65}% ${Math.cos(scrollOffset * 0.006) * 20 + 80}%, 
-                ${Math.cos(scrollOffset * 0.004) * 30 + 30}% ${Math.sin(scrollOffset * 0.007) * 15 + 65}%,
-                ${Math.sin(scrollOffset * 0.006) * 12 + 18}% ${Math.cos(scrollOffset * 0.008) * 25 + 45}%
-              )`
-            }}
-          ></div>
-
-          {/* Groovy blob 2 - wavy abstract form */}
-          <div 
-            className={`absolute w-28 h-36 transition-all duration-[2000ms] ease-out opacity-7 ${
-              activeSection === 1 
-                ? 'bg-gradient-to-tl from-cyan-200/10 to-blue-300/6' 
-                : activeSection === 2
-                ? 'bg-gradient-to-tl from-violet-200/10 to-purple-300/6'
-                : 'bg-gradient-to-tl from-teal-200/10 to-emerald-300/6'
-            }`}
-            style={{
-              right: `${20 + (isScrolling ? Math.cos(scrollOffset * 0.003) * 30 : 0)}%`,
-              top: `${40 + (isScrolling ? Math.sin(scrollOffset * 0.004) * 25 : 0)}%`,
-              transform: `rotate(${isScrolling ? -scrollOffset * 0.15 + Math.cos(scrollOffset * 0.006) * 40 : 0}deg) 
-                         scale(${0.9 + (isScrolling ? Math.sin(scrollOffset * 0.005) * 0.4 : 0)})
-                         perspective(100px) rotateX(${isScrolling ? Math.sin(scrollOffset * 0.004) * 20 : 0}deg)`,
-              borderRadius: `${Math.cos(scrollOffset * 0.01) * 35 + 65}% ${Math.sin(scrollOffset * 0.009) * 30 + 50}% ${Math.cos(scrollOffset * 0.007) * 25 + 75}% ${Math.sin(scrollOffset * 0.008) * 40 + 40}%`,
-              filter: `blur(${15 + (isScrolling ? Math.sin(scrollOffset * 0.006) * 10 : 0)}px)`,
-              clipPath: `ellipse(${Math.sin(scrollOffset * 0.007) * 20 + 55}% ${Math.cos(scrollOffset * 0.008) * 25 + 75}% at ${Math.cos(scrollOffset * 0.004) * 15 + 55}% ${Math.sin(scrollOffset * 0.006) * 20 + 55}%)`
-            }}
-          ></div>
-
-          {/* Groovy blob 3 - twisted organic shape */}
-          <div 
-            className={`absolute w-24 h-32 transition-all duration-[2000ms] ease-out opacity-9 ${
-              activeSection === 1 
-                ? 'bg-gradient-to-r from-indigo-300/12 to-cyan-200/8' 
-                : activeSection === 2
-                ? 'bg-gradient-to-r from-pink-300/12 to-violet-200/8'
-                : 'bg-gradient-to-r from-green-300/12 to-teal-200/8'
-            }`}
-            style={{
-              left: `${60 + (isScrolling ? Math.sin(scrollOffset * 0.004) * 20 : 0)}%`,
-              bottom: `${30 + (isScrolling ? Math.cos(scrollOffset * 0.005) * 15 : 0)}%`,
-              transform: `rotate(${isScrolling ? scrollOffset * 0.2 + Math.sin(scrollOffset * 0.007) * 25 : 0}deg) 
-                         scale(${0.7 + (isScrolling ? Math.cos(scrollOffset * 0.006) * 0.5 : 0)})
-                         skew(${isScrolling ? Math.cos(scrollOffset * 0.007) * 20 : 0}deg, ${isScrolling ? Math.sin(scrollOffset * 0.008) * 15 : 0}deg)`,
-              borderRadius: `${Math.sin(scrollOffset * 0.012) * 45 + 55}% ${Math.cos(scrollOffset * 0.01) * 30 + 70}% ${Math.sin(scrollOffset * 0.009) * 35 + 45}% ${Math.cos(scrollOffset * 0.011) * 40 + 60}%`,
-              filter: `blur(${18 + (isScrolling ? Math.sin(scrollOffset * 0.005) * 12 : 0)}px) hue-rotate(${isScrolling ? scrollOffset * 0.5 : 0}deg)`
-            }}
-          ></div>
-
-          {/* Groovy blob 4 - flowing ribbon-like shape */}
-          <div 
-            className={`absolute w-20 h-44 transition-all duration-[2000ms] ease-out opacity-6 ${
-              activeSection === 1 
-                ? 'bg-gradient-to-bl from-blue-200/9 to-indigo-300/6' 
-                : activeSection === 2
-                ? 'bg-gradient-to-bl from-purple-200/9 to-pink-300/6'
-                : 'bg-gradient-to-bl from-emerald-200/9 to-green-300/6'
-            }`}
-            style={{
-              right: `${10 + (isScrolling ? Math.sin(scrollOffset * 0.005) * 35 : 0)}%`,
-              bottom: `${20 + (isScrolling ? Math.cos(scrollOffset * 0.004) * 20 : 0)}%`,
-              transform: `rotate(${isScrolling ? -scrollOffset * 0.25 + Math.cos(scrollOffset * 0.006) * 35 : 0}deg) 
-                         scale(${0.6 + (isScrolling ? Math.sin(scrollOffset * 0.008) * 0.6 : 0)})
-                         skew(${isScrolling ? Math.sin(scrollOffset * 0.009) * 25 : 0}deg, ${isScrolling ? Math.cos(scrollOffset * 0.007) * 12 : 0}deg)`,
-              borderRadius: `${Math.cos(scrollOffset * 0.015) * 50 + 50}% ${Math.sin(scrollOffset * 0.012) * 25 + 75}% ${Math.cos(scrollOffset * 0.011) * 30 + 70}% ${Math.sin(scrollOffset * 0.014) * 25 + 55}%`,
-              filter: `blur(${20 + (isScrolling ? Math.sin(scrollOffset * 0.006) * 15 : 0)}px)`,
-              clipPath: `polygon(
-                ${Math.cos(scrollOffset * 0.008) * 12 + 25}% 0%, 
-                ${Math.sin(scrollOffset * 0.007) * 15 + 85}% ${Math.cos(scrollOffset * 0.009) * 8 + 20}%, 
-                ${Math.cos(scrollOffset * 0.01) * 20 + 80}% ${Math.sin(scrollOffset * 0.009) * 12 + 50}%, 
-                ${Math.sin(scrollOffset * 0.006) * 25 + 75}% ${Math.cos(scrollOffset * 0.011) * 15 + 85}%,
-                ${Math.cos(scrollOffset * 0.009) * 15 + 35}% 100%,
-                ${Math.sin(scrollOffset * 0.012) * 20 + 20}% ${Math.cos(scrollOffset * 0.005) * 12 + 75}%,
-                0% ${Math.sin(scrollOffset * 0.008) * 15 + 35}%
-              )`
-            }}
-          ></div>
-
-          {/* Groovy blob 5 - abstract amoeba-like form */}
-          <div 
-            className={`absolute w-36 h-24 transition-all duration-[2000ms] ease-out opacity-8 ${
-              activeSection === 1 
-                ? 'bg-gradient-to-tr from-cyan-300/10 to-blue-200/7' 
-                : activeSection === 2
-                ? 'bg-gradient-to-tr from-violet-300/10 to-purple-200/7'
-                : 'bg-gradient-to-tr from-teal-300/10 to-emerald-200/7'
-            }`}
-            style={{
-              left: `${5 + (isScrolling ? Math.cos(scrollOffset * 0.005) * 25 : 0)}%`,
-              top: `${60 + (isScrolling ? Math.sin(scrollOffset * 0.003) * 20 : 0)}%`,
-              transform: `rotate(${isScrolling ? scrollOffset * 0.13 + Math.cos(scrollOffset * 0.008) * 45 : 0}deg) 
-                         scale(${0.9 + (isScrolling ? Math.sin(scrollOffset * 0.005) * 0.3 : 0)})
-                         perspective(150px) rotateY(${isScrolling ? Math.cos(scrollOffset * 0.006) * 30 : 0}deg)`,
-              borderRadius: `${Math.sin(scrollOffset * 0.017) * 40 + 60}% ${Math.cos(scrollOffset * 0.015) * 35 + 65}% ${Math.sin(scrollOffset * 0.013) * 30 + 70}% ${Math.cos(scrollOffset * 0.016) * 25 + 55}%`,
-              filter: `blur(${16 + (isScrolling ? Math.sin(scrollOffset * 0.007) * 12 : 0)}px)`,
-              clipPath: `ellipse(${Math.cos(scrollOffset * 0.01) * 25 + 75}% ${Math.sin(scrollOffset * 0.009) * 20 + 60}% at ${Math.sin(scrollOffset * 0.006) * 12 + 40}% ${Math.cos(scrollOffset * 0.008) * 15 + 70}%)`
-            }}
-          ></div>
-
-          {/* Groovy blob 6 - twisted spiral-like shape */}
-          <div 
-            className={`absolute w-22 h-38 transition-all duration-[2000ms] ease-out opacity-5 ${
-              activeSection === 1 
-                ? 'bg-gradient-to-l from-indigo-200/8 to-blue-300/5' 
-                : activeSection === 2
-                ? 'bg-gradient-to-l from-pink-200/8 to-violet-300/5'
-                : 'bg-gradient-to-l from-green-200/8 to-teal-300/5'
-            }`}
-            style={{
-              right: `${40 + (isScrolling ? Math.sin(scrollOffset * 0.006) * 30 : 0)}%`,
-              top: `${15 + (isScrolling ? Math.cos(scrollOffset * 0.005) * 25 : 0)}%`,
-              transform: `rotate(${isScrolling ? scrollOffset * 0.3 + Math.sin(scrollOffset * 0.009) * 20 : 0}deg) 
-                         scale(${0.5 + (isScrolling ? Math.cos(scrollOffset * 0.007) * 0.7 : 0)})
-                         skew(${isScrolling ? Math.sin(scrollOffset * 0.01) * 30 : 0}deg, ${isScrolling ? Math.cos(scrollOffset * 0.009) * 18 : 0}deg)`,
-              borderRadius: `${Math.cos(scrollOffset * 0.02) * 35 + 65}% ${Math.sin(scrollOffset * 0.017) * 40 + 60}% ${Math.cos(scrollOffset * 0.016) * 25 + 75}% ${Math.sin(scrollOffset * 0.019) * 30 + 50}%`,
-              filter: `blur(${22 + (isScrolling ? Math.cos(scrollOffset * 0.006) * 18 : 0)}px) saturate(${isScrolling ? Math.sin(scrollOffset * 0.005) * 0.3 + 1.2 : 1.2})`
-            }}
-          ></div>
-        </div>
-        
-        {/* Flowing geometric shapes */}
-        <div className="absolute inset-0">
-          {/* Morphing blob shapes */}
-          <div 
-            className={`absolute w-32 h-32 transition-all duration-[3000ms] ease-out opacity-20 ${
-              activeSection === 1 
-                ? 'bg-blue-300/20' 
-                : activeSection === 2
-                ? 'bg-purple-300/20'
-                : 'bg-emerald-300/20'
-            }`}
-            style={{
-              left: `${15 + activeSection * 25}%`,
-              top: `${20 + Math.sin(activeSection) * 30}%`,
-              transform: `rotate(${activeSection * 90}deg) scale(${0.6 + activeSection * 0.4})`,
-              borderRadius: `${30 + Math.sin(activeSection * 2) * 40}% ${70 - Math.cos(activeSection) * 30}% ${50 + Math.sin(activeSection * 1.5) * 30}% ${40 - Math.cos(activeSection * 2) * 20}%`,
-              clipPath: `ellipse(${40 + Math.sin(activeSection * 3) * 20}% ${60 + Math.cos(activeSection * 2) * 20}% at 50% 50%)`
-            }}
-          ></div>
-          
-          {/* Flowing lines/paths */}
-          <div 
-            className={`absolute w-24 h-48 transition-all duration-[4000ms] ease-out opacity-15 ${
-              activeSection === 1 
-                ? 'bg-indigo-200/15' 
-                : activeSection === 2
-                ? 'bg-pink-200/15'
-                : 'bg-teal-200/15'
-            }`}
-            style={{
-              right: `${10 + activeSection * 20}%`,
-              bottom: `${30 + Math.cos(activeSection * 1.5) * 25}%`,
-              transform: `rotate(${-activeSection * 45}deg) skew(${Math.sin(activeSection) * 15}deg) scale(${0.8 + Math.cos(activeSection * 2) * 0.3})`,
-              borderRadius: `${60 + Math.sin(activeSection * 4) * 30}% ${20 + Math.cos(activeSection * 3) * 40}%`,
-              clipPath: `polygon(${20 + Math.sin(activeSection) * 20}% 0%, ${80 + Math.cos(activeSection) * 15}% ${30 + Math.sin(activeSection * 2) * 20}%, ${60 - Math.cos(activeSection) * 25}% 100%, ${10 + Math.sin(activeSection * 1.5) * 15}% ${70 - Math.cos(activeSection * 2) * 20}%)`
-            }}
-          ></div>
-          
-          {/* Organic flowing shapes */}
-          <div 
-            className={`absolute w-40 h-28 transition-all duration-[3500ms] ease-out opacity-12 ${
-              activeSection === 1 
-                ? 'bg-cyan-300/12' 
-                : activeSection === 2
-                ? 'bg-violet-300/12'
-                : 'bg-green-300/12'
-            }`}
-            style={{
-              left: `${60 + Math.sin(activeSection * 0.8) * 30}%`,
-              top: `${40 + Math.cos(activeSection * 1.2) * 35}%`,
-              transform: `rotate(${activeSection * 60}deg) scale(${0.7 + Math.sin(activeSection * 1.8) * 0.4})`,
-              borderRadius: `${Math.sin(activeSection * 5) * 50 + 50}% ${Math.cos(activeSection * 4) * 40 + 60}% ${Math.sin(activeSection * 3) * 45 + 55}% ${Math.cos(activeSection * 6) * 35 + 65}%`
-            }}
-          ></div>
-        </div>
-        
-        {/* Dynamic sketch-like flowing lines */}
-        <div className="absolute inset-0 opacity-15">
-          <svg className="w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
-            {/* Flowing sketch lines */}
-            {[...Array(8)].map((_, i) => (
-              <path
-                key={i}
-                d={`M${i * 150 + Math.sin(activeSection * (0.3 + i * 0.1)) * 100},${100 + i * 60 + Math.cos(activeSection * (0.5 + i * 0.15)) * 80} 
-                    Q${200 + i * 120 + Math.sin(activeSection * (0.7 + i * 0.2)) * 120},${150 + i * 70 + Math.cos(activeSection * (0.4 + i * 0.12)) * 90}
-                    ${400 + i * 100 + Math.cos(activeSection * (0.6 + i * 0.18)) * 100},${200 + i * 50 + Math.sin(activeSection * (0.8 + i * 0.25)) * 70}
-                    T${800 + i * 80 + Math.sin(activeSection * (0.9 + i * 0.3)) * 80},${250 + i * 40 + Math.cos(activeSection * (1.1 + i * 0.22)) * 60}
-                    ${1000 + Math.cos(activeSection * (1.2 + i * 0.28)) * 60},${300 + i * 30 + Math.sin(activeSection * (1.4 + i * 0.35)) * 50}`}
-                stroke={
-                  activeSection === 1 
-                    ? `rgba(59, 130, 246, ${0.1 + Math.sin(i + activeSection) * 0.05})` 
-                    : activeSection === 2
-                    ? `rgba(147, 51, 234, ${0.1 + Math.sin(i + activeSection) * 0.05})`
-                    : `rgba(16, 185, 129, ${0.1 + Math.sin(i + activeSection) * 0.05})`
-                }
-                strokeWidth={1 + Math.sin(i * 0.5 + activeSection) * 0.5}
-                fill="none"
-                className="transition-all duration-[3000ms] ease-out"
-                style={{
-                  strokeDasharray: `${5 + Math.sin(i + activeSection * 2) * 3} ${3 + Math.cos(i + activeSection * 1.5) * 2}`,
-                  strokeDashoffset: activeSection * 10 + i * 2,
-                }}
-              />
-            ))}
-            
-            {/* Organic flowing curves */}
-            {[...Array(5)].map((_, i) => (
-              <path
-                key={`curve-${i}`}
-                d={`M${100 + i * 200 + Math.sin(activeSection * (0.4 + i * 0.2)) * 150},${400 + Math.cos(activeSection * (0.6 + i * 0.15)) * 100}
-                    C${300 + i * 180 + Math.cos(activeSection * (0.8 + i * 0.25)) * 120},${300 + Math.sin(activeSection * (1.0 + i * 0.3)) * 80}
-                    ${500 + i * 160 + Math.sin(activeSection * (1.2 + i * 0.35)) * 100},${500 + Math.cos(activeSection * (0.7 + i * 0.2)) * 90}
-                    ${700 + i * 140 + Math.cos(activeSection * (1.4 + i * 0.4)) * 80},${450 + Math.sin(activeSection * (1.6 + i * 0.45)) * 70}`}
-                stroke={
-                  activeSection === 1 
-                    ? `rgba(99, 102, 241, ${0.08 + Math.cos(i + activeSection * 1.5) * 0.04})` 
-                    : activeSection === 2
-                    ? `rgba(236, 72, 153, ${0.08 + Math.cos(i + activeSection * 1.5) * 0.04})`
-                    : `rgba(52, 211, 153, ${0.08 + Math.cos(i + activeSection * 1.5) * 0.04})`
-                }
-                strokeWidth={0.8 + Math.cos(i * 0.7 + activeSection * 1.2) * 0.4}
-                fill="none"
-                className="transition-all duration-[4000ms] ease-out"
-                style={{
-                  strokeLinecap: 'round',
-                  strokeLinejoin: 'round',
-                }}
-              />
-            ))}
-            
-            {/* Scattered organic dots/nodes */}
-            {[...Array(15)].map((_, i) => (
-              <circle
-                key={`dot-${i}`}
-                cx={150 + (i * 73) % 1000 + Math.sin(activeSection * (0.5 + i * 0.1)) * 60}
-                cy={200 + (i * 47) % 400 + Math.cos(activeSection * (0.7 + i * 0.15)) * 50}
-                r={Math.max(0.1, 1 + Math.sin(i + activeSection * 2) * 0.8)}
-                fill={
-                  activeSection === 1 
-                    ? `rgba(37, 99, 235, ${0.2 + Math.sin(i * 2 + activeSection) * 0.1})` 
-                    : activeSection === 2
-                    ? `rgba(168, 85, 247, ${0.2 + Math.sin(i * 2 + activeSection) * 0.1})`
-                    : `rgba(5, 150, 105, ${0.2 + Math.sin(i * 2 + activeSection) * 0.1})`
-                }
-                className="transition-all duration-[2500ms] ease-out"
-              />
-            ))}
-            
-            {/* Connecting lines between elements */}
-            {[...Array(6)].map((_, i) => (
-              <line
-                key={`connector-${i}`}
-                x1={200 + i * 150 + Math.sin(activeSection * (0.3 + i * 0.2)) * 80}
-                y1={300 + Math.cos(activeSection * (0.5 + i * 0.18)) * 60}
-                x2={350 + i * 130 + Math.cos(activeSection * (0.7 + i * 0.25)) * 70}
-                y2={250 + Math.sin(activeSection * (0.9 + i * 0.22)) * 50}
-                stroke={
-                  activeSection === 1 
-                    ? `rgba(59, 130, 246, ${0.06 + Math.sin(i + activeSection * 0.8) * 0.03})` 
-                    : activeSection === 2
-                    ? `rgba(147, 51, 234, ${0.06 + Math.sin(i + activeSection * 0.8) * 0.03})`
-                    : `rgba(16, 185, 129, ${0.06 + Math.sin(i + activeSection * 0.8) * 0.03})`
-                }
-                strokeWidth={0.5}
-                className="transition-all duration-[3500ms] ease-out"
-                style={{
-                  strokeDasharray: '2 4',
-                  strokeDashoffset: activeSection * 5 + i,
-                }}
-              />
-            ))}
-          </svg>
-        </div>
-        
-        {/* Dynamic mesh gradient overlay */}
-        <div 
-          className="absolute inset-0 transition-all duration-[3000ms] ease-out opacity-30"
-          style={{
-            background: `
-              radial-gradient(circle at ${30 + Math.sin(activeSection) * 40}% ${40 + Math.cos(activeSection * 0.8) * 30}%, rgba(255,255,255,0.1) 0%, transparent 50%),
-              radial-gradient(circle at ${70 + Math.cos(activeSection * 1.2) * 25}% ${60 + Math.sin(activeSection * 0.6) * 35}%, rgba(255,255,255,0.08) 0%, transparent 60%),
-              radial-gradient(circle at ${50 + Math.sin(activeSection * 1.5) * 30}% ${30 + Math.cos(activeSection) * 40}%, rgba(255,255,255,0.06) 0%, transparent 70%)
-            `
-          }}
-        ></div>
-        
-        {/* Subtle animated noise texture */}
-        <div 
-          className="absolute inset-0 opacity-[0.02] transition-transform duration-[2000ms] ease-out"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E")`,
-            transform: `translate(${Math.sin(activeSection * 0.3) * 10}px, ${Math.cos(activeSection * 0.4) * 8}px) scale(${1 + Math.sin(activeSection * 0.2) * 0.1})`
-          }}
-        ></div>
-      </div>
-      
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
+      <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
         
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            Professional AI Prompt Builder
+        <div className="text-center mb-16">
+          <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent mb-6 leading-tight">
+            Build Better AI Prompts
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Transform your ideas into optimized prompts that get better results from any AI model
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Transform your ideas into structured prompts that deliver exceptional results from any AI model
           </p>
         </div>
 
         {/* Rotating Examples */}
         <RotatingPromptExamples />
 
-        {/* Floating Progress Indicator */}
-        {showProgressBar && (
-          <div className="fixed top-24 right-8 z-40 transition-all duration-500 ease-in-out">
-            <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/60 p-4 transition-all duration-300 hover:bg-white/95 hover:shadow-2xl">
-              <div className="flex items-center space-x-3">
-                {steps.map((step, index) => (
-                  <div key={step.id} className="relative group">
-                    <button
-                      onClick={() => scrollToSection(step.id)}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
-                        activeSection === step.id
-                          ? 'bg-blue-600 text-white shadow-md scale-110'
-                          : step.completed
-                          ? 'bg-green-500 text-white hover:scale-105'
-                          : 'bg-gray-300 text-gray-600 hover:bg-gray-400 hover:text-white'
-                      }`}
-                    >
-                      {step.completed ? (
-                        <Check className="w-5 h-5" />
-                      ) : (
-                        <step.icon className="w-4 h-4" />
-                      )}
-                    </button>
-                    
-                    {/* Connection Line */}
-                    {index < steps.length - 1 && (
-                      <div className={`absolute top-1/2 left-full w-6 h-0.5 -translate-y-1/2 transition-colors duration-300 ${
-                        step.completed ? 'bg-green-400' : 'bg-gray-300'
-                      }`} />
-                    )}
-                    
-                    {/* Tooltip */}
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                      <div className="bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                        {step.title}
-                      </div>
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-                    </div>
-                  </div>
-                ))}
-                
-                {/* Reset Button */}
-                <div className="ml-2 pl-2 border-l border-gray-200">
+        {/* Error Notification */}
+        {errorNotification && (
+          <div 
+            className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-500 ease-in-out"
+            role="alert"
+            aria-live="assertive"
+          >
+            <div className={`max-w-md mx-auto rounded-xl shadow-lg border p-4 ${
+              errorNotification.type === 'error' 
+                ? 'bg-red-50 border-red-200' 
+                : 'bg-yellow-50 border-yellow-200'
+            }`}>
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <AlertCircle className={`w-5 h-5 ${
+                    errorNotification.type === 'error' ? 'text-red-400' : 'text-yellow-400'
+                  }`} />
+                </div>
+                <div className="ml-3 flex-1">
+                  <h3 className={`text-sm font-medium ${
+                    errorNotification.type === 'error' ? 'text-red-800' : 'text-yellow-800'
+                  }`}>
+                    {errorNotification.title}
+                  </h3>
+                  <p className={`mt-1 text-sm ${
+                    errorNotification.type === 'error' ? 'text-red-700' : 'text-yellow-700'
+                  }`}>
+                    {errorNotification.message}
+                  </p>
+                </div>
+                <div className="ml-4 flex-shrink-0">
                   <button
-                    onClick={handleReset}
-                    className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-700 transition-all duration-200 flex items-center justify-center group"
-                    title="Start Over"
+                    onClick={() => setErrorNotification(null)}
+                    className={`rounded-md inline-flex ${
+                      errorNotification.type === 'error' 
+                        ? 'text-red-400 hover:text-red-500' 
+                        : 'text-yellow-400 hover:text-yellow-500'
+                    } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                      errorNotification.type === 'error' ? 'focus:ring-red-500' : 'focus:ring-yellow-500'
+                    }`}
+                    aria-label="Dismiss notification"
                   >
-                    <RefreshCw className="w-4 h-4" />
-                    
-                    {/* Tooltip */}
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                      <div className="bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                        Start Over
-                      </div>
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-                    </div>
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -741,41 +365,89 @@ const SimplifiedPromptGenerator = () => {
           </div>
         )}
 
+        {/* Floating Progress Indicator */}
+        {showProgressBar && (
+          <div className="fixed top-24 right-6 z-40 transition-all duration-500 ease-in-out">
+            <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-100 p-3 transition-all duration-300 hover:shadow-xl">
+              <div className="flex items-center space-x-3">
+                {steps.map((step, index) => (
+                  <div key={step.id} className="relative group">
+                    <button
+                      onClick={() => scrollToSection(step.id)}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                        activeSection === step.id
+                          ? 'bg-blue-600 text-white shadow-md scale-110'
+                          : step.completed
+                          ? 'bg-green-500 text-white hover:scale-105'
+                          : 'bg-gray-300 text-gray-600 hover:bg-gray-400 hover:text-white'
+                      }`}
+                      aria-label={`Go to step ${step.id}${step.completed ? ' (completed)' : ''}`}
+                    >
+                      {step.completed ? (
+                        <Check className="w-5 h-5" />
+                      ) : (
+                        <span className="text-sm font-semibold">{step.id}</span>
+                      )}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main Content - Full Width */}
-        <div className="space-y-16">
+        <div className="space-y-20">
           
           {/* Section 1: Define Context */}
           <section ref={contextSectionRef} className="scroll-mt-32">
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full text-sm font-medium text-blue-800 mb-4">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-full text-sm font-semibold text-indigo-700 mb-6 border border-indigo-100">
                 <Target className="w-4 h-4 mr-2" />
-                Step 1
+                Step 1 of 2
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Define Your Context</h2>
-              <p className="text-gray-600">Choose your role and describe your task</p>
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Define Your Context</h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">Choose your role and describe what you want to accomplish</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="relative">
+              {/* Visual Connection Line */}
+              {formData.role && (
+                <div className="hidden lg:block absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 rounded-full bg-blue-500 animate-pulse"></div>
+                    <div className="w-8 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-purple-500 animate-pulse"></div>
+                  </div>
+                </div>
+              )}
               
-              {/* Role Selection */}
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-                <ImprovedRoleSelector
-                  selectedRole={formData.role}
-                  onRoleChange={(role) => handleFormChange('role', role)}
-                  showDescription={true}
-                />
-              </div>
-              
-              {/* Task Description */}
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {/* Role Selection */}
+                <div className={`card-scroll-enhanced rounded-2xl shadow-lg p-8 transition-all duration-300 ${
+                  formData.role 
+                    ? 'border-2 border-blue-200 bg-blue-50/30' 
+                    : 'border border-gray-200'
+                }`}>
+                  <ImprovedRoleSelector
+                    selectedRole={formData.role}
+                    onRoleChange={(role) => handleFormChange('role', role)}
+                    onWorkflowComplete={handleWorkflowComplete}
+                  />
+                </div>
+                
+                {/* Task Description */}
+                <div className={`card-scroll-enhanced rounded-2xl shadow-lg p-8 transition-all duration-300 ${
+                  formData.role 
+                    ? 'border-2 border-purple-200 bg-purple-50/30' 
+                    : 'border border-gray-200 opacity-75'
+                }`}>
                 <div className="flex items-center space-x-2 mb-6">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                     <FileText className="w-4 h-4 text-white" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Describe Your Task</h3>
-                    <p className="text-sm text-gray-500">What do you want to accomplish?</p>
-                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">Task Description</h3>
                 </div>
                 
                 <div className="space-y-4">
@@ -783,84 +455,181 @@ const SimplifiedPromptGenerator = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Task Description <span className="text-red-500">*</span>
                     </label>
+                    {formData.role && (
+                      <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg contextual-hint">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center animate-pulse">
+                            <span className="text-white text-xs">💡</span>
+                          </div>
+                          <p className="text-sm text-blue-800 font-medium">
+                            {formData.role === 'Marketing Specialist' && 'Describe your campaign goals, target audience, or content strategy...'}
+                            {formData.role === 'Software Developer' && 'Explain the feature you want to build, bug to fix, or system to design...'}
+                            {formData.role === 'UX/UI Designer' && 'Describe the interface, user flow, or design challenge you\'re working on...'}
+                            {formData.role === 'Project Manager' && 'Outline the project scope, timeline, or team coordination needs...'}
+                            {formData.role === 'Content Writer' && 'Describe the content type, audience, tone, and key messages...'}
+                            {formData.role === 'Data Analyst' && 'Explain the data analysis, insights, or reporting requirements...'}
+                            {(formData.role && !['Marketing Specialist', 'Software Developer', 'UX/UI Designer', 'Project Manager', 'Content Writer', 'Data Analyst'].includes(formData.role)) && 
+                              `As a ${formData.role}, describe your specific goals and requirements...`}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     <textarea
                       value={formData.task}
                       onChange={(e) => handleFormChange('task', e.target.value)}
-                      placeholder="Describe what you want to accomplish..."
-                      className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      placeholder={
+                        formData.role 
+                          ? `Describe your ${formData.role.toLowerCase()} task or objective...`
+                          : "Describe what you want to accomplish..."
+                      }
+                      className={`w-full h-32 px-4 py-3 border rounded-lg resize-none form-field-enhanced ${
+                        formData.task.length === 0 
+                          ? 'border-gray-300' 
+                          : formData.task.length < 20 
+                            ? 'border-yellow-300 bg-yellow-50' 
+                            : formData.task.length > 450 
+                              ? 'border-red-300 bg-red-50' 
+                              : 'border-green-300 bg-green-50'
+                      }`}
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      {formData.task.length}/500 characters
-                    </p>
+                    <div className="flex justify-between items-center mt-1">
+                      <p className={`text-xs ${
+                        formData.task.length === 0 
+                          ? 'text-gray-500' 
+                          : formData.task.length < 20 
+                            ? 'text-yellow-600' 
+                            : formData.task.length > 450 
+                              ? 'text-red-600' 
+                              : 'text-green-600'
+                      }`}>
+                        {formData.task.length}/500 characters
+                        {formData.task.length < 20 && formData.task.length > 0 && (
+                          <span className="ml-2">• Add more details for better results</span>
+                        )}
+                        {formData.task.length > 450 && (
+                          <span className="ml-2">• Close to limit</span>
+                        )}
+                        {formData.task.length >= 20 && formData.task.length <= 450 && (
+                          <span className="ml-2">• Great length! ✓</span>
+                        )}
+                      </p>
+                      {formData.task.length >= 20 && (
+                        <div className="flex items-center text-xs text-green-600">
+                          <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
+                          Auto-saved
+                        </div>
+                      )}
+                    </div>
                   </div>
                   
                   {/* Advanced Options Toggle */}
                   <div className="pt-4 border-t border-gray-100">
                     <button
                       onClick={() => setShowAdvanced(!showAdvanced)}
-                      className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-700"
+                      className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-700 transition-all duration-200 hover:bg-blue-50 px-3 py-2 rounded-lg group"
                     >
-                      <Settings className="w-4 h-4" />
+                      <Settings className={`w-4 h-4 transition-transform duration-200 ${showAdvanced ? 'rotate-90' : ''} group-hover:scale-110`} />
                       <span>{showAdvanced ? 'Hide' : 'Show'} Advanced Options</span>
+                      <div className={`ml-2 text-xs px-2 py-1 rounded-full transition-all duration-200 ${
+                        showAdvanced ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {showAdvanced ? 'Visible' : 'Hidden'}
+                      </div>
                     </button>
                   </div>
                   
                   {/* Advanced Fields */}
                   {showAdvanced && (
-                    <div className="space-y-4 pt-4 border-t border-gray-100">
+                    <div className="space-y-4 pt-4 border-t border-gray-100" style={{ animation: 'fadeInUp 0.4s ease-out' }}>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Context
+                          <span className="text-xs text-gray-500 font-normal ml-2">
+                            💡 This helps tailor the tone and complexity of your prompt
+                          </span>
                         </label>
                         <textarea
                           value={formData.context}
                           onChange={(e) => handleFormChange('context', e.target.value)}
                           placeholder="Additional context or background information..."
-                          className="w-full h-24 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                          className={`w-full h-24 px-4 py-3 border rounded-lg resize-none form-field-enhanced ${
+                            formData.context.length === 0 
+                              ? 'border-gray-300' 
+                              : formData.context.length > 0 
+                                ? 'border-blue-300 bg-blue-50' 
+                                : 'border-gray-300'
+                          }`}
                         />
+                        <p className={`text-xs mt-1 ${
+                          formData.context.length > 0 ? 'text-blue-600' : 'text-gray-500'
+                        }`}>
+                          {formData.context.length}/300 characters
+                          {formData.context.length > 0 && (
+                            <span className="ml-2">• Context added ✓</span>
+                          )}
+                        </p>
                       </div>
                       
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Requirements
+                          <span className="text-xs text-gray-500 font-normal ml-2">
+                            🎯 Specify constraints or must-have elements
+                          </span>
                         </label>
                         <textarea
                           value={formData.requirements}
                           onChange={(e) => handleFormChange('requirements', e.target.value)}
-                          placeholder="Specific requirements or constraints..."
-                          className="w-full h-24 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                          placeholder="Specific requirements, constraints, or criteria..."
+                          className={`w-full h-24 px-4 py-3 border rounded-lg resize-none form-field-enhanced ${
+                            formData.requirements.length === 0 
+                              ? 'border-gray-300' 
+                              : formData.requirements.length > 0 
+                                ? 'border-purple-300 bg-purple-50' 
+                                : 'border-gray-300'
+                          }`}
                         />
+                        <p className={`text-xs mt-1 ${
+                          formData.requirements.length > 0 ? 'text-purple-600' : 'text-gray-500'
+                        }`}>
+                          {formData.requirements.length}/200 characters
+                          {formData.requirements.length > 0 && (
+                            <span className="ml-2">• Requirements specified ✓</span>
+                          )}
+                        </p>
                       </div>
                       
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Style
+                            Format
+                            <span className="text-xs text-gray-500 font-normal ml-2">
+                              📄 How should the output be structured?
+                            </span>
                           </label>
                           <input
                             type="text"
-                            value={formData.style}
-                            onChange={(e) => handleFormChange('style', e.target.value)}
-                            placeholder="e.g., formal, casual, technical"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={formData.format}
+                            onChange={(e) => handleFormChange('format', e.target.value)}
+                            placeholder="e.g., bullet points, paragraph, step-by-step..."
+                            className={`w-full px-4 py-3 border rounded-lg form-field-enhanced ${
+                              formData.format.length === 0 
+                                ? 'border-gray-300' 
+                                : formData.format.length > 0 
+                                  ? 'border-green-300 bg-green-50' 
+                                  : 'border-gray-300'
+                            }`}
                           />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Output Format
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.output}
-                            onChange={(e) => handleFormChange('output', e.target.value)}
-                            placeholder="e.g., bullet points, essay, code"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
+                          <p className={`text-xs mt-1 ${
+                            formData.format.length > 0 ? 'text-green-600' : 'text-gray-500'
+                          }`}>
+                            {formData.format.length > 0 && (
+                              <span>• Format specified ✓</span>
+                            )}
+                          </p>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -869,126 +638,142 @@ const SimplifiedPromptGenerator = () => {
           {/* Section 2: Configure & Enhance */}
           <section ref={configureSectionRef} className="scroll-mt-32">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full text-sm font-medium text-purple-800 mb-4">
+              <div className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-purple-50 to-pink-50 rounded-full text-sm font-semibold text-purple-700 mb-4 border border-purple-100">
                 <Wand2 className="w-4 h-4 mr-2" />
-                Step 2
+                Step 2 of 2
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Configure & Enhance</h2>
-              <p className="text-gray-600">Select AI model and enhance your prompt</p>
+              <h2 className="text-3xl font-bold text-gray-900 mb-3">Configure & Enhance</h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">Select your AI model, enhance your prompt, and get your optimized result</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
-              {/* Model Selection */}
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-                <div className="flex items-center space-x-2 mb-6">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
-                    <Settings className="w-4 h-4 text-white" />
+            {/* Consolidated Grid Layout */}
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                
+                {/* Left Column: Model Selection & Enhancement */}
+                <div className="space-y-6">
+                  {/* AI Model Selection - Compact */}
+                  <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center text-sm font-bold">1</div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">AI Model</h3>
+                        <p className="text-sm text-gray-600">Choose the best model for your task</p>
+                      </div>
+                    </div>
+                    <ModelSelector
+                      selectedModel={selectedModel}
+                      onModelChange={setSelectedModel}
+                      modelRecommendation={formData.role || formData.task ? getModelRecommendation() : null}
+                      compact={true}
+                    />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">AI Model Selection</h3>
-                    <p className="text-sm text-gray-500">Choose the optimal AI model</p>
+
+                  {/* Enhancement Settings - Compact */}
+                  <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 relative">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="w-8 h-8 bg-green-600 text-white rounded-lg flex items-center justify-center text-sm font-bold">2</div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Enhancement</h3>
+                        <p className="text-sm text-gray-600">Fine-tune your prompt quality</p>
+                      </div>
+                    </div>
+                    
+                    {/* Loading Overlay */}
+                    {isGenerating && (
+                      <div className="absolute inset-0 bg-white/95 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
+                        <div className="flex flex-col items-center space-y-3">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                          <p className="text-sm font-medium text-purple-600">Enhancing...</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <EnrichmentOptions
+                      enrichmentData={{ enrichmentLevel }}
+                      onChange={(field, value) => {
+                        if (field === 'enrichmentLevel') {
+                          setEnrichmentLevel(value)
+                        }
+                      }}
+                      isEnriching={isGenerating}
+                    />
+                    
+                    {/* Enhance Button */}
+                    {rawPrompt && (
+                      <div className="mt-6 pt-4 border-t border-gray-200">
+                        <button
+                          onClick={generatePrompt}
+                          disabled={isGenerating || !validation.isValid || hasEnhancedCurrentInputs}
+                          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:shadow-md hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center space-x-2"
+                        >
+                          {isGenerating ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              <span>Enhancing...</span>
+                            </>
+                          ) : hasEnhancedCurrentInputs ? (
+                            <>
+                              <Check className="w-4 h-4" />
+                              <span>Enhanced</span>
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4" />
+                              <span>Enhance Prompt</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
-                
-                <ModelSelector
-                  selectedModel={selectedModel}
-                  onModelChange={handleModelChange}
-                  compact={false}
-                />
-              </div>
-              
-              {/* Enhancement Preview */}
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-                <div className="flex items-center space-x-2 mb-6">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center">
-                    <Eye className="w-4 h-4 text-white" />
+
+                {/* Right Column: Live Preview */}
+                <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+                  <div className="bg-gradient-to-r from-indigo-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                          <Sparkles className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">Your Optimized Prompt</h3>
+                          <p className="text-sm text-gray-600">
+                            {validation.isValid ? 'Ready to copy and use' : 'Complete Step 1 to generate'}
+                          </p>
+                        </div>
+                      </div>
+
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Prompt Preview</h3>
-                    <p className="text-sm text-gray-500">See your generated prompt</p>
+                  
+                  <div className="p-6 min-h-[400px]">
+                    <EnhancedPromptPreview
+                      rawPrompt={rawPrompt}
+                      enrichedPrompt={enrichedPrompt}
+                      enrichmentResult={enrichmentResult}
+                      isLoading={false}
+                      hasError={!validation.isValid}
+                      validation={validation}
+                      selectedModel={selectedModel}
+                      isEnriching={isGenerating}
+                      hasEnrichment={!!enrichedPrompt}
+                      onEnrichNow={isPro && !hasEnhancedCurrentInputs ? generatePrompt : null}
+                      isAuthenticated={isAuthenticated}
+                      isPro={isPro}
+                      formData={formData}
+                      hasEnhancedCurrentInputs={hasEnhancedCurrentInputs}
+                    />
                   </div>
                 </div>
-                
-                {validation.isValid ? (
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 rounded-lg p-4 border">
-                      <pre className="font-mono text-sm leading-relaxed whitespace-pre-wrap text-gray-800 max-h-40 overflow-y-auto">
-                        {rawPrompt}
-                      </pre>
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <span>{rawPrompt.length} characters</span>
-                      <span className="flex items-center">
-                        <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
-                        Ready for enhancement
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>Complete Step 1 to see your prompt preview</p>
-                  </div>
-                )}
               </div>
             </div>
           </section>
 
-          {/* Section 3: Get Your Prompt */}
-          <section ref={resultSectionRef} className="scroll-mt-32">
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-100 to-teal-100 rounded-full text-sm font-medium text-green-800 mb-4">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Step 3
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Get Your Prompt</h2>
-              <p className="text-gray-600">Copy and use your optimized prompt</p>
-            </div>
 
-            <div className="max-w-4xl mx-auto">
-              {validation.isValid ? (
-                <EnhancedPromptPreview
-                  rawPrompt={rawPrompt}
-                  enrichedPrompt={enrichedPrompt}
-                  enrichmentResult={enrichmentResult}
-                  selectedModel={selectedModel}
-                  validation={validation}
-                  isEnriching={isEnriching}
-                  hasEnrichment={hasEnrichment}
-                  onEnrichNow={handleEnrichment}
-                  isAuthenticated={isAuthenticated}
-                  isPro={isPro}
-                  formData={formData}
-                />
-              ) : (
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-12 text-center">
-                  <Sparkles className="w-16 h-16 mx-auto mb-6 text-gray-300" />
-                  <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                    Complete Previous Steps
-                  </h3>
-                  <p className="text-gray-500 mb-6">
-                    Fill in your role and task description to generate your optimized prompt
-                  </p>
-                  <button
-                    onClick={() => scrollToSection(1)}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                  >
-                    Go to Step 1
-                  </button>
-                </div>
-              )}
-            </div>
-          </section>
         </div>
       </div>
-      
-      {/* Error Display */}
-      {error && (
-        <div className="fixed bottom-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg z-50">
-          <p>{error}</p>
-        </div>
-      )}
     </div>
   )
 }

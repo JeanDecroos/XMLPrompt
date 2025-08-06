@@ -192,20 +192,16 @@ const ProgressiveContextWizard = ({
   const progress = formData.role && formData.task ? 100 : formData.role ? 60 : 20
 
   return (
-    <div className="progressive-context-wizard">
-      {/* Compact Progress Header */}
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full text-sm font-medium text-blue-800 mb-3">
-          <Target className="w-4 h-4 mr-2" />
-          Step 1: Define Your Context
-        </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-1">Who are you and what do you need?</h2>
-        <p className="text-gray-600 mb-4">Let's build your perfect prompt step by step</p>
+    <div className="progressive-context-wizard bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      {/* Header */}
+      <div className="text-center px-8 py-8 bg-gradient-to-b from-gray-50 to-white border-b border-gray-100">
+        <h2 className="text-3xl font-bold text-gray-900 mb-3">Define Your Context</h2>
+        <p className="text-gray-600 text-lg">Build your perfect prompt in 3 simple steps</p>
       </div>
 
-      {/* Compact Step Navigation */}
-      <div className="max-w-4xl mx-auto mb-6">
-        <div className="flex items-center justify-center space-x-4">
+      {/* Step Navigation */}
+      <div className="px-8 py-6">
+        <div className="flex items-center justify-center space-x-4 max-w-md mx-auto">
           {/* Step 1 */}
           <button
             onClick={() => setCurrentStep(1)}

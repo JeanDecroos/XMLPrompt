@@ -1,6 +1,6 @@
 // Frontend service for communicating with backend API for prompt enrichment
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002'
 
 export class PromptEnrichmentService {
   static async enrichPrompt(promptData, userToken = null, userTier = 'free') {
@@ -28,9 +28,12 @@ export class PromptEnrichmentService {
       }
 
       const result = await response.json()
+      
+      // Backend returns {success: true, data: {enhancedPrompt: "...", ...}}
+      // We want to return {success: true, data: {enhancedPrompt: "...", ...}}
       return {
         success: true,
-        data: result
+        data: result.data  // Extract the data field from backend response
       }
     } catch (error) {
       console.error('Prompt enrichment failed:', error)

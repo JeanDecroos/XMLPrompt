@@ -104,23 +104,19 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
         </div>
       )}
       
-      {compact && (
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-medium text-gray-700 flex items-center">
-            <Cpu className="w-4 h-4 mr-2 text-primary-600" />
-            AI Model Selection
-          </h4>
-        </div>
-      )}
+
       
-      {/* Semantic Routing Recommendation Display */}
-      {modelRecommendation && (
-        <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
-          <div className="flex items-start justify-between">
+      {/* Model Recommendation & Guidance */}
+      {modelRecommendation ? (
+        <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start space-x-3">
+            <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Star className="w-3 h-3 text-white fill-current" />
+            </div>
             <div className="flex-1">
               <div className="flex items-center mb-2">
-                <Star className="w-4 h-4 text-yellow-500 fill-current mr-2" />
-                <span className="text-sm font-medium text-blue-900">Smart Recommendation</span>
+                <span className="text-sm font-medium text-blue-900">We suggest: </span>
+                <span className="text-sm font-bold text-blue-900 ml-1">{modelRecommendation.primary.model.name}</span>
                 <span className={`ml-2 px-2 py-0.5 text-xs rounded-full ${
                   modelRecommendation.primary.confidence >= 0.8 
                     ? 'bg-green-100 text-green-700' 
@@ -128,26 +124,45 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
                     ? 'bg-yellow-100 text-yellow-700'
                     : 'bg-orange-100 text-orange-700'
                 }`}>
-                  {(modelRecommendation.primary.confidence * 100).toFixed(0)}% confidence
+                  {(modelRecommendation.primary.confidence * 100).toFixed(0)}% match
                 </span>
               </div>
               <p className="text-sm text-blue-800 mb-2">
-                <strong>{modelRecommendation.primary.model.name}</strong> - {modelRecommendation.primary.reasoning}
+                {modelRecommendation.primary.reasoning}
+              </p>
+              <p className="text-xs text-blue-700 italic">
+                💡 You can always change this selection below
               </p>
               {modelRecommendation.alternatives.length > 0 && (
-                <details className="text-xs text-blue-700">
-                  <summary className="cursor-pointer hover:text-blue-800">
-                    View {modelRecommendation.alternatives.length} alternatives
+                <details className="text-xs text-blue-700 mt-2">
+                  <summary className="cursor-pointer hover:text-blue-800 select-none">
+                    View {modelRecommendation.alternatives.length} alternative{modelRecommendation.alternatives.length > 1 ? 's' : ''}
                   </summary>
                   <div className="mt-2 space-y-1 pl-4 border-l-2 border-blue-200">
                     {modelRecommendation.alternatives.slice(0, 2).map((alt, index) => (
-                      <div key={index}>
+                      <div key={index} className="text-blue-600">
                         <strong>{alt.model.name}</strong> ({(alt.score * 100).toFixed(0)}% match) - {alt.reasoning}
                       </div>
                     ))}
                   </div>
                 </details>
               )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="mb-4 p-3 bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-200 rounded-lg">
+          <div className="flex items-center space-x-3">
+            <div className="w-5 h-5 rounded-full bg-gray-400 flex items-center justify-center">
+              <Star className="w-3 h-3 text-white" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">GPT-4o</span> is selected by default
+              </p>
+              <p className="text-xs text-gray-600 mt-1">
+                💡 You can change this selection based on your specific needs
+              </p>
             </div>
           </div>
         </div>
@@ -283,18 +298,7 @@ const ModelSelector = ({ selectedModel, onModelChange, suggestedModelId, modelRe
         )}
       </div>
 
-      {/* Simple Summary */}
-      {currentModel && (
-        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
-          <div className="text-sm text-gray-700">
-            <strong className="text-gray-900">{currentModel.name}</strong> supports up to{' '}
-            <strong className="text-blue-700">{currentModel.contextWindow?.toLocaleString()}</strong> tokens
-            {currentModel.features?.multimodal && (
-              <span className="text-blue-600 font-medium">• Multimodal</span>
-            )}
-          </div>
-        </div>
-      )}
+
     </div>
   )
 }

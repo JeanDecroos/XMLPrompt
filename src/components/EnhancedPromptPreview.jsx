@@ -20,10 +20,30 @@ const EnhancedPromptPreview = ({
   isPro,
   formData,
   onOpenHistory,
-  savedPrompt
+  savedPrompt,
+  hasEnhancedCurrentInputs
 }) => {
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState(hasEnrichment ? 'enriched' : 'raw')
+  
+  // Auto-switch to enhanced tab when enrichment completes
+  React.useEffect(() => {
+    if (hasEnrichment && enrichedPrompt) {
+      console.log('🔄 Auto-switching to enriched tab', { hasEnrichment, enrichedPrompt: !!enrichedPrompt })
+      setActiveTab('enriched')
+    }
+  }, [hasEnrichment, enrichedPrompt])
+  
+  // Initialize tab to enhanced when component receives enhanced prompt
+  React.useEffect(() => {
+    if (enrichedPrompt && !rawPrompt) {
+      setActiveTab('enriched')
+    } else if (enrichedPrompt && rawPrompt) {
+      setActiveTab('enriched') // Default to enhanced when both exist
+    }
+  }, [enrichedPrompt, rawPrompt])
+  
+
   const [saving, setSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState(null)
   const [saveError, setSaveError] = useState(null)
@@ -115,11 +135,21 @@ const EnhancedPromptPreview = ({
   const renderPromptContent = (prompt, isEnhanced = false) => {
     return (
       <div className="space-y-3">
-        <div className="bg-gray-50 rounded-lg p-4 border min-h-[200px]">
+        <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 min-h-[320px]">
           {prompt ? (
-            <pre className="font-mono text-sm leading-relaxed whitespace-pre-wrap text-gray-800 overflow-x-auto">
-              {prompt}
-            </pre>
+            <div className="relative">
+              {isEnhanced && (
+                <div className="absolute top-2 right-2 z-10">
+                  <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full border border-green-200">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    Enhanced
+                  </span>
+                </div>
+              )}
+              <pre className="font-mono text-sm leading-relaxed whitespace-pre-wrap text-gray-800 overflow-x-auto">
+                <code className="language-xml">{prompt}</code>
+              </pre>
+            </div>
           ) : (
             <div className="flex items-center justify-center h-32 text-gray-500">
               {isEnriching ? (
@@ -205,12 +235,17 @@ const EnhancedPromptPreview = ({
   }
 
   return (
-    <div className="card p-6">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h3 className="text-xl font-semibold text-gray-900 flex items-center">
             <Eye className="w-5 h-5 mr-2 text-blue-600" />
             Generated Prompts
+            {enrichedPrompt && (
+              <span className="ml-2 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                ✨ Enhanced
+              </span>
+            )}
           </h3>
           <p className="text-sm text-gray-600 mt-1">
             {currentModel && `Optimized for ${currentModel.name}`}
@@ -237,13 +272,24 @@ const EnhancedPromptPreview = ({
                   Enhanced
                 </span>
               )}
-              {!hasEnrichment && onEnrichNow && (
+              {!hasEnrichment && (
                 <button
                   onClick={onEnrichNow}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm"
+                  disabled={!onEnrichNow || hasEnhancedCurrentInputs}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-blue-600 disabled:hover:to-purple-600"
+                  title={hasEnhancedCurrentInputs ? 'Already enhanced - edit inputs to enhance again' : 'Enhance this prompt'}
                 >
-                  <Sparkles className="w-4 h-4 mr-1 inline" />
-                  Enhance Prompt
+                  {hasEnhancedCurrentInputs ? (
+                    <>
+                      <Check className="w-4 h-4 mr-1 inline" />
+                      Enhanced
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-1 inline" />
+                      Enhance Prompt
+                    </>
+                  )}
                 </button>
               )}
             </div>
@@ -280,8 +326,8 @@ const EnhancedPromptPreview = ({
         </div>
       )}
 
-      {/* Tab Navigation */}
-      {rawPrompt && (
+      {/* Tab Navigation - Only show when we have both raw and enhanced prompts */}
+      {rawPrompt && enrichedPrompt && hasEnrichment && (
         <div className="flex space-x-1 mb-4 bg-gray-100 p-1 rounded-lg">
           <button
             onClick={() => setActiveTab('raw')}
@@ -294,28 +340,68 @@ const EnhancedPromptPreview = ({
             <Code className="w-4 h-4 mr-1 inline" />
             Basic Prompt
           </button>
-          {(enrichedPrompt || hasEnrichment) && (
-            <button
-              onClick={() => setActiveTab('enriched')}
-              className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
-                activeTab === 'enriched'
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <Sparkles className="w-4 h-4 mr-1 inline" />
-              Enhanced Prompt
-            </button>
-          )}
+          <button
+            onClick={() => setActiveTab('enriched')}
+            className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+              activeTab === 'enriched'
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 mr-1 inline" />
+            Enhanced Prompt
+          </button>
         </div>
       )}
 
       {/* Content */}
-      {activeTab === 'raw' && renderPromptContent(rawPrompt)}
-      {activeTab === 'enriched' && renderPromptContent(enrichedPrompt || rawPrompt, true)}
+      {enrichedPrompt ? (
+        // ALWAYS show enhanced prompt when available
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-sm font-medium text-green-700 bg-green-100 px-3 py-1 rounded-full flex items-center">
+              <Sparkles className="w-3 h-3 mr-1" />
+              Enhanced XML Prompt from OpenAI
+            </span>
+            <span className="text-xs text-gray-500">
+              {enrichedPrompt.length} characters
+            </span>
+          </div>
+          {renderPromptContent(enrichedPrompt, true)}
+        </div>
+      ) : rawPrompt ? (
+        // Show raw prompt when no enhancement is available
+        <div>
+          <div className="mb-3">
+            <span className="text-sm font-medium text-blue-700 bg-blue-100 px-3 py-1 rounded-full flex items-center">
+              <FileText className="w-3 h-3 mr-1" />
+              Basic Prompt
+            </span>
+          </div>
+          {renderPromptContent(rawPrompt)}
+        </div>
+      ) : (
+        // Empty state when no prompt is generated
+        <div className="flex flex-col items-center justify-center h-64 text-center">
+          <AlertCircle className="w-12 h-12 text-gray-400 mb-4" />
+          <h4 className="text-lg font-medium text-gray-700 mb-2">
+            Complete the form to generate a prompt
+          </h4>
+          <p className="text-gray-500 max-w-md">
+            Fill in the required fields (Role and Task Description) to see your generated prompt here.
+          </p>
+          {validation.errors && validation.errors.length > 0 && (
+            <div className="mt-4 text-sm text-red-600">
+              Missing: {validation.errors.join(', ')}
+            </div>
+          )}
+        </div>
+      )}
+
+
 
       {/* Enhancement Results */}
-      {hasEnrichment && enrichmentResult && activeTab === 'enriched' && (
+      {hasEnrichment && enrichmentResult && (enrichedPrompt || activeTab === 'enriched') && (
         <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <h4 className="font-medium text-blue-900 mb-2 flex items-center">
             <Sparkles className="w-4 h-4 mr-1" />
@@ -362,23 +448,7 @@ const EnhancedPromptPreview = ({
         </div>
       )}
 
-      {/* Empty State */}
-      {!validation.isValid && (
-        <div className="flex flex-col items-center justify-center h-64 text-center">
-          <AlertCircle className="w-12 h-12 text-gray-400 mb-4" />
-          <h4 className="text-lg font-medium text-gray-700 mb-2">
-            Complete the form to generate a prompt
-          </h4>
-          <p className="text-gray-500 max-w-md">
-            Fill in the required fields (Role and Task Description) to see your generated prompt here.
-          </p>
-          {validation.errors.length > 0 && (
-            <div className="mt-4 text-sm text-red-600">
-              Missing: {validation.errors.join(', ')}
-            </div>
-          )}
-        </div>
-      )}
+
 
       {/* Share Modal */}
       <SharePromptModal

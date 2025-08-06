@@ -3,6 +3,140 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Phase 2: Enhanced Animations */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Form field focus enhancement */
+.form-field-enhanced {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.form-field-enhanced:focus {
+  @apply ring-2 ring-blue-500 ring-opacity-50 border-blue-500 shadow-lg;
+  transform: translateY(-1px);
+}
+
+/* Enhanced placeholder styling for better contrast */
+.form-field-enhanced::placeholder {
+  color: #374151 !important; /* text-gray-700 - much darker for better contrast */
+  opacity: 1 !important;
+  font-weight: 400 !important;
+}
+
+.form-field-enhanced:focus::placeholder {
+  color: #6b7280 !important; /* text-gray-500 */
+  opacity: 0.8 !important;
+}
+
+/* Specific placeholder styling for different field types */
+textarea.form-field-enhanced::placeholder,
+input.form-field-enhanced::placeholder {
+  color: #374151 !important; /* text-gray-700 - much darker */
+  font-style: italic !important;
+  opacity: 1 !important;
+  font-weight: 400 !important;
+}
+
+/* Force darker placeholder for all form fields */
+input::placeholder,
+textarea::placeholder {
+  color: #374151 !important; /* text-gray-700 */
+  opacity: 1 !important;
+}
+
+/* Ensure input text is dark and readable */
+input.form-field-enhanced,
+textarea.form-field-enhanced {
+  color: #111827 !important; /* text-gray-900 - very dark for input text */
+  font-weight: 400 !important;
+}
+
+/* Ensure text is dark when typing */
+input:not(:placeholder-shown),
+textarea:not(:placeholder-shown) {
+  color: #111827 !important; /* text-gray-900 - very dark */
+}
+
+/* Force dark text for all form inputs */
+input,
+textarea {
+  color: #111827 !important; /* text-gray-900 */
+}
+
+/* Additional specificity for task description field */
+textarea[placeholder*="task"],
+textarea[placeholder*="Task"],
+input[placeholder*="task"],
+input[placeholder*="Task"] {
+  color: #374151 !important;
+}
+
+textarea[placeholder*="task"]::placeholder,
+textarea[placeholder*="Task"]::placeholder,
+input[placeholder*="task"]::placeholder,
+input[placeholder*="Task"]::placeholder {
+  color: #374151 !important; /* text-gray-700 - much darker */
+  opacity: 1 !important;
+  font-weight: 400 !important;
+}
+
+/* Role card selection animation */
+.role-selected {
+  animation: bounceIn 0.6s ease-out;
+}
+
+/* Contextual hint slide-in */
+.contextual-hint {
+  animation: slideInRight 0.4s ease-out;
+}
+
 :root {
   /* AI-Tech Color Palette */
   --primary-50: #f0f9ff;
@@ -47,6 +181,24 @@
   --shadow-glow: 0 0 20px rgb(99 102 241 / 0.3);
   --shadow-glow-lg: 0 0 40px rgb(99 102 241 / 0.2);
   
+  /* Dynamic Background System */
+  --bg-base: #ffffff;
+  --bg-gradient-start: #fefefe;
+  --bg-gradient-mid: #f8fafc;
+  --bg-gradient-end: #f1f5f9;
+  
+  /* Scroll-triggered color transitions - Enhanced visibility */
+  --scroll-bg-0: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+  --scroll-bg-25: linear-gradient(135deg, #fefefe 0%, #f0f9ff 50%, #f1f5f9 100%);
+  --scroll-bg-50: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 30%, #e0f2fe 100%);
+  --scroll-bg-75: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 20%, #93c5fd 60%, #e0f2fe 100%);
+  --scroll-bg-100: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 40%, #c4b5fd 80%, #ddd6fe 100%);
+  
+  /* Subtle accent gradients */
+  --accent-gradient-blue: linear-gradient(135deg, rgba(14, 165, 233, 0.03) 0%, rgba(56, 189, 248, 0.02) 100%);
+  --accent-gradient-purple: linear-gradient(135deg, rgba(139, 92, 246, 0.03) 0%, rgba(168, 85, 247, 0.02) 100%);
+  --accent-gradient-warm: linear-gradient(135deg, rgba(251, 146, 60, 0.02) 0%, rgba(249, 115, 22, 0.01) 100%);
+
   /* Goal-First Selector Colors */
   --goal-blue: #3b82f6;
   --goal-green: #10b981;
@@ -69,19 +221,79 @@
   --radius-2xl: 1.5rem;
 }
 
+/* Register custom properties for smooth gradient animation */
+@property --grad-start {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #f8fafc;
+}
+@property --grad-mid {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #f1f5f9;
+}
+@property --grad-end {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #e0f2fe;
+}
+
+/* Keyframes now animate the color variables, not the background itself */
+@keyframes scroll-background {
+  0% {
+    --grad-start: #f8fafc;
+    --grad-mid: #f1f5f9;
+    --grad-end: #e0f2fe;
+  }
+  25% {
+    --grad-start: #e0f2fe;
+    --grad-mid: #dbeafe;
+    --grad-end: #c4b5fd;
+  }
+  50% {
+    --grad-start: #dbeafe;
+    --grad-mid: #c4b5fd;
+    --grad-end: #a78bfa;
+  }
+  75% {
+    --grad-start: #c4b5fd;
+    --grad-mid: #a78bfa;
+    --grad-end: #8b5cf6;
+  }
+  100% {
+    --grad-start: #a78bfa;
+    --grad-mid: #8b5cf6;
+    --grad-end: #7c3aed;
+  }
+}
+
 @layer base {
-  * {
-    @apply border-gray-200;
+  html {
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    /* The background now uses the animatable variables */
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-mid), var(--grad-end));
+    background-attachment: fixed;
+    /* Link the animation to the scroll timeline */
+    animation: scroll-background linear;
+    animation-timeline: scroll(root);
+  }
+
+  body, #root {
+    min-height: 100%; /* Use min-height here as well */
+    margin: 0;
+    padding: 0;
+    background: transparent !important;
   }
   
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    @apply bg-gradient-to-br from-slate-50 via-blue-50/40 to-purple-50/30 text-gray-900;
+    color: #0f172a; /* Replaces @apply text-gray-900 */
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    min-height: 100vh;
   }
-  
-  /* Enhanced background pattern */
+
+  /* Subtle accent overlays that enhance scroll backgrounds */
   body::before {
     content: '';
     position: fixed;
@@ -90,11 +302,20 @@
     width: 100%;
     height: 100%;
     background: 
-      radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 40% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
-    z-index: -1;
+      radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.02) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.02) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(56, 189, 248, 0.01) 0%, transparent 50%);
     pointer-events: none;
+    z-index: -1;
+    opacity: 0.6;
+    transition: opacity 0.8s ease-in-out;
+  }
+
+  /* Enhanced overlay on scroll */
+  body.scroll-50::before,
+  body.scroll-75::before,
+  body.scroll-100::before {
+    opacity: 0.8;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -1552,6 +1773,70 @@ html {
 
 .scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
   background-color: rgba(209, 213, 219, 0.5);
+}
+
+/* Dynamic Background Utilities */
+@layer utilities {
+  .bg-scroll-aware {
+    background: transparent;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .card-scroll-enhanced {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .card-scroll-enhanced:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(14, 165, 233, 0.1);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  }
+
+  .text-scroll-enhanced {
+    color: rgb(15, 23, 42);
+    transition: color 0.3s ease;
+  }
+
+  body.scroll-75 .text-scroll-enhanced,
+  body.scroll-100 .text-scroll-enhanced {
+    color: rgb(30, 41, 59);
+  }
+
+  /* Responsive behavior for mobile devices */
+  @media (max-width: 768px) {
+    .card-scroll-enhanced {
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+  }
+
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    body {
+      transition: none;
+    }
+    
+    .card-scroll-enhanced {
+      transition: none;
+    }
+    
+    body::before {
+      transition: none;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    body.scroll-75,
+    body.scroll-100 {
+      background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%) !important;
+    }
+  }
 }
 
 .scrollbar-thumb-gray-300::-webkit-scrollbar-thumb:hover {
