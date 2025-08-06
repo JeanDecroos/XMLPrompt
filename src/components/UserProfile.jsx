@@ -7,6 +7,15 @@ import {
   CheckCircle, AlertCircle, RefreshCw, LogOut, Bell, Globe, ChevronRight, Crown, Sparkles
 } from 'lucide-react'
 
+// Import settings modals
+import NotificationsModal from './settings/NotificationsModal'
+import PrivacyModal from './settings/PrivacyModal'
+import ExportDataModal from './settings/ExportDataModal'
+import TwoFactorModal from './settings/TwoFactorModal'
+import LoginHistoryModal from './settings/LoginHistoryModal'
+import PaymentMethodsModal from './settings/PaymentMethodsModal'
+import BillingHistoryModal from './settings/BillingHistoryModal'
+
 export default function UserProfile({ stats }) {
   const { user, signOut } = useAuth()
   const [activeTab, setActiveTab] = useState('overview')
@@ -16,6 +25,15 @@ export default function UserProfile({ stats }) {
   const [subscriptionTier, setSubscriptionTier] = useState(SUBSCRIPTION_TIERS.FREE)
   const [isPro, setIsPro] = useState(false)
   const [loading, setLoading] = useState(true)
+  
+  // Modal states
+  const [notificationsModal, setNotificationsModal] = useState(false)
+  const [privacyModal, setPrivacyModal] = useState(false)
+  const [exportDataModal, setExportDataModal] = useState(false)
+  const [twoFactorModal, setTwoFactorModal] = useState(false)
+  const [loginHistoryModal, setLoginHistoryModal] = useState(false)
+  const [paymentMethodsModal, setPaymentMethodsModal] = useState(false)
+  const [billingHistoryModal, setBillingHistoryModal] = useState(false)
 
   useEffect(() => {
     const checkSubscription = async () => {
@@ -253,21 +271,30 @@ export default function UserProfile({ stats }) {
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <h3 className="font-semibold text-gray-900 mb-3">Account Settings</h3>
         <div className="space-y-3">
-          <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+          <button 
+            onClick={() => setNotificationsModal(true)}
+            className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
+          >
             <div className="flex items-center space-x-3">
               <Bell className="w-5 h-5 text-gray-600" />
               <span className="text-sm text-gray-700">Notifications</span>
             </div>
             <ChevronRight className="w-4 h-4 text-gray-400" />
           </button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+          <button 
+            onClick={() => setPrivacyModal(true)}
+            className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
+          >
             <div className="flex items-center space-x-3">
               <Globe className="w-5 h-5 text-gray-600" />
               <span className="text-sm text-gray-700">Privacy Settings</span>
             </div>
             <ChevronRight className="w-4 h-4 text-gray-400" />
           </button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+          <button 
+            onClick={() => setExportDataModal(true)}
+            className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
+          >
             <div className="flex items-center space-x-3">
               <Download className="w-5 h-5 text-gray-600" />
               <span className="text-sm text-gray-700">Export Data</span>
@@ -281,7 +308,10 @@ export default function UserProfile({ stats }) {
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <h3 className="font-semibold text-gray-900 mb-3">Security</h3>
         <div className="space-y-3">
-          <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+          <button 
+            onClick={() => setTwoFactorModal(true)}
+            className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
+          >
             <div className="flex items-center space-x-3">
               <Shield className="w-5 h-5 text-gray-600" />
               <span className="text-sm text-gray-700">Two-Factor Authentication</span>
@@ -291,7 +321,10 @@ export default function UserProfile({ stats }) {
               <ChevronRight className="w-4 h-4 text-gray-400" />
             </div>
           </button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+          <button 
+            onClick={() => setLoginHistoryModal(true)}
+            className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
+          >
             <div className="flex items-center space-x-3">
               <Calendar className="w-5 h-5 text-gray-600" />
               <span className="text-sm text-gray-700">Login History</span>
@@ -305,14 +338,20 @@ export default function UserProfile({ stats }) {
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <h3 className="font-semibold text-gray-900 mb-3">Billing & Subscription</h3>
         <div className="space-y-3">
-          <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+          <button 
+            onClick={() => setPaymentMethodsModal(true)}
+            className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
+          >
             <div className="flex items-center space-x-3">
               <CreditCard className="w-5 h-5 text-gray-600" />
               <span className="text-sm text-gray-700">Payment Methods</span>
             </div>
             <ChevronRight className="w-4 h-4 text-gray-400" />
           </button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+          <button 
+            onClick={() => setBillingHistoryModal(true)}
+            className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
+          >
             <div className="flex items-center space-x-3">
               <Download className="w-5 h-5 text-gray-600" />
               <span className="text-sm text-gray-700">Billing History</span>
@@ -362,6 +401,36 @@ export default function UserProfile({ stats }) {
         {activeTab === 'usage' && renderUsage()}
         {activeTab === 'settings' && renderSettings()}
       </div>
+
+      {/* Settings Modals */}
+      <NotificationsModal 
+        isOpen={notificationsModal} 
+        onClose={() => setNotificationsModal(false)} 
+      />
+      <PrivacyModal 
+        isOpen={privacyModal} 
+        onClose={() => setPrivacyModal(false)} 
+      />
+      <ExportDataModal 
+        isOpen={exportDataModal} 
+        onClose={() => setExportDataModal(false)} 
+      />
+      <TwoFactorModal 
+        isOpen={twoFactorModal} 
+        onClose={() => setTwoFactorModal(false)} 
+      />
+      <LoginHistoryModal 
+        isOpen={loginHistoryModal} 
+        onClose={() => setLoginHistoryModal(false)} 
+      />
+      <PaymentMethodsModal 
+        isOpen={paymentMethodsModal} 
+        onClose={() => setPaymentMethodsModal(false)} 
+      />
+      <BillingHistoryModal 
+        isOpen={billingHistoryModal} 
+        onClose={() => setBillingHistoryModal(false)} 
+      />
     </div>
   )
 } 
