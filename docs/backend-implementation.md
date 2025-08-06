@@ -1,8 +1,8 @@
-# XMLPrompter Backend Implementation Guide
+# Promptr Backend Implementation Guide
 
 ## 🎯 **Overview**
 
-This document provides a comprehensive guide to the XMLPrompter production-ready backend implementation. The backend is built with Node.js, Express, and Supabase, featuring enterprise-grade architecture with comprehensive API endpoints, authentication, caching, job queues, and monitoring.
+This document provides a comprehensive guide to the Promptr production-ready backend implementation. The backend is built with Node.js, Express, and Supabase, featuring enterprise-grade architecture with comprehensive API endpoints, authentication, caching, job queues, and monitoring.
 
 ## 📋 **Table of Contents**
 
@@ -96,7 +96,7 @@ backend/
 
 1. **Create New Supabase Project**:
    - Go to [supabase.com](https://supabase.com)
-   - Create new project: `xmlprompter-production`
+   - Create new project: `promptr-production`
    - Note your project URL and keys
 
 2. **Run Database Schema**:
@@ -716,7 +716,7 @@ npm run db:reset
 
 ## 🎉 **Conclusion**
 
-This backend implementation provides a robust, scalable foundation for the XMLPrompter application. It includes:
+This backend implementation provides a robust, scalable foundation for the Promptr application. It includes:
 
 - **Enterprise-grade architecture** with proper separation of concerns
 - **Comprehensive API** covering all application features

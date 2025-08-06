@@ -1,8 +1,8 @@
-# XMLPrompter/PromptCraft AI - Complete Technical Documentation
+# Promptr - Complete Technical Documentation
 
 ## 🎯 Executive Summary
 
-**XMLPrompter** (branded as **PromptCraft AI**) is a comprehensive, enterprise-grade AI prompt engineering platform that transforms basic user input into optimized prompts for 50+ AI models. The platform implements a sophisticated three-step process: prompt building, intelligent model selection, and AI-powered prompt refinement with quality scoring.
+**Promptr** is a comprehensive, enterprise-grade AI prompt engineering platform that transforms basic user input into optimized prompts for 50+ AI models. The platform implements a sophisticated three-step process: prompt building, intelligent model selection, and AI-powered prompt refinement with quality scoring.
 
 ### Core Value Proposition
 - **Universal AI Compatibility**: Native support for Claude, GPT, Gemini, DeepSeek, Qwen, and 45+ other models

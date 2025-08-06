@@ -1,7 +1,7 @@
 {
-  "name": "xmlprompter-backend",
+  "name": "promptr-backend",
   "version": "2.0.0",
-  "description": "XMLPrompter Backend API - Production-ready backend for prompt engineering platform",
+      "description": "Promptr Backend API - Production-ready backend for prompt engineering platform",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
@@ -92,16 +92,16 @@
     "openai",
     "anthropic"
   ],
-  "author": "XMLPrompter Team",
+      "author": "Promptr Team",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/xmlprompter-backend.git"
+          "url": "https://github.com/your-org/promptr-backend.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/xmlprompter-backend/issues"
+          "url": "https://github.com/your-org/promptr-backend/issues"
   },
-  "homepage": "https://xmlprompter.com",
+      "homepage": "https://promptr.com",
   "lint-staged": {
     "*.js": [
       "eslint --fix",

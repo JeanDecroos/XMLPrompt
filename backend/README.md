@@ -1,6 +1,6 @@
-# XMLPrompter Backend API
+# Promptr Backend API
 
-> **Production-ready backend for XMLPrompter/PromptCraft AI** - A comprehensive Node.js API server with enterprise-grade features for prompt engineering and AI integration.
+> **Production-ready backend for Promptr** - A comprehensive Node.js API server with enterprise-grade features for prompt engineering and AI integration.
 
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express-4.18+-blue.svg)](https://expressjs.com/)
@@ -185,7 +185,7 @@ FEATURE_PUBLIC_GALLERY=true
 
 ### **1. Create Supabase Project**
 1. Go to [supabase.com](https://supabase.com)
-2. Create new project: `xmlprompter-production`
+2. Create new project: `promptr-production`
 3. Note your project URL and keys
 
 ### **2. Run Database Schema**
@@ -304,7 +304,7 @@ pm2 start ecosystem.config.js
 ### **Docker**
 ```bash
 # Build Docker image
-docker build -t xmlprompter-backend .
+docker build -t promptr-backend .
 
 # Run with Docker Compose
 docker-compose up -d

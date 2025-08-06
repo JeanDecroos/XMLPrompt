@@ -19,7 +19,7 @@ config({ path: path.resolve(__dirname, '..', '.env.local') })
 const supabaseUrl = process.env.VITE_SUPABASE_URL
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY
 
-console.log('🔐 XMLPrompter Frontend Authentication Test')
+  console.log('🔐 Promptr Frontend Authentication Test')
 console.log('=' .repeat(60))
 
 async function testFrontendAuth() {

@@ -50,7 +50,7 @@ const Header = () => {
                 </div>
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">PromptCraft</h1>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Promptr</h1>
                 <p className="text-sm text-gray-500 font-medium hidden sm:block">AI Prompt Builder</p>
               </div>
             </Link>

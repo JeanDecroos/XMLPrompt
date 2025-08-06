@@ -19,7 +19,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJ
 // JWT Secret
 const jwtSecret = 'FKqIjknWVw736dGhQokNzTANr8LCScfnUSRyXmpBP1aAClyiOpj5YUvrSsXeVK2H1dTlDqaso9ghTj3AqBKI2A=='
 
-console.log('🚀 XMLPrompter Supabase Integration Test')
+  console.log('🚀 Promptr Supabase Integration Test')
 console.log('=' .repeat(50))
 
 // Test basic connection

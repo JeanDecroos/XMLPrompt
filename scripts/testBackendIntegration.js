@@ -22,7 +22,7 @@ const supabaseUrl = 'https://nxwflnxspsokscfhuaqr.supabase.co'
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54d2ZsbnhzcHNva3NjZmh1YXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3Njk5MzQsImV4cCI6MjA2NjM0NTkzNH0.jMWf2BEfI_4gAtMO9yzv3Nw5QWiIhyPanANP5px51gA'
 const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54d2ZsbnhzcHNva3NjZmh1YXFyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDc2OTkzNCwiZXhwIjoyMDY2MzQ1OTM0fQ.CbT3iYiaghBJ_lJPSAXFVMKyJtTVJoFL-61x4HHMxi0'
 
-console.log('🔧 XMLPrompter Backend Integration Test')
+  console.log('🔧 Promptr Backend Integration Test')
 console.log('=' .repeat(50))
 
 // Test backend configuration
@@ -172,7 +172,7 @@ try {
     const rootResponse = await fetch('http://localhost:3002/')
     const rootData = await rootResponse.json()
     
-    if (rootData.name && rootData.name.includes('XMLPrompter')) {
+    if (rootData.name && rootData.name.includes('Promptr')) {
       console.log('✅ Backend API endpoints working')
       apiEndpointsWorking = true
     } else {

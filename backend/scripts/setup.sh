@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# XMLPrompter Backend Setup Script
-# This script automates the setup process for the XMLPrompter backend
+# Promptr Backend Setup Script
+# This script automates the setup process for the Promptr backend
 
 set -e  # Exit on any error
 
@@ -210,7 +210,7 @@ start_dev_server() {
 
 # Display help
 show_help() {
-    echo "XMLPrompter Backend Setup Script"
+    echo "Promptr Backend Setup Script"
     echo ""
     echo "Usage: $0 [OPTION]"
     echo ""
@@ -227,7 +227,7 @@ show_help() {
 # Main setup process
 main_setup() {
     echo ""
-    echo "🚀 XMLPrompter Backend Setup"
+    echo "🚀 Promptr Backend Setup"
     echo "=============================="
     echo ""
     

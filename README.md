@@ -40,7 +40,7 @@ A modern, user-friendly web application that helps users generate optimized XML 
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd XMLPrompter
+cd Promptr
 ```
 
 2. Install dependencies:

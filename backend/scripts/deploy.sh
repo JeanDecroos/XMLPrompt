@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# XMLPrompter Backend Deployment Script
+# Promptr Backend Deployment Script
 # This script sets up the production-ready backend API
 
 set -e  # Exit on any error
 
-echo "🚀 XMLPrompter Backend Deployment"
+echo "🚀 Promptr Backend Deployment"
 echo "=================================="
 
 # Colors for output
@@ -38,7 +38,7 @@ if [ ! -f "package.json" ]; then
     exit 1
 fi
 
-print_status "Starting XMLPrompter backend deployment..."
+print_status "Starting Promptr backend deployment..."
 
 # Step 1: Install dependencies
 print_status "Installing dependencies..."
@@ -187,7 +187,7 @@ echo ""
 echo "🎉 DEPLOYMENT COMPLETE!"
 echo "======================="
 echo ""
-print_success "XMLPrompter Backend API is ready to start"
+print_success "Promptr Backend API is ready to start"
 echo ""
 echo "📋 Next Steps:"
 echo "1. Start the server:"

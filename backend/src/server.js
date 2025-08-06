@@ -1,5 +1,5 @@
 /**
- * XMLPrompter Backend API Server
+ * Promptr Backend API Server
  * Production-ready Express.js server with comprehensive middleware
  */
 
@@ -255,7 +255,7 @@ async function startServer() {
 
     // Start the server
     const server = app.listen(config.server.port, config.server.host, () => {
-      logger.info('🚀 XMLPrompter Backend API started')
+      logger.info('🚀 Promptr Backend API started')
       logger.info(`📍 Server running on http://${config.server.host}:${config.server.port}`)
       logger.info(`🌍 Environment: ${config.env}`)
       

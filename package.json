@@ -1,5 +1,5 @@
 {
-  "name": "promptcraft-ai",
+  "name": "promptr",
   "version": "1.0.0",
   "description": "Universal AI Prompt Optimizer - Create optimized prompts for any AI model with intelligent format adaptation",
   "type": "module",

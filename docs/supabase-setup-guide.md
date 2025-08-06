@@ -1,7 +1,7 @@
 # Supabase Project Setup Guide
 
 ## 🎯 **Project Overview**
-This guide walks through setting up a production-ready Supabase project for XMLPrompter/PromptCraft AI with comprehensive backend functionality.
+This guide walks through setting up a production-ready Supabase project for Promptr with comprehensive backend functionality.
 
 ## 📋 **Prerequisites**
 - Supabase account (free tier is sufficient for development)
@@ -16,7 +16,7 @@ This guide walks through setting up a production-ready Supabase project for XMLP
 2. Click "New Project"
 3. Choose organization
 4. Project details:
-   - **Name**: `xmlprompter-production`
+   - **Name**: `promptr-production`
    - **Database Password**: Generate strong password (save securely)
    - **Region**: Choose closest to your users
    - **Pricing Plan**: Start with Free, upgrade as needed

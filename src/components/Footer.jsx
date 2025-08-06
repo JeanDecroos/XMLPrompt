@@ -12,7 +12,7 @@ const Footer = () => {
               <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-purple-700 rounded-xl">
                 <Wand2 className="w-5 h-5 text-white" />
               </div>
-              <h3 className="text-lg font-bold text-gradient">PromptCraft AI</h3>
+              <h3 className="text-lg font-bold text-gradient">Promptr</h3>
             </div>
             <p className="text-gray-600 text-sm leading-relaxed">
               Professional AI prompt engineering made simple and accessible.
@@ -60,7 +60,7 @@ const Footer = () => {
                 <Twitter className="w-4 h-4" />
               </a>
               <a 
-                href="mailto:hello@promptcraft.ai" 
+                href="mailto:hello@promptr.com" 
                 className="p-2 bg-white/60 rounded-lg border border-gray-200/60 text-gray-500 hover:text-gray-700 transition-colors"
                 aria-label="Email"
               >
@@ -74,7 +74,7 @@ const Footer = () => {
         <div className="mt-8 pt-6 border-t border-white/20">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <div className="flex items-center space-x-4 text-sm text-gray-500">
-              <span>© 2024 PromptCraft AI</span>
+              <span>© 2024 Promptr</span>
               <a href="#privacy" className="hover:text-gray-700 transition-colors">Privacy</a>
               <a href="#terms" className="hover:text-gray-700 transition-colors">Terms</a>
             </div>

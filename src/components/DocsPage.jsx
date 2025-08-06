@@ -169,17 +169,17 @@ curl -X POST https://api.promptcraft.ai/v1/prompts/generate \\
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-4">Getting Started</h1>
               <p className="text-lg text-gray-600 mb-6">
-                Welcome to PromptCraft AI! This guide will help you create effective AI prompts and get the most out of our platform.
+                Welcome to Promptr! This guide will help you create effective AI prompts and get the most out of our platform.
               </p>
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
               <div className="flex items-center mb-3">
                 <Info className="w-5 h-5 text-blue-600 mr-2" />
-                <h3 className="text-lg font-semibold text-blue-900">What is PromptCraft AI?</h3>
+                <h3 className="text-lg font-semibold text-blue-900">What is Promptr?</h3>
               </div>
               <p className="text-blue-800">
-                PromptCraft AI is a professional prompt engineering platform that helps you create, optimize, and manage AI prompts for various use cases. Our smart routing system automatically selects the best AI model for your specific task.
+                Promptr is a professional prompt engineering platform that helps you create, optimize, and manage AI prompts for various use cases. Our smart routing system automatically selects the best AI model for your specific task.
               </p>
             </div>
 
@@ -271,7 +271,7 @@ curl -X POST https://api.promptcraft.ai/v1/prompts/generate \\
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-4">API Reference</h1>
               <p className="text-lg text-gray-600 mb-6">
-                Complete reference for the PromptCraft AI REST API.
+                Complete reference for the Promptr REST API.
               </p>
             </div>
 
@@ -335,7 +335,7 @@ curl -X POST https://api.promptcraft.ai/v1/prompts/generate \\
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-4">JavaScript SDK</h1>
               <p className="text-lg text-gray-600 mb-6">
-                Official JavaScript/TypeScript SDK for PromptCraft AI.
+                Official JavaScript/TypeScript SDK for Promptr.
               </p>
             </div>
 
@@ -396,7 +396,7 @@ curl -X POST https://api.promptcraft.ai/v1/prompts/generate \\
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Documentation</h1>
-              <p className="text-gray-600 mt-1">Everything you need to master PromptCraft AI</p>
+                              <p className="text-gray-600 mt-1">Everything you need to master Promptr</p>
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />

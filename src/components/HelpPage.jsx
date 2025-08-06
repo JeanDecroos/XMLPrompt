@@ -144,7 +144,7 @@ const HelpPage = () => {
           </div>
           <h1 className="text-4xl font-bold mb-4">Help & Support</h1>
           <p className="text-xl text-blue-100">
-            Get the most out of PromptCraft AI with our comprehensive guides and support resources
+            Get the most out of Promptr with our comprehensive guides and support resources
           </p>
         </div>
       </div>
@@ -264,13 +264,13 @@ const HelpPage = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Need More Help?</h3>
               <div className="space-y-4">
                 <a
-                  href="mailto:support@promptcraft.ai"
+                  href="mailto:support@promptr.com"
                   className="flex items-center p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
                 >
                   <Mail className="w-5 h-5 text-blue-600 mr-3" />
                   <div>
                     <div className="font-medium text-blue-900">Email Support</div>
-                    <div className="text-sm text-blue-600">support@promptcraft.ai</div>
+                    <div className="text-sm text-blue-600">support@promptr.com</div>
                   </div>
                 </a>
                 

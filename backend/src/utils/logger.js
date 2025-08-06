@@ -94,7 +94,7 @@ const logger = winston.createLogger({
   level: config.logging.level,
   format: fileFormat,
   defaultMeta: {
-    service: 'xmlprompter-backend',
+    service: 'promptr-backend',
     environment: config.env,
     version: config.app.version
   },

@@ -52,7 +52,7 @@ const configSchema = Joi.object({
   REDIS_URL: Joi.string().default('redis://localhost:6379'),
   REDIS_PASSWORD: Joi.string().allow('').optional(),
   REDIS_DB: Joi.number().default(0),
-  REDIS_KEY_PREFIX: Joi.string().default('xmlprompter:'),
+        REDIS_KEY_PREFIX: Joi.string().default('promptr:'),
 
   // Authentication & Security
   JWT_SECRET: Joi.string().min(32).required(),
@@ -83,7 +83,7 @@ const configSchema = Joi.object({
 
   SENDGRID_API_KEY: Joi.string().optional(),
   SENDGRID_FROM_EMAIL: Joi.string().email().optional(),
-  SENDGRID_FROM_NAME: Joi.string().default('XMLPrompter'),
+        SENDGRID_FROM_NAME: Joi.string().default('Promptr'),
 
   // File Storage
   UPLOAD_DIR: Joi.string().default('uploads'),
@@ -218,7 +218,7 @@ if (error) {
 export const config = {
   env: envVars.NODE_ENV,
   app: {
-    name: 'XMLPrompter Backend API',
+          name: 'Promptr Backend API',
     version: '2.0.0',
     apiVersion: envVars.API_VERSION
   },

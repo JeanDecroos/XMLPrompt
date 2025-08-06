@@ -311,7 +311,7 @@ const SharedPromptViewer = ({ shareId, onBack }) => {
               <div className="flex items-center space-x-4 text-sm text-gray-500">
                 <span className="flex items-center">
                   <Globe className="w-4 h-4 mr-1" />
-                  Shared via XMLPrompter
+                  Shared via Promptr
                 </span>
               </div>
               
@@ -331,7 +331,7 @@ const SharedPromptViewer = ({ shareId, onBack }) => {
           <div className="mt-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 text-white text-center">
             <h3 className="text-xl font-bold mb-2">Want to create prompts like this?</h3>
             <p className="text-blue-100 mb-4">
-              Join XMLPrompter to build, enhance, and share your own AI prompts
+              Join Promptr to build, enhance, and share your own AI prompts
             </p>
             <a
               href="/"
