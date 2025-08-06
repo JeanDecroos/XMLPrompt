@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { SubscriptionService, SUBSCRIPTION_TIERS } from '../services/subscriptionService'
 import { 
   User, Settings, CreditCard, 
   BarChart3, Shield, Download, Calendar, Zap, Edit3, Camera,
-  CheckCircle, AlertCircle, RefreshCw, LogOut, Bell, Globe, ChevronRight
+  CheckCircle, AlertCircle, RefreshCw, LogOut, Bell, Globe, ChevronRight, Crown, Sparkles
 } from 'lucide-react'
 
 export default function UserProfile({ stats }) {
@@ -12,6 +13,30 @@ export default function UserProfile({ stats }) {
   const [isEditing, setIsEditing] = useState(false)
   const [displayName, setDisplayName] = useState(user?.email?.split('@')[0] || '')
   const [showAvatarUpload, setShowAvatarUpload] = useState(false)
+  const [subscriptionTier, setSubscriptionTier] = useState(SUBSCRIPTION_TIERS.FREE)
+  const [isPro, setIsPro] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const checkSubscription = async () => {
+      if (user) {
+        try {
+          const tier = await SubscriptionService.getSubscriptionTier(user)
+          const proStatus = await SubscriptionService.isProUser(user)
+          setSubscriptionTier(tier)
+          setIsPro(proStatus)
+        } catch (error) {
+          console.error('Error checking subscription:', error)
+        } finally {
+          setLoading(false)
+        }
+      } else {
+        setLoading(false)
+      }
+    }
+
+    checkSubscription()
+  }, [user])
 
   if (!user) return null
 
@@ -32,6 +57,28 @@ export default function UserProfile({ stats }) {
   const handleSaveProfile = () => {
     // TODO: Save profile changes to database
     setIsEditing(false)
+  }
+
+  const getPlanDisplayName = (tier) => {
+    switch (tier) {
+      case SUBSCRIPTION_TIERS.PRO:
+        return 'Premium'
+      case SUBSCRIPTION_TIERS.ENTERPRISE:
+        return 'Enterprise'
+      default:
+        return 'Free'
+    }
+  }
+
+  const getPlanColor = (tier) => {
+    switch (tier) {
+      case SUBSCRIPTION_TIERS.PRO:
+        return 'text-purple-600 bg-purple-50 border-purple-200'
+      case SUBSCRIPTION_TIERS.ENTERPRISE:
+        return 'text-blue-600 bg-blue-50 border-blue-200'
+      default:
+        return 'text-gray-600 bg-gray-50 border-gray-200'
+    }
   }
 
   const tabs = [
@@ -82,6 +129,48 @@ export default function UserProfile({ stats }) {
         </button>
       </div>
 
+      {/* Account Status */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
+        <h3 className="font-semibold text-gray-900 mb-3">Account Status</h3>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <span className="text-sm text-gray-700">Active</span>
+          </div>
+          <div className={`px-3 py-1 rounded-full text-sm font-medium border ${getPlanColor(subscriptionTier)}`}>
+            {loading ? 'Loading...' : getPlanDisplayName(subscriptionTier)} Plan
+          </div>
+        </div>
+        
+        {/* Call to Action for Free Users */}
+        {!loading && !isPro && (
+          <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-4 text-white">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Crown className="w-5 h-5" />
+                  <h4 className="font-semibold">Upgrade to Premium</h4>
+                </div>
+                <p className="text-sm text-purple-100 mb-3">
+                  Get unlimited prompts, advanced AI enhancements, and priority support
+                </p>
+                <div className="flex items-center space-x-2 text-xs text-purple-200">
+                  <Sparkles className="w-3 h-3" />
+                  <span>Save 70% - Limited time offer</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold">3 EUR</div>
+                <div className="text-xs text-purple-200">/ month</div>
+                <button className="mt-2 px-4 py-2 bg-white text-purple-600 rounded-lg text-sm font-medium hover:bg-purple-50 transition-colors">
+                  Upgrade Now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-4">
         <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
@@ -95,18 +184,6 @@ export default function UserProfile({ stats }) {
         <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
           <div className="text-2xl font-bold text-gray-900">{s.modelsUsed.length}</div>
           <div className="text-xs text-gray-600">Models Used</div>
-        </div>
-      </div>
-
-      {/* Account Status */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
-        <h3 className="font-semibold text-gray-900 mb-2">Account Status</h3>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-            <span className="text-sm text-gray-700">Active</span>
-          </div>
-          <span className="text-sm text-gray-600">Free Plan</span>
         </div>
       </div>
     </div>
@@ -160,6 +237,11 @@ export default function UserProfile({ stats }) {
               style={{ width: `${Math.min((s.tokensUsed / 4000) * 100, 100)}%` }}
             />
           </div>
+          {!isPro && (
+            <div className="text-xs text-gray-500 text-center">
+              Upgrade to Premium for unlimited tokens
+            </div>
+          )}
         </div>
       </div>
     </div>
