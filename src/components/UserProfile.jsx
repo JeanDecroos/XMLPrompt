@@ -4,7 +4,7 @@ import { SubscriptionService, SUBSCRIPTION_TIERS } from '../services/subscriptio
 import { 
   User, Settings, CreditCard, 
   BarChart3, Shield, Download, Calendar, Zap, Edit3, Camera,
-  CheckCircle, AlertCircle, RefreshCw, LogOut, Bell, Globe, ChevronRight, Crown, Sparkles
+  CheckCircle, AlertCircle, RefreshCw, LogOut, Bell, Globe, ChevronRight, Crown, Sparkles, Palette
 } from 'lucide-react'
 
 // Import settings modals
@@ -15,10 +15,11 @@ import TwoFactorModal from './settings/TwoFactorModal'
 import LoginHistoryModal from './settings/LoginHistoryModal'
 import PaymentMethodsModal from './settings/PaymentMethodsModal'
 import BillingHistoryModal from './settings/BillingHistoryModal'
+import AppearanceModal from './settings/AppearanceModal'
 
-export default function UserProfile({ stats }) {
+export default function UserProfile({ stats, initialTab }) {
   const { user, signOut } = useAuth()
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState(initialTab || 'overview')
   const [isEditing, setIsEditing] = useState(false)
   const [displayName, setDisplayName] = useState(user?.email?.split('@')[0] || '')
   const [showAvatarUpload, setShowAvatarUpload] = useState(false)
@@ -34,6 +35,7 @@ export default function UserProfile({ stats }) {
   const [loginHistoryModal, setLoginHistoryModal] = useState(false)
   const [paymentMethodsModal, setPaymentMethodsModal] = useState(false)
   const [billingHistoryModal, setBillingHistoryModal] = useState(false)
+  const [appearanceModal, setAppearanceModal] = useState(false)
 
   useEffect(() => {
     const checkSubscription = async () => {
@@ -292,6 +294,16 @@ export default function UserProfile({ stats }) {
             <ChevronRight className="w-4 h-4 text-gray-400" />
           </button>
           <button 
+            onClick={() => setAppearanceModal(true)}
+            className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
+          >
+            <div className="flex items-center space-x-3">
+              <Palette className="w-5 h-5 text-gray-600" />
+              <span className="text-sm text-gray-700">Appearance</span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+          </button>
+          <button 
             onClick={() => setExportDataModal(true)}
             className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
           >
@@ -430,6 +442,10 @@ export default function UserProfile({ stats }) {
       <BillingHistoryModal 
         isOpen={billingHistoryModal} 
         onClose={() => setBillingHistoryModal(false)} 
+      />
+      <AppearanceModal 
+        isOpen={appearanceModal} 
+        onClose={() => setAppearanceModal(false)} 
       />
     </div>
   )

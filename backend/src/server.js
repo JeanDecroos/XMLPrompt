@@ -19,9 +19,10 @@ import { database } from './config/database.js'
 import { redis } from './config/redis.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { authMiddleware } from './middleware/auth.js'
-import { rateLimitMiddleware } from './middleware/rateLimit.js'
+import { combinedLimitMiddleware } from './middleware/rateLimit.js'
 import { analyticsMiddleware } from './middleware/analytics.js'
 import { validationMiddleware } from './middleware/validation.js'
+import { securityMonitoringMiddleware, authFailureMonitoring } from './middleware/securityMonitoring.js'
 
 // Route imports
 import healthRoutes from './routes/health.js'
@@ -89,6 +90,38 @@ app.use(cors({
 }))
 
 // ============================================================================
+// SECURITY MIDDLEWARE
+// ============================================================================
+
+// Security headers with helmet
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://js.stripe.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:", "blob:"],
+      connectSrc: ["'self'", "https://api.openai.com", "https://api.anthropic.com", "https://generativelanguage.googleapis.com"],
+      frameSrc: ["'self'", "https://js.stripe.com"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: []
+    }
+  },
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true
+  },
+  xFrameOptions: { action: 'deny' },
+  xContentTypeOptions: true,
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  crossOriginEmbedderPolicy: false, // Disable for development
+  crossOriginOpenerPolicy: { policy: 'same-origin' },
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}))
+
+// ============================================================================
 // BASIC MIDDLEWARE
 // ============================================================================
 
@@ -107,6 +140,9 @@ if (config.env !== 'test') {
     }
   }))
 }
+
+// Security monitoring middleware (tracks security events)
+app.use(securityMonitoringMiddleware)
 
 // Analytics middleware (tracks all requests)
 app.use(analyticsMiddleware)
@@ -149,8 +185,8 @@ app.use(speedLimiter)
 // CUSTOM MIDDLEWARE
 // ============================================================================
 
-// Custom rate limiting (database-backed)
-app.use(rateLimitMiddleware)
+// Custom rate limiting (Redis-backed with express-rate-limit)
+app.use(combinedLimitMiddleware)
 
 // ============================================================================
 // ROUTES
@@ -163,7 +199,7 @@ app.use('/health', healthRoutes)
 const apiRouter = express.Router()
 
 // Public routes (no auth required)
-apiRouter.use('/auth', authRoutes)
+apiRouter.use('/auth', authFailureMonitoring, authRoutes)
 apiRouter.use('/webhooks', webhookRoutes)
 
 // Protected routes (auth required)

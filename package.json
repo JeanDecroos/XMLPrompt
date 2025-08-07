@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "build:extension": "node scripts/build-chrome-extension.js",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "fix-db": "node scripts/fixDatabaseSchema.js",
     "grant-pro": "node scripts/grantProAccess.js",
@@ -49,6 +50,6 @@
     "eslint-plugin-react-refresh": "^0.4.3",
     "postcss": "^8.4.27",
     "tailwindcss": "^3.3.3",
-    "vite": "^4.4.5"
+    "vite": "^6.3.5"
   }
 }

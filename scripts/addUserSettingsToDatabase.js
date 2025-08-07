@@ -77,6 +77,7 @@ async function addUserSettingsToDatabase() {
       'preferences_language TEXT DEFAULT \'en\'',
       'preferences_theme TEXT DEFAULT \'light\' CHECK (preferences_theme IN (\'light\', \'dark\', \'auto\'))',
       'preferences_email_frequency TEXT DEFAULT \'weekly\' CHECK (preferences_email_frequency IN (\'daily\', \'weekly\', \'monthly\', \'never\'))',
+      'preferences_background_animation BOOLEAN DEFAULT TRUE',
       
       // Data export settings
       'export_preferences JSONB DEFAULT \'{"include_prompts": true, "include_usage": true, "include_profile": true, "include_settings": false, "format": "json"}\''
@@ -213,7 +214,8 @@ async function addUserSettingsToDatabase() {
                 'timezone', preferences_timezone,
                 'language', preferences_language,
                 'theme', preferences_theme,
-                'emailFrequency', preferences_email_frequency
+                'emailFrequency', preferences_email_frequency,
+                'backgroundAnimation', preferences_background_animation
               ),
               'export', export_preferences
             ) INTO result

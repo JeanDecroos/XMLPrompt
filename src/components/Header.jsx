@@ -128,13 +128,14 @@ const Header = () => {
                           Profile
                         </Link>
 
-                        <button 
-                          onClick={() => setShowSubscriptionStatus(!showSubscriptionStatus)} 
+                        <Link 
+                          to="/profile?tab=settings"
+                          onClick={() => setIsUserMenuOpen(false)}
                           className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50/80 flex items-center"
                         >
                           <Settings className="w-4 h-4 mr-2" />
                           Account Settings
-                        </button>
+                        </Link>
 
                         {!isPro && (
                           <button 
@@ -224,12 +225,13 @@ const Header = () => {
                       <User className="w-4 h-4 mr-1" />
                       Profile
                     </Link>
-                    <button 
-                      onClick={() => setShowSubscriptionStatus(!showSubscriptionStatus)}
+                    <Link 
+                      to="/profile?tab=settings"
+                      onClick={() => setIsMenuOpen(false)}
                       className="btn btn-secondary btn-sm"
                     >
                       Account Settings
-                    </button>
+                    </Link>
                     <button 
                       onClick={handleSignOut} 
                       className="btn btn-ghost btn-sm text-red-600"
@@ -275,7 +277,7 @@ const Header = () => {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">Account Settings</h2>
+                <h2 className="text-xl font-bold text-gray-900">Subscription Status</h2>
                 <button
                   onClick={() => setShowSubscriptionStatus(false)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"

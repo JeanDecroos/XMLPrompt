@@ -201,15 +201,39 @@ class UserSettingsService {
         throw new Error('User not authenticated')
       }
 
+      const updateData = {
+        updated_at: new Date().toISOString()
+      }
+
+      // Handle standard preferences
+      if (preferences.timezone !== undefined) updateData.preferences_timezone = preferences.timezone
+      if (preferences.language !== undefined) updateData.preferences_language = preferences.language
+      if (preferences.theme !== undefined) updateData.preferences_theme = preferences.theme
+      if (preferences.emailFrequency !== undefined) updateData.preferences_email_frequency = preferences.emailFrequency
+      if (preferences.backgroundAnimation !== undefined) updateData.preferences_background_animation = preferences.backgroundAnimation
+
+      // Handle privacy settings
+      if (preferences.dataRetentionPolicy !== undefined) updateData.data_retention_policy = preferences.dataRetentionPolicy
+      if (preferences.dataAnalyticsOptOut !== undefined) updateData.data_analytics_opt_out = preferences.dataAnalyticsOptOut
+      if (preferences.marketingOptOut !== undefined) updateData.marketing_opt_out = preferences.marketingOptOut
+      if (preferences.dataExportConsent !== undefined) updateData.data_export_consent = preferences.dataExportConsent
+      if (preferences.dataProcessingConsent !== undefined) updateData.data_processing_consent = preferences.dataProcessingConsent
+
+      // Handle GDPR settings
+      if (preferences.gdprConsentGiven !== undefined) {
+        if (preferences.gdprConsentGiven) {
+          updateData.gdpr_consent_given_at = new Date().toISOString()
+          updateData.gdpr_consent_version = '1.0'
+        } else {
+          updateData.gdpr_consent_given_at = null
+        }
+      }
+      if (preferences.rightToBeForgottenRequested !== undefined) updateData.right_to_be_forgotten_requested = preferences.rightToBeForgottenRequested
+      if (preferences.dataPortabilityRequested !== undefined) updateData.data_portability_requested = preferences.dataPortabilityRequested
+
       const { data, error } = await supabase
         .from('profiles')
-        .update({
-          preferences_timezone: preferences.timezone,
-          preferences_language: preferences.language,
-          preferences_theme: preferences.theme,
-          preferences_email_frequency: preferences.emailFrequency,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', user.id)
         .select()
 

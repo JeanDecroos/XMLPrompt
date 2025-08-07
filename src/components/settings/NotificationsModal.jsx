@@ -14,6 +14,8 @@ const NotificationsModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(false)
+  const [hasChanges, setHasChanges] = useState(false)
 
   // Load settings from database on mount
   useEffect(() => {
@@ -48,6 +50,7 @@ const NotificationsModal = ({ isOpen, onClose }) => {
       if (userSettings.notifications) {
         setSettings(userSettings.notifications)
       }
+      setHasChanges(false)
     } catch (err) {
       console.error('Failed to load notification settings:', err)
       setError('Failed to load settings. Using defaults.')
@@ -61,16 +64,26 @@ const NotificationsModal = ({ isOpen, onClose }) => {
       ...prev,
       [key]: !prev[key]
     }))
+    setHasChanges(true)
+    setError(null)
   }
 
   const handleSave = async () => {
     setSaving(true)
     setError(null)
+    setSuccess(false)
     
     try {
       await UserSettingsService.updateNotificationSettings(settings)
       console.log('Notification settings saved successfully')
-      onClose()
+      setSuccess(true)
+      setHasChanges(false)
+      
+      // Close modal after showing success message
+      setTimeout(() => {
+        onClose()
+        setSuccess(false)
+      }, 1500)
     } catch (err) {
       console.error('Failed to save notification settings:', err)
       setError('Failed to save settings. Please try again.')
@@ -108,12 +121,16 @@ const NotificationsModal = ({ isOpen, onClose }) => {
           <div className="space-y-4">
             <div className="space-y-3">
               <h3 className="font-semibold text-gray-900">Email Notifications</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Choose which types of notifications you'd like to receive via email. 
+                You can change these settings at any time.
+              </p>
               
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <div className="font-medium text-gray-900">Email Notifications</div>
-                    <div className="text-sm text-gray-600">Receive notifications via email</div>
+                    <div className="text-sm text-gray-600">Master switch for all email notifications</div>
                   </div>
                   <button
                     onClick={() => handleToggle('email')}
@@ -131,7 +148,7 @@ const NotificationsModal = ({ isOpen, onClose }) => {
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <div className="font-medium text-gray-900">Prompt Reminders</div>
-                    <div className="text-sm text-gray-600">Reminders about saved prompts</div>
+                    <div className="text-sm text-gray-600">Get reminded about your saved prompts and templates</div>
                   </div>
                   <button
                     onClick={() => handleToggle('promptReminders')}
@@ -148,7 +165,7 @@ const NotificationsModal = ({ isOpen, onClose }) => {
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <div className="font-medium text-gray-900">Usage Alerts</div>
-                    <div className="text-sm text-gray-600">When approaching usage limits</div>
+                    <div className="text-sm text-gray-600">Get notified when you're approaching your monthly limits</div>
                   </div>
                   <button
                     onClick={() => handleToggle('usageAlerts')}
@@ -165,7 +182,7 @@ const NotificationsModal = ({ isOpen, onClose }) => {
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <div className="font-medium text-gray-900">Security Alerts</div>
-                    <div className="text-sm text-gray-600">Important security notifications</div>
+                    <div className="text-sm text-gray-600">Important security notifications like login attempts</div>
                   </div>
                   <button
                     onClick={() => handleToggle('securityAlerts')}
@@ -182,7 +199,7 @@ const NotificationsModal = ({ isOpen, onClose }) => {
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <div className="font-medium text-gray-900">Marketing Emails</div>
-                    <div className="text-sm text-gray-600">Product updates and promotions</div>
+                    <div className="text-sm text-gray-600">Product updates, new features, and promotional offers</div>
                   </div>
                   <button
                     onClick={() => handleToggle('marketingEmails')}
@@ -199,7 +216,7 @@ const NotificationsModal = ({ isOpen, onClose }) => {
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <div className="font-medium text-gray-900">Weekly Digest</div>
-                    <div className="text-sm text-gray-600">Summary of your activity</div>
+                    <div className="text-sm text-gray-600">Weekly summary of your activity and usage statistics</div>
                   </div>
                   <button
                     onClick={() => handleToggle('weeklyDigest')}
@@ -216,6 +233,16 @@ const NotificationsModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
+          {/* Success Message */}
+          {success && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <Check className="w-4 h-4 text-green-600" />
+                <span className="text-sm text-green-700">Settings saved successfully!</span>
+              </div>
+            </div>
+          )}
+
           {/* Error Message */}
           {error && (
             <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -226,28 +253,59 @@ const NotificationsModal = ({ isOpen, onClose }) => {
             </div>
           )}
 
+          {/* Changes Indicator */}
+          {hasChanges && !saving && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <AlertCircle className="w-4 h-4 text-blue-600" />
+                <span className="text-sm text-blue-700">You have unsaved changes</span>
+              </div>
+            </div>
+          )}
+
           {/* Actions */}
-          <div className="flex space-x-3 mt-8">
+          <div className="flex flex-col space-y-3 mt-8">
+            <div className="flex space-x-3">
+              <button
+                onClick={onClose}
+                disabled={saving}
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || loading || !hasChanges}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {saving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
+              </button>
+            </div>
+            
             <button
-              onClick={onClose}
-              disabled={saving}
-              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
+              onClick={() => {
+                setSettings({
+                  email: true,
+                  promptReminders: true,
+                  usageAlerts: false,
+                  securityAlerts: true,
+                  marketingEmails: false,
+                  weeklyDigest: true
+                })
+                setHasChanges(true)
+                setError(null)
+              }}
               disabled={saving || loading}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full px-4 py-2 text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {saving ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Saving...
-                </>
-              ) : (
-                'Save Changes'
-              )}
+              Reset to Defaults
             </button>
           </div>
         </div>

@@ -1,121 +1,156 @@
 /**
  * Rate Limit Middleware
- * Handles database-backed rate limiting for API requests
+ * Handles Redis-backed rate limiting for API requests
  */
 
+import rateLimit from 'express-rate-limit'
+import slowDown from 'express-slow-down'
 import { config } from '../config/index.js'
 import { logger } from '../utils/logger.js'
-import { database } from '../config/database.js'
+import { redis } from '../config/redis.js'
 import { AppError, RateLimitError } from './errorHandler.js'
 
-export const rateLimitMiddleware = async (req, res, next) => {
+// Redis store for rate limiting
+const RedisStore = {
+  client: redis,
+  prefix: 'rate_limit:',
+  
+  async get(key) {
+    try {
+      const value = await this.client.get(this.prefix + key);
+      return value ? JSON.parse(value) : null;
+    } catch (error) {
+      logger.error('Redis get error:', error);
+      return null;
+    }
+  },
+  
+  async set(key, value, ttl) {
+    try {
+      await this.client.setex(this.prefix + key, ttl, JSON.stringify(value));
+    } catch (error) {
+      logger.error('Redis set error:', error);
+    }
+  },
+  
+  async del(key) {
+    try {
+      await this.client.del(this.prefix + key);
+    } catch (error) {
+      logger.error('Redis del error:', error);
+    }
+  }
+};
+
+// Rate limiting configuration
+const rateLimitConfig = {
+  windowMs: config.rateLimit.windowMs || 15 * 60 * 1000, // 15 minutes
+  max: config.rateLimit.maxRequests || 100, // limit each IP to 100 requests per windowMs
+  message: {
+    error: true,
+    message: 'Too many requests, please try again later.',
+    code: 'RATE_LIMIT_EXCEEDED'
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  store: RedisStore,
+  keyGenerator: (req) => {
+    // Use user ID if authenticated, otherwise use IP
+    return req.user?.id || req.ip;
+  },
+  skip: (req) => {
+    // Skip rate limiting for health checks and static assets
+    return req.path === '/health' || req.path.startsWith('/static/');
+  },
+  onLimitReached: (req, res) => {
+    logger.warn(`Rate limit exceeded for ${req.user?.id || req.ip} on ${req.path}`);
+  }
+};
+
+// Speed limiting configuration
+const speedLimitConfig = {
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  delayAfter: 50, // Allow 50 requests per 15 minutes, then...
+  delayMs: 500, // Begin adding 500ms of delay per request above 50
+  maxDelayMs: 20000, // Maximum delay of 20 seconds
+  store: RedisStore,
+  keyGenerator: (req) => {
+    return req.user?.id || req.ip;
+  },
+  skip: (req) => {
+    return req.path === '/health' || req.path.startsWith('/static/');
+  }
+};
+
+// Create rate limiting middleware
+export const rateLimitMiddleware = rateLimit(rateLimitConfig);
+
+// Create speed limiting middleware
+export const speedLimitMiddleware = slowDown(speedLimitConfig);
+
+// Combined middleware for both rate and speed limiting
+export const combinedLimitMiddleware = (req, res, next) => {
+  if (!config.features.enableRateLimiting) {
+    return next();
+  }
+  
+  // Apply speed limiting first, then rate limiting
+  speedLimitMiddleware(req, res, (err) => {
+    if (err) return next(err);
+    rateLimitMiddleware(req, res, next);
+  });
+};
+
+// Legacy middleware for backward compatibility
+export const legacyRateLimitMiddleware = async (req, res, next) => {
   if (!config.features.enableRateLimiting) {
     return next();
   }
 
-  const identifier = req.user?.id || req.ip; // Use user ID if authenticated, else IP
-  const identifierType = req.user ? 'user' : 'ip';
+  const identifier = req.user?.id || req.ip;
   const endpoint = req.path;
-  const windowMs = config.rateLimit.windowMs; // e.g., 900000 (15 minutes)
-  const maxRequests = config.rateLimit.maxRequests; // e.g., 100
+  const windowMs = config.rateLimit.windowMs || 15 * 60 * 1000;
+  const maxRequests = config.rateLimit.maxRequests || 100;
 
   try {
-    // Get or create rate limit entry
-    let { data: rateLimitEntry, error } = await database.supabase
-      .from('rate_limits')
-      .select('*')
-      .eq('identifier', identifier)
-      .eq('identifier_type', identifierType)
-      .eq('endpoint', endpoint)
-      .single();
-
-    if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found
-      logger.error('Database error in rateLimitMiddleware:', error);
-      return next(new AppError('Rate limit service unavailable', 500));
-    }
-
-    if (!rateLimitEntry) {
-      // Create new entry if not found or expired
-      const { data: newEntry, error: insertError } = await database.supabase
-        .from('rate_limits')
-        .insert({
-          identifier,
-          identifier_type: identifierType,
-          endpoint,
-          request_count: 1,
-          window_start: new Date(Date.now() - (Date.now() % windowMs)), // Align to window start
-          window_duration_seconds: windowMs / 1000,
-        })
-        .select('*')
-        .single();
-
-      if (insertError) {
-        logger.error('Error inserting rate limit entry:', insertError);
-        return next(new AppError('Rate limit service unavailable', 500));
-      }
-      rateLimitEntry = newEntry;
+    const key = `rate_limit:${identifier}:${endpoint}`;
+    const windowStart = Math.floor(Date.now() / windowMs) * windowMs;
+    
+    // Get current count from Redis
+    const currentCount = await redis.get(key);
+    const count = currentCount ? parseInt(currentCount) : 0;
+    
+    // Check if window has expired
+    const windowKey = `rate_limit_window:${identifier}:${endpoint}`;
+    const windowStartTime = await redis.get(windowKey);
+    
+    if (!windowStartTime || parseInt(windowStartTime) < windowStart) {
+      // Reset window
+      await redis.setex(windowKey, Math.ceil(windowMs / 1000), windowStart.toString());
+      await redis.setex(key, Math.ceil(windowMs / 1000), '1');
     } else {
-      // Check if current window has expired
-      const windowStartTime = new Date(rateLimitEntry.window_start).getTime();
-      const currentTime = Date.now();
-
-      if (currentTime - windowStartTime > windowMs) {
-        // Reset window if expired
-        const { data: updatedEntry, error: updateError } = await database.supabase
-          .from('rate_limits')
-          .update({
-            request_count: 1,
-            window_start: new Date(currentTime - (currentTime % windowMs)),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', rateLimitEntry.id)
-          .select('*')
-          .single();
-
-        if (updateError) {
-          logger.error('Error updating expired rate limit entry:', updateError);
-          return next(new AppError('Rate limit service unavailable', 500));
-        }
-        rateLimitEntry = updatedEntry;
-      } else {
-        // Increment count within current window
-        const { data: updatedEntry, error: updateError } = await database.supabase
-          .from('rate_limits')
-          .update({
-            request_count: rateLimitEntry.request_count + 1,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', rateLimitEntry.id)
-          .select('*')
-          .single();
-
-        if (updateError) {
-          logger.error('Error incrementing rate limit count:', updateError);
-          return next(new AppError('Rate limit service unavailable', 500));
-        }
-        rateLimitEntry = updatedEntry;
+      // Check if limit exceeded
+      if (count >= maxRequests) {
+        const retryAfter = Math.ceil((windowStart + windowMs - Date.now()) / 1000);
+        logger.warn(`Rate limit exceeded for ${identifier} on ${endpoint}`);
+        res.setHeader('Retry-After', retryAfter);
+        return next(new RateLimitError('Too many requests, please try again later.', retryAfter));
       }
+      
+      // Increment count
+      await redis.incr(key);
+      await redis.expire(key, Math.ceil(windowMs / 1000));
     }
 
-    // Check if limit exceeded
-    if (rateLimitEntry.request_count > maxRequests) {
-      const retryAfterSeconds = Math.ceil((windowMs - (Date.now() - new Date(rateLimitEntry.window_start).getTime())) / 1000);
-      logger.warn(`RateLimitError: Too many requests for identifier ${identifier} on ${endpoint}`);
-      res.setHeader('Retry-After', retryAfterSeconds);
-      throw new RateLimitError('Too many requests, please try again later.', retryAfterSeconds);
-    }
-
+    // Set rate limit headers
     res.setHeader('X-RateLimit-Limit', maxRequests);
-    res.setHeader('X-RateLimit-Remaining', Math.max(0, maxRequests - rateLimitEntry.request_count));
-    res.setHeader('X-RateLimit-Reset', new Date(new Date(rateLimitEntry.window_start).getTime() + windowMs).toISOString());
+    res.setHeader('X-RateLimit-Remaining', Math.max(0, maxRequests - count - 1));
+    res.setHeader('X-RateLimit-Reset', new Date(windowStart + windowMs).toISOString());
 
     next();
   } catch (error) {
-    if (error instanceof AppError) {
-      next(error);
-    } else {
-      logger.error('Unexpected error in rateLimitMiddleware:', error);
-      next(new AppError('Internal server error', 500));
-    }
+    logger.error('Rate limit error:', error);
+    // Continue without rate limiting if Redis is unavailable
+    next();
   }
 }; 
