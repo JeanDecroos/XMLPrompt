@@ -60,17 +60,17 @@ const Header = () => {
             <nav className="hidden md:flex items-center space-x-2">
               <div className="flex items-center space-x-1">
                 {/* Help */}
-                <Link to="/help" className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50">
+                <Link to="/help" className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50">
                   Help
                 </Link>
 
                 {/* Documentation */}
-                <Link to="/docs" className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50">
+                <Link to="/docs" className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50">
                   Docs
                 </Link>
 
                 {/* Pricing */}
-                <Link to="/pricing" className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50">
+                <Link to="/pricing" className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50">
                   Pricing
                 </Link>
               </div>
@@ -162,13 +162,13 @@ const Header = () => {
                 <div className="hidden md:flex items-center space-x-3">
                   <button 
                     onClick={() => openAuthModal('signin')} 
-                    className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50"
+                    className="btn btn-secondary btn-sm"
                   >
                     Sign In
                   </button>
                   <button 
                     onClick={() => openAuthModal('signup')} 
-                    className="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                    className="btn btn-premium btn-sm"
                   >
                     Get Started
                   </button>
@@ -178,7 +178,7 @@ const Header = () => {
               {/* Mobile Menu Button */}
               <button 
                 onClick={() => setIsMenuOpen(!isMenuOpen)} 
-                className="md:hidden p-2 rounded-xl hover:bg-white/60 transition-all duration-200" 
+                className="md:hidden p-2 rounded-xl hover:bg-white/60 transition-all duration-200 focus-visible" 
                 aria-label="Toggle menu"
               >
                 {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -228,7 +228,7 @@ const Header = () => {
                     <Link 
                       to="/profile?tab=settings"
                       onClick={() => setIsMenuOpen(false)}
-                      className="btn btn-secondary btn-sm"
+                      className="btn btn-secondary btn-sm flex items-center justify-center"
                     >
                       Account Settings
                     </Link>
@@ -277,7 +277,7 @@ const Header = () => {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">Subscription Status</h2>
+                <h2 className="text-xl font-bold text-gray-900">Account Settings</h2>
                 <button
                   onClick={() => setShowSubscriptionStatus(false)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"

@@ -307,7 +307,7 @@ const SimplifiedPromptGenerator = () => {
           <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent mb-6 leading-tight">
             Build Better AI Prompts
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto leading-relaxed">
             Transform your ideas into structured prompts that deliver exceptional results from any AI model
           </p>
         </div>
@@ -407,7 +407,7 @@ const SimplifiedPromptGenerator = () => {
                 Step 1 of 2
               </div>
               <h2 className="text-4xl font-bold text-gray-900 mb-4">Define Your Context</h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">Choose your role and describe what you want to accomplish</p>
+              <p className="text-xl text-gray-700 max-w-2xl mx-auto">Choose your role and describe what you want to accomplish</p>
             </div>
 
             <div className="relative">
@@ -544,7 +544,7 @@ const SimplifiedPromptGenerator = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Context
-                          <span className="text-xs text-gray-500 font-normal ml-2">
+                          <span className="text-xs text-gray-600 font-normal ml-2">
                             💡 This helps tailor the tone and complexity of your prompt
                           </span>
                         </label>
@@ -561,7 +561,7 @@ const SimplifiedPromptGenerator = () => {
                           }`}
                         />
                         <p className={`text-xs mt-1 ${
-                          formData.context.length > 0 ? 'text-blue-600' : 'text-gray-500'
+                          formData.context.length > 0 ? 'text-blue-700' : 'text-gray-600'
                         }`}>
                           {formData.context.length}/300 characters
                           {formData.context.length > 0 && (
@@ -573,7 +573,7 @@ const SimplifiedPromptGenerator = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Requirements
-                          <span className="text-xs text-gray-500 font-normal ml-2">
+                          <span className="text-xs text-gray-600 font-normal ml-2">
                             🎯 Specify constraints or must-have elements
                           </span>
                         </label>
@@ -590,7 +590,7 @@ const SimplifiedPromptGenerator = () => {
                           }`}
                         />
                         <p className={`text-xs mt-1 ${
-                          formData.requirements.length > 0 ? 'text-purple-600' : 'text-gray-500'
+                          formData.requirements.length > 0 ? 'text-purple-700' : 'text-gray-600'
                         }`}>
                           {formData.requirements.length}/200 characters
                           {formData.requirements.length > 0 && (
@@ -602,7 +602,7 @@ const SimplifiedPromptGenerator = () => {
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Format
-                            <span className="text-xs text-gray-500 font-normal ml-2">
+                            <span className="text-xs text-gray-600 font-normal ml-2">
                               📄 How should the output be structured?
                             </span>
                           </label>
