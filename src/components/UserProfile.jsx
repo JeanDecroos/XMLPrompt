@@ -153,7 +153,7 @@ export default function UserProfile({ stats }) {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2">
             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-            <span className="text-sm text-gray-700">Active</span>
+            <span className="text-sm text-gray-800">Active</span>
           </div>
           <div className={`px-3 py-1 rounded-full text-sm font-medium border ${getPlanColor(subscriptionTier)}`}>
             {loading ? 'Loading...' : getPlanDisplayName(subscriptionTier)} Plan
@@ -214,15 +214,15 @@ export default function UserProfile({ stats }) {
         <h3 className="font-semibold text-gray-900 mb-3">This Month</h3>
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{s.monthlyUsage.prompts}</div>
+            <div className="text-2xl font-bold text-blue-700">{s.monthlyUsage.prompts}</div>
             <div className="text-xs text-gray-600">Prompts Created</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">{s.monthlyUsage.tokens.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-green-700">{s.monthlyUsage.tokens.toLocaleString()}</div>
             <div className="text-xs text-gray-600">Tokens Used</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">{s.monthlyUsage.enrichments}</div>
+            <div className="text-2xl font-bold text-purple-700">{s.monthlyUsage.enrichments}</div>
             <div className="text-xs text-gray-600">Enrichments</div>
           </div>
         </div>
