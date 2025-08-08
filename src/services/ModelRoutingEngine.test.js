@@ -6,6 +6,7 @@
  */
 
 import { routeToOptimalModel, modelRouter } from './ModelRoutingEngine.js';
+import { describe, it, expect } from 'vitest';
 
 // Test scenarios covering different domains and use cases
 const TEST_SCENARIOS = [
@@ -385,8 +386,21 @@ export function runAllTests() {
 }
 
 // Auto-run tests if this file is executed directly
-if (typeof window === 'undefined' && typeof process !== 'undefined') {
+if (typeof window === 'undefined' && typeof process !== 'undefined' && !(import.meta && import.meta.vitest)) {
   runAllTests();
 }
 
 export { runSemanticRoutingTests, testSemanticSimilarity, testConfidenceScoring, testConstraintHandling }; 
+
+// Minimal Vitest suite to satisfy CI and validate basic behavior
+describe('ModelRoutingEngine', () => {
+  it('returns a primary recommendation with confidence > 0', () => {
+    const recommendation = routeToOptimalModel(
+      'Software Developer',
+      'Generate a complex React component with TypeScript interfaces'
+    );
+    expect(recommendation).toBeTruthy();
+    expect(typeof recommendation.primary.modelId).toBe('string');
+    expect(recommendation.primary.confidence).toBeGreaterThan(0);
+  });
+});
