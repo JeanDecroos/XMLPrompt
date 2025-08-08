@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { SubscriptionService, SUBSCRIPTION_TIERS } from '../services/subscriptionService'
+import ProfileService from '../services/profileService'
+import PlanBillingCard from './profile/PlanBillingCard'
+import SecurityCard from './profile/SecurityCard'
+import RecentActivityCard from './profile/RecentActivityCard'
+import QuickActions from './profile/QuickActions'
 import { 
   User, Settings, CreditCard, 
   BarChart3, Shield, Download, Calendar, Zap, Edit3, Camera,
@@ -105,6 +110,23 @@ export default function UserProfile({ stats }) {
     { id: 'settings', label: 'Settings', icon: Settings },
   ]
 
+  const [profileData, setProfileData] = useState(null)
+  const [loadingProfile, setLoadingProfile] = useState(true)
+
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      try {
+        const data = await ProfileService.getOverview(user?.id)
+        if (mounted) setProfileData(data)
+      } finally {
+        if (mounted) setLoadingProfile(false)
+      }
+    }
+    if (user) load()
+    return () => { mounted = false }
+  }, [user])
+
   const renderOverview = () => (
     <div className="space-y-6">
       {/* Profile Header */}
@@ -204,6 +226,39 @@ export default function UserProfile({ stats }) {
           <div className="text-xs text-gray-600">Models Used</div>
         </div>
       </div>
+
+      {/* Plan & Billing + Security */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <PlanBillingCard plan={profileData?.plan} quota={profileData?.quota} />
+        <SecurityCard
+          security={profileData?.security}
+          onToggle2FA={async (enable) => {
+            const res = await ProfileService.toggleTwoFactor(user?.id, enable)
+            if (res?.success) {
+              setProfileData((prev) => ({ ...prev, security: { ...prev.security, twoFactorEnabled: res.enabled } }))
+            }
+          }}
+          onRevokeSession={async (sessionId) => {
+            const res = await ProfileService.revokeSession(user?.id, sessionId)
+            if (res?.success) {
+              setProfileData((prev) => ({
+                ...prev,
+                security: { ...prev.security, sessions: prev.security.sessions.filter((s) => s.id !== sessionId) },
+              }))
+            }
+          }}
+        />
+      </div>
+
+      {/* Recent Activity */}
+      <RecentActivityCard
+        memberSince={profileData?.security?.memberSince}
+        lastActive={profileData?.security?.lastActive}
+        sharedPrompts={profileData?.recent?.sharedPrompts}
+      />
+
+      {/* Quick Actions */}
+      <QuickActions isTopTier={isPro} />
     </div>
   )
 
