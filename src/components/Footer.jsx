@@ -14,7 +14,7 @@ const Footer = () => {
               </div>
               <h3 className="text-lg font-bold text-gradient">Promptr</h3>
             </div>
-            <p className="text-gray-600 text-sm leading-relaxed">
+            <p className="text-gray-700 text-sm leading-relaxed">
               Professional AI prompt engineering made simple and accessible.
             </p>
           </div>
@@ -24,17 +24,17 @@ const Footer = () => {
             <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#pricing" className="text-gray-600 hover:text-purple-600 transition-colors text-sm">
+                <a href="#pricing" className="text-gray-700 hover:text-purple-600 transition-colors text-sm">
                   Pricing
                 </a>
               </li>
               <li>
-                <a href="#docs" className="text-gray-600 hover:text-purple-600 transition-colors text-sm">
+                <a href="#docs" className="text-gray-700 hover:text-purple-600 transition-colors text-sm">
                   Documentation
                 </a>
               </li>
               <li>
-                <a href="#support" className="text-gray-600 hover:text-purple-600 transition-colors text-sm">
+                <a href="#support" className="text-gray-700 hover:text-purple-600 transition-colors text-sm">
                   Support
                 </a>
               </li>
@@ -73,13 +73,13 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="mt-8 pt-6 border-t border-white/20">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <div className="flex items-center space-x-4 text-sm text-gray-600">
               <span>© 2024 Promptr</span>
-              <a href="#privacy" className="hover:text-gray-700 transition-colors">Privacy</a>
-              <a href="#terms" className="hover:text-gray-700 transition-colors">Terms</a>
+              <a href="#privacy" className="hover:text-gray-800 transition-colors">Privacy</a>
+              <a href="#terms" className="hover:text-gray-800 transition-colors">Terms</a>
             </div>
             
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
               <span>Made with</span>
               <Heart className="w-4 h-4 text-red-500 fill-current" />
               <span>for the AI community</span>
