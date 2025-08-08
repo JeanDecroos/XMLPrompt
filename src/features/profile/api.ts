@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { Invoices, Plan, Profile, Sessions, SharedPrompts, TwoFADisableResp, TwoFAEnable, TwoFAStatus, TwoFAVerifyResp, UploadAvatarResp, Usage } from '@api/types'
 import api from '@api/client'
 import {
   InvoicesSchema,
@@ -22,43 +23,43 @@ const parse = <T>(schema: any, data: unknown): T => schema.parse(data)
 
 // Queries
 export const usePlan = () =>
-  useQuery({
+  useQuery<Plan>({
     queryKey: ['billing', 'plan'],
     queryFn: async () => parse(PlanSchema, (await api.get('/api/billing/plan')).data),
     retry: (count, err: any) => (err?.status && err.status >= 400 && err.status < 500 ? false : count < 2),
   })
 
 export const useUsage = () =>
-  useQuery({
+  useQuery<Usage>({
     queryKey: ['billing', 'usage'],
     queryFn: async () => parse(UsageSchema, (await api.get('/api/billing/usage')).data),
     retry: (count, err: any) => (err?.status && err.status >= 400 && err.status < 500 ? false : count < 2),
   })
 
 export const useInvoices = (limit = 5) =>
-  useQuery({
+  useQuery<Invoices>({
     queryKey: ['billing', 'invoices', limit],
     queryFn: async () => parse(InvoicesSchema, (await api.get('/api/billing/invoices', { params: { limit } })).data),
   })
 
 export const use2FAStatus = () =>
-  useQuery({ queryKey: ['security', '2fa'], queryFn: async () => parse(TwoFAStatusSchema, (await api.get('/api/security/2fa/status')).data) })
+  useQuery<TwoFAStatus>({ queryKey: ['security', '2fa'], queryFn: async () => parse(TwoFAStatusSchema, (await api.get('/api/security/2fa/status')).data) })
 
 export const useEnable2FA = () =>
-  useMutation({
+  useMutation<TwoFAEnable>({
     mutationFn: async () => parse(TwoFAEnableSchema, (await api.post('/api/security/2fa/enable')).data),
   })
 
 export const useVerify2FA = () =>
-  useMutation({
+  useMutation<TwoFAVerifyResp, unknown, string>({
     mutationFn: async (code: string) => parse(TwoFAVerifyRespSchema, (await api.post('/api/security/2fa/verify', TwoFAVerifyBodySchema.parse({ code }))).data),
   })
 
 export const useDisable2FA = () =>
-  useMutation({ mutationFn: async () => parse(TwoFADisableRespSchema, (await api.post('/api/security/2fa/disable')).data) })
+  useMutation<TwoFADisableResp>({ mutationFn: async () => parse(TwoFADisableRespSchema, (await api.post('/api/security/2fa/disable')).data) })
 
 export const useSessions = () =>
-  useQuery({ queryKey: ['security', 'sessions'], queryFn: async () => parse(SessionsSchema, (await api.get('/api/security/sessions')).data) })
+  useQuery<Sessions>({ queryKey: ['security', 'sessions'], queryFn: async () => parse(SessionsSchema, (await api.get('/api/security/sessions')).data) })
 
 export const useRevokeSession = () => {
   const qc = useQueryClient()
@@ -78,11 +79,11 @@ export const useRevokeSession = () => {
 }
 
 export const useProfile = () =>
-  useQuery({ queryKey: ['account', 'profile'], queryFn: async () => parse(ProfileSchema, (await api.get('/api/account/profile')).data) })
+  useQuery<Profile>({ queryKey: ['account', 'profile'], queryFn: async () => parse(ProfileSchema, (await api.get('/api/account/profile')).data) })
 
 export const useUpdateProfile = () => {
   const qc = useQueryClient()
-  return useMutation({
+  return useMutation<Profile, unknown, unknown>({
     mutationFn: async (payload: unknown) => parse(ProfileSchema, (await api.patch('/api/account/profile', UpdateProfileSchema.parse(payload))).data),
     onSuccess: (data) => qc.setQueryData(['account', 'profile'], data),
   })
@@ -90,7 +91,7 @@ export const useUpdateProfile = () => {
 
 export const useUploadAvatar = () => {
   const qc = useQueryClient()
-  return useMutation({
+  return useMutation<UploadAvatarResp, unknown, File>({
     mutationFn: async (file: File) => {
       const form = new FormData()
       form.append('file', file)
@@ -103,7 +104,7 @@ export const useUploadAvatar = () => {
 }
 
 export const useSharedPrompts = (limit = 3) =>
-  useQuery({
+  useQuery<SharedPrompts>({
     queryKey: ['prompts', 'shared', limit],
     queryFn: async () => parse(SharedPromptsSchema, (await api.get('/api/prompts/shared', { params: { limit } })).data),
   })
