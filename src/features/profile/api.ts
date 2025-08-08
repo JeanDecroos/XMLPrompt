@@ -97,7 +97,7 @@ export const useUploadAvatar = () => {
       return parse(UploadAvatarRespSchema, (await api.put('/api/account/avatar', form, { headers: { 'Content-Type': 'multipart/form-data' } })).data)
     },
     onSuccess: (data) => {
-      qc.setQueryData<any>(['account', 'profile'], (prev) => ({ ...prev, avatarUrl: data.avatarUrl }))
+      qc.setQueryData(['account', 'profile'], (prev: any) => ({ ...(prev || {}), avatarUrl: data.avatarUrl }))
     },
   })
 }

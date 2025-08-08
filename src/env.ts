@@ -6,7 +6,7 @@ const EnvSchema = z.object({
   VITE_FEATURE_IDENTITY: z.string().optional(),
 })
 
-const raw = EnvSchema.parse(import.meta.env)
+const raw = EnvSchema.parse((import.meta as any).env)
 
 export const ENV = {
   API_BASE_URL: raw.VITE_API_URL,
@@ -14,7 +14,7 @@ export const ENV = {
   FEATURE_IDENTITY: raw.VITE_FEATURE_IDENTITY === 'true',
 }
 
-if (import.meta.env.PROD && !ENV.API_BASE_URL) {
+if (((import.meta as any).env?.PROD) && !ENV.API_BASE_URL) {
   throw new Error('API_BASE_URL is required in production')
 }
 

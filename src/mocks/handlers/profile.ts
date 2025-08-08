@@ -42,7 +42,8 @@ export const profileHandlers = [
   http.get('/api/security/2fa/status', () => HttpResponse.json({ enabled: false })),
   http.post('/api/security/2fa/enable', () => HttpResponse.json({ otpauthUrl: 'otpauth://totp/Promptr:test?secret=ABC123' })),
   http.post('/api/security/2fa/verify', async ({ request }) => {
-    const { code } = await request.json()
+    const body: any = await request.json()
+    const code = body?.code
     if (code !== '123456') {
       return new HttpResponse(JSON.stringify({ message: 'Invalid code' }), { status: 400 })
     }
@@ -72,13 +73,12 @@ export const profileHandlers = [
     })
   }),
   http.patch('/api/account/profile', async ({ request }) => {
-    const body = await request.json()
-    return HttpResponse.json({
+    const body: any = await request.json()
+    return HttpResponse.json(Object.assign({
       email: 'user@example.com',
       memberSince: subHours(new Date(), 24 * 365).toISOString(),
       lastActiveAt: new Date().toISOString(),
-      ...body,
-    })
+    }, body || {}))
   }),
   http.put('/api/account/avatar', () => HttpResponse.json({ avatarUrl: 'https://example.com/avatar.png' })),
 
