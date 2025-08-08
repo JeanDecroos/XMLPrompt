@@ -247,7 +247,7 @@ const EnhancedPromptPreview = ({
               </span>
             )}
           </h3>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-gray-700 mt-1">
             {currentModel && `Optimized for ${currentModel.name}`}
             {promptMetadata?.format && ` • ${promptMetadata.format.toUpperCase()} format`}
           </p>
