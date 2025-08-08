@@ -1,9 +1,13 @@
 import express from 'express'
 import MFAService from '../services/mfaService.js'
-import { authenticateUser } from '../middleware/auth.js'
-import { rateLimit } from '../middleware/rateLimit.js'
-import { validateRequest } from '../middleware/validation.js'
+import { authMiddleware as authenticateUser } from '../middleware/auth.js'
+import rateLimit from 'express-rate-limit'
+import { validationMiddleware as validateRequest } from '../middleware/validation.js'
 import logger from '../utils/logger.js'
+import { database } from '../config/database.js'
+
+// Shared Supabase client
+const supabase = database.client
 
 const router = express.Router()
 
