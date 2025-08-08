@@ -1,7 +1,10 @@
 import crypto from 'crypto'
 import QRCode from 'qrcode'
-import { supabase } from '../config/database.js'
+import { database } from '../config/database.js'
 import logger from '../utils/logger.js'
+
+// Use the shared Supabase client from database config
+const supabase = database.client
 
 class MFAService {
   /**

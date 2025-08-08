@@ -7,6 +7,7 @@ import { logger } from '../utils/logger.js'
 import { config } from '../config/index.js'
 import { redis } from '../config/redis.js'
 import { database } from '../config/database.js'
+import { randomUUID } from 'crypto'
 
 // Security event types
 const SECURITY_EVENTS = {
@@ -51,7 +52,7 @@ class SecurityMonitor {
   async logSecurityEvent(eventType, details) {
     try {
       const event = {
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         event_type: eventType,
         timestamp: new Date().toISOString(),
         user_id: details.userId || null,
@@ -343,17 +344,22 @@ export const authFailureMonitoring = async (req, res, next) => {
         additional: { error: data.message }
       })
       
-      // Check if IP should be flagged
-      const failureKey = `auth_failures:${req.ip}`
-      const failures = await redis.incr(failureKey)
-      await redis.expire(failureKey, 3600) // Reset after 1 hour
-      
-      if (failures >= 5) {
-        securityMonitor.updateIPReputation(req.ip, IP_REPUTATION.SUSPICIOUS, 'Multiple auth failures')
-      }
+      // Check if IP should be flagged (fire-and-forget)
+      ;(async () => {
+        try {
+          const failureKey = `auth_failures:${req.ip}`
+          const failures = await redis.incr(failureKey)
+          await redis.expire(failureKey, 3600) // Reset after 1 hour
+          if (failures >= 5) {
+            await securityMonitor.updateIPReputation(req.ip, IP_REPUTATION.SUSPICIOUS, 'Multiple auth failures')
+          }
+        } catch (err) {
+          logger.error('Error updating auth failure counters:', err)
+        }
+      })()
     }
     
-    originalJson.call(this, data)
+    return originalJson.call(this, data)
   }
   
   next()
