@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { SubscriptionService, SUBSCRIPTION_TIERS } from '../services/subscriptionService'
-import ProfileService from '../services/profileService'
 import PlanBillingCard from './profile/PlanBillingCard'
 import SecurityCard from './profile/SecurityCard'
 import RecentActivityCard from './profile/RecentActivityCard'
@@ -110,22 +109,7 @@ export default function UserProfile({ stats }) {
     { id: 'settings', label: 'Settings', icon: Settings },
   ]
 
-  const [profileData, setProfileData] = useState(null)
-  const [loadingProfile, setLoadingProfile] = useState(true)
-
-  useEffect(() => {
-    let mounted = true
-    const load = async () => {
-      try {
-        const data = await ProfileService.getOverview(user?.id)
-        if (mounted) setProfileData(data)
-      } finally {
-        if (mounted) setLoadingProfile(false)
-      }
-    }
-    if (user) load()
-    return () => { mounted = false }
-  }, [user])
+  // Data now wired via hooks inside child components
 
   const renderOverview = () => (
     <div className="space-y-6">
@@ -229,33 +213,12 @@ export default function UserProfile({ stats }) {
 
       {/* Plan & Billing + Security */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PlanBillingCard plan={profileData?.plan} quota={profileData?.quota} />
-        <SecurityCard
-          security={profileData?.security}
-          onToggle2FA={async (enable) => {
-            const res = await ProfileService.toggleTwoFactor(user?.id, enable)
-            if (res?.success) {
-              setProfileData((prev) => ({ ...prev, security: { ...prev.security, twoFactorEnabled: res.enabled } }))
-            }
-          }}
-          onRevokeSession={async (sessionId) => {
-            const res = await ProfileService.revokeSession(user?.id, sessionId)
-            if (res?.success) {
-              setProfileData((prev) => ({
-                ...prev,
-                security: { ...prev.security, sessions: prev.security.sessions.filter((s) => s.id !== sessionId) },
-              }))
-            }
-          }}
-        />
+        <PlanBillingCard />
+        <SecurityCard />
       </div>
 
       {/* Recent Activity */}
-      <RecentActivityCard
-        memberSince={profileData?.security?.memberSince}
-        lastActive={profileData?.security?.lastActive}
-        sharedPrompts={profileData?.recent?.sharedPrompts}
-      />
+      <RecentActivityCard />
 
       {/* Quick Actions */}
       <QuickActions isTopTier={isPro} />
