@@ -4,7 +4,7 @@ module.exports = {
   env: { browser: true, es2020: true },
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended',
     'plugin:react-hooks/recommended',
     'plugin:import/errors',
     'plugin:import/warnings'
@@ -34,5 +34,14 @@ module.exports = {
       node: { extensions: ['.js', '.jsx', '.ts', '.tsx'] },
       typescript: { project: './tsconfig.json' }
     }
-  }
+  },
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: { project: './tsconfig.json' },
+      plugins: ['@typescript-eslint'],
+      extends: ['plugin:@typescript-eslint/recommended'],
+    }
+  ]
 } 
