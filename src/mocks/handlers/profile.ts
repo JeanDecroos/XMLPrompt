@@ -42,8 +42,8 @@ export const profileHandlers = [
   http.get('/api/security/2fa/status', () => HttpResponse.json({ enabled: false })),
   http.post('/api/security/2fa/enable', () => HttpResponse.json({ otpauthUrl: 'otpauth://totp/Promptr:test?secret=ABC123' })),
   http.post('/api/security/2fa/verify', async ({ request }) => {
-    const body: any = await request.json()
-    const code = body?.code
+    const body = (await request.json()) as { code?: string }
+    const code = body.code
     if (code !== '123456') {
       return new HttpResponse(JSON.stringify({ message: 'Invalid code' }), { status: 400 })
     }
@@ -73,7 +73,7 @@ export const profileHandlers = [
     })
   }),
   http.patch('/api/account/profile', async ({ request }) => {
-    const body: any = await request.json()
+    const body = (await request.json()) as Record<string, unknown>
     return HttpResponse.json(Object.assign({
       email: 'user@example.com',
       memberSince: subHours(new Date(), 24 * 365).toISOString(),

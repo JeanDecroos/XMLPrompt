@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Invoices, Plan, Profile, Sessions, SharedPrompts, TwoFADisableResp, TwoFAEnable, TwoFAStatus, TwoFAVerifyResp, UploadAvatarResp, Usage } from '@api/types'
+import type { Invoices, Plan, Profile, Sessions, SharedPrompts, TwoFADisableResp, TwoFAEnable, TwoFAStatus, TwoFAVerifyResp, UploadAvatarResp, Usage, RevokeResp } from '@api/types'
 import api from '@api/client'
 import {
   InvoicesSchema,
@@ -19,21 +19,27 @@ import {
 } from '@api/schemas'
 
 // Helpers
-const parse = <T>(schema: any, data: unknown): T => schema.parse(data)
+const parse = <T>(schema: { parse: (d: unknown) => T }, data: unknown): T => schema.parse(data)
 
 // Queries
 export const usePlan = () =>
   useQuery<Plan>({
     queryKey: ['billing', 'plan'],
     queryFn: async () => parse(PlanSchema, (await api.get('/api/billing/plan')).data),
-    retry: (count, err: any) => (err?.status && err.status >= 400 && err.status < 500 ? false : count < 2),
+    retry: (count, err: unknown) => {
+      const status = typeof err === 'object' && err !== null && 'status' in err ? (err as { status?: number }).status : undefined
+      return typeof status === 'number' && status >= 400 && status < 500 ? false : count < 2
+    },
   })
 
 export const useUsage = () =>
   useQuery<Usage>({
     queryKey: ['billing', 'usage'],
     queryFn: async () => parse(UsageSchema, (await api.get('/api/billing/usage')).data),
-    retry: (count, err: any) => (err?.status && err.status >= 400 && err.status < 500 ? false : count < 2),
+    retry: (count, err: unknown) => {
+      const status = typeof err === 'object' && err !== null && 'status' in err ? (err as { status?: number }).status : undefined
+      return typeof status === 'number' && status >= 400 && status < 500 ? false : count < 2
+    },
   })
 
 export const useInvoices = (limit = 5) =>
@@ -63,16 +69,16 @@ export const useSessions = () =>
 
 export const useRevokeSession = () => {
   const qc = useQueryClient()
-  return useMutation({
-    mutationFn: async (id: string) => parse(RevokeRespSchema, (await api.delete(`/api/security/sessions/${id}`)).data),
-    onMutate: async (id) => {
+  return useMutation<RevokeResp, unknown, string, { prev?: Sessions }>({
+    mutationFn: async (id: string): Promise<RevokeResp> => parse(RevokeRespSchema, (await api.delete(`/api/security/sessions/${id}`)).data),
+    onMutate: async (id): Promise<{ prev?: Sessions }> => {
       await qc.cancelQueries({ queryKey: ['security', 'sessions'] })
-      const prev = qc.getQueryData<any>(['security', 'sessions'])
-      qc.setQueryData(['security', 'sessions'], (data: any) => ({ sessions: (data?.sessions || []).filter((s: any) => s.id !== id) }))
+      const prev = qc.getQueryData<Sessions>(['security', 'sessions'])
+      qc.setQueryData(['security', 'sessions'], (data: Sessions | undefined) => ({ sessions: (data?.sessions || []).filter((s) => s.id !== id) }))
       return { prev }
     },
-    onError: (_e, _id, ctx: any) => {
-      if (ctx?.prev) qc.setQueryData(['security', 'sessions'], ctx.prev)
+    onError: (_e, _id, ctx) => {
+      if (ctx?.prev) qc.setQueryData(['security', 'sessions'], ctx.prev as Sessions)
     },
     onSettled: () => qc.invalidateQueries({ queryKey: ['security', 'sessions'] }),
   })
@@ -83,8 +89,8 @@ export const useProfile = () =>
 
 export const useUpdateProfile = () => {
   const qc = useQueryClient()
-  return useMutation<Profile, unknown, unknown>({
-    mutationFn: async (payload: unknown) => parse(ProfileSchema, (await api.patch('/api/account/profile', UpdateProfileSchema.parse(payload))).data),
+  return useMutation<Profile, unknown, import('@api/types').UpdateProfile>({
+    mutationFn: async (payload) => parse(ProfileSchema, (await api.patch('/api/account/profile', UpdateProfileSchema.parse(payload))).data),
     onSuccess: (data) => qc.setQueryData(['account', 'profile'], data),
   })
 }
@@ -98,7 +104,7 @@ export const useUploadAvatar = () => {
       return parse(UploadAvatarRespSchema, (await api.put('/api/account/avatar', form, { headers: { 'Content-Type': 'multipart/form-data' } })).data)
     },
     onSuccess: (data) => {
-      qc.setQueryData(['account', 'profile'], (prev: any) => ({ ...(prev || {}), avatarUrl: data.avatarUrl }))
+      qc.setQueryData(['account', 'profile'], (prev: Profile | undefined) => ({ ...(prev || {}), avatarUrl: data.avatarUrl }))
     },
   })
 }
