@@ -28,7 +28,7 @@ Component Architecture:
 ├── App.jsx (Root Component & Router)
 ├── contexts/AuthContext.jsx (Global Auth State)
 ├── components/
-│   ├── SimplifiedPromptGenerator.jsx (Main Interface - 757 lines)
+│   ├── SimplifiedPromptGenerator.jsx (Main Interface - 780 lines)
 │   ├── EnhancedPromptPreview.jsx (Side-by-side Comparison)
 │   ├── ModelSelector.jsx (AI Model Selection)
 │   ├── ImprovedRoleSelector.jsx (Professional Roles)
@@ -47,12 +47,12 @@ Component Architecture:
 │   ├── promptService.js (Prompt CRUD Operations)
 │   ├── sharingService.js (Sharing Functionality)
 │   ├── subscriptionService.js (Billing Management)
-│   └── ModelRoutingEngine.js (AI Model Selection - 99 lines)
+│   └── ModelRoutingEngine.js (AI Model Selection - 836 lines)
 ├── utils/
 │   ├── universalPromptGenerator.js (Format Adaptation - 372 lines)
 │   └── promptEnricher.js (Enhancement Logic)
 ├── data/
-│   ├── aiModels.js (50+ AI Model Definitions - 1712 lines)
+│   ├── aiModels.js (40 AI Model Definitions - 1822 lines)
 │   ├── roles.js (100+ Professional Roles - 370 lines)
 │   ├── userGoals.js (Enhancement Objectives)
 │   └── achievements.js (Gamification System)
@@ -76,8 +76,8 @@ Backend Stack:
 └── Morgan 1.10.0 (HTTP Request Logging)
 
 API Structure:
-├── src/server.js (Main Application Entry - 319 lines)
-├── config/index.js (Configuration Management - 446 lines)
+├── src/server.js (Main Application Entry - 320 lines)
+├── config/index.js (Configuration Management - 472 lines)
 ├── middleware/
 │   ├── auth.js (JWT Authentication - 60 lines)
 │   ├── validation.js (Joi Schema Validation - 21 lines)
@@ -480,7 +480,7 @@ POST /api/v1/api-keys            # API key management
 
 ## 🤖 AI Model Integration
 
-### Supported Models (50+)
+### Supported Models (40)
 ```javascript
 // Claude Models (Anthropic)
 'claude-4-opus', 'claude-4-sonnet', 'claude-3-5-sonnet'
