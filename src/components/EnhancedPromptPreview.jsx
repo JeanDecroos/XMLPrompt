@@ -193,7 +193,7 @@ const EnhancedPromptPreview = ({
                 aria-label="Export format"
                 value={exportFormat}
                 onChange={(e) => setExportFormat(e.target.value)}
-                className="border border-gray-300 rounded-md text-sm px-2 py-1 bg-white"
+                className="border border-gray-300 rounded-md text-sm px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="txt">.txt</option>
                 <option value="json">.json</option>
@@ -223,7 +223,9 @@ const EnhancedPromptPreview = ({
                   }
                   const metaTitle = (typeof promptMetadata?.title === 'string' && promptMetadata.title.trim()) ? promptMetadata.title.trim() : 'prompt'
                   const { ext, mime } = map[exportFormat] || map.txt
-                  downloadString(payload, `${metaTitle}.${ext}`, mime)
+                  // Ensure filename has safe characters
+                  const safe = metaTitle.replace(/[^a-z0-9-_\.]+/gi, '_')
+                  downloadString(payload, `${safe}.${ext}`, mime)
                 }}
                 aria-label="Export prompt"
                 className="btn btn-secondary btn-sm"

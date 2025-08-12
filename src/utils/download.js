@@ -6,10 +6,13 @@ export function downloadString(content, filename, mime = 'text/plain;charset=utf
     const a = document.createElement('a')
     a.href = url
     a.download = filename
+    a.rel = 'noopener'
+    // Some browsers need the element to be in the DOM
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    // Defer revocation to allow the navigation to start (Safari/Firefox quirk)
+    setTimeout(() => URL.revokeObjectURL(url), 100)
   } catch (_) {
     // Best-effort; if something goes wrong, do nothing silently
   }
