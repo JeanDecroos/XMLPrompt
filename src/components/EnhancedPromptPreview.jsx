@@ -170,7 +170,7 @@ const EnhancedPromptPreview = ({
         </div>
         
         {prompt && (
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mt-6">
             <div className="flex items-center space-x-2 ml-auto">
               <button
                 onClick={() => handleCopy(prompt)}
