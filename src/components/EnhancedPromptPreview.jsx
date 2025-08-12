@@ -26,6 +26,7 @@ const EnhancedPromptPreview = ({
 }) => {
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState(hasEnrichment ? 'enriched' : 'raw')
+  const [exportFormat, setExportFormat] = useState('txt')
   
   // Auto-switch to enhanced tab when enrichment completes
   React.useEffect(() => {
@@ -134,42 +135,6 @@ const EnhancedPromptPreview = ({
   }
 
   const renderPromptContent = (prompt, isEnhanced = false) => {
-    const [exportFormat, setExportFormat] = useState('txt')
-
-    const resolveExportPayload = (format) => {
-      // Prefer enriched prompt when present
-      const preferred = (enrichedPrompt || rawPrompt || '')
-
-      // Some generators may return objects; current code passes strings.
-      // If we ever receive an object, preserve it for JSON; otherwise wrap.
-      if (format === 'json') {
-        if (typeof preferred === 'string') {
-          return JSON.stringify({ prompt: preferred }, null, 2)
-        }
-        try {
-          return JSON.stringify(preferred, null, 2)
-        } catch {
-          return JSON.stringify({ prompt: String(preferred) }, null, 2)
-        }
-      }
-      // Non-JSON: export the visible text content
-      return typeof preferred === 'string' ? preferred : String(preferred)
-    }
-
-    const handleExport = () => {
-      const map = {
-        txt: { ext: 'txt', mime: 'text/plain;charset=utf-8' },
-        json: { ext: 'json', mime: 'application/json;charset=utf-8' },
-        xml: { ext: 'xml', mime: 'application/xml;charset=utf-8' },
-        yaml: { ext: 'yaml', mime: 'text/yaml;charset=utf-8' },
-        md: { ext: 'md', mime: 'text/markdown;charset=utf-8' },
-      }
-      const metaTitle = (typeof promptMetadata?.title === 'string' && promptMetadata.title.trim()) ? promptMetadata.title.trim() : 'prompt'
-      const { ext, mime } = map[exportFormat] || map.txt
-      const payload = resolveExportPayload(exportFormat)
-      downloadString(payload, `${metaTitle}.${ext}`, mime)
-    }
-
     return (
       <div className="space-y-3">
         <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 min-h-[320px]">
@@ -237,7 +202,29 @@ const EnhancedPromptPreview = ({
                 <option value="md">.md</option>
               </select>
               <button
-                onClick={handleExport}
+                onClick={() => {
+                  const map = {
+                    txt: { ext: 'txt', mime: 'text/plain;charset=utf-8' },
+                    json: { ext: 'json', mime: 'application/json;charset=utf-8' },
+                    xml: { ext: 'xml', mime: 'application/xml;charset=utf-8' },
+                    yaml: { ext: 'yaml', mime: 'text/yaml;charset=utf-8' },
+                    md: { ext: 'md', mime: 'text/markdown;charset=utf-8' },
+                  }
+                  const preferred = (enrichedPrompt || rawPrompt || '')
+                  let payload
+                  if (exportFormat === 'json') {
+                    if (typeof preferred === 'string') {
+                      payload = JSON.stringify({ prompt: preferred }, null, 2)
+                    } else {
+                      try { payload = JSON.stringify(preferred, null, 2) } catch { payload = JSON.stringify({ prompt: String(preferred) }, null, 2) }
+                    }
+                  } else {
+                    payload = (typeof preferred === 'string') ? preferred : String(preferred)
+                  }
+                  const metaTitle = (typeof promptMetadata?.title === 'string' && promptMetadata.title.trim()) ? promptMetadata.title.trim() : 'prompt'
+                  const { ext, mime } = map[exportFormat] || map.txt
+                  downloadString(payload, `${metaTitle}.${ext}`, mime)
+                }}
                 aria-label="Export prompt"
                 className="btn btn-secondary btn-sm"
                 title="Download the current prompt"
