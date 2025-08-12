@@ -3,6 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .actionSeparator { @apply mt-6 pt-3 border-t border-slate-200/70 dark:border-slate-700/60; }
+}
+
 /* Phase 2: Enhanced Animations */
 @keyframes fadeInUp {
   0% {
