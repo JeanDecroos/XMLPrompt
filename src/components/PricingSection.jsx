@@ -42,7 +42,7 @@ const PricingSection = () => {
                 <p className="text-gray-600 mt-1">Perfect for getting started</p>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-gray-900">$0</div>
+                <div className="text-3xl font-bold text-gray-900">€0</div>
                 <div className="text-sm text-gray-500">forever</div>
               </div>
             </div>
