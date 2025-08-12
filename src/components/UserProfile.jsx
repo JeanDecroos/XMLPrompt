@@ -184,8 +184,11 @@ export default function UserProfile({ stats }) {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold">Pricing TBA</div>
-                <div className="text-xs text-purple-200">in development</div>
+                <div className="flex items-baseline space-x-2">
+                  <span className="text-sm text-purple-200 line-through">€10</span>
+                  <div className="text-2xl font-bold">€3</div>
+                </div>
+                <div className="text-xs text-purple-200">/ month (coming soon)</div>
                 <button className="mt-2 px-4 py-2 bg-white text-purple-600 rounded-lg text-sm font-medium hover:bg-purple-50 transition-colors">
                   Join Waitlist
                 </button>

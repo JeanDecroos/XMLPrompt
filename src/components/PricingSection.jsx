@@ -11,11 +11,11 @@ const PricingSection = () => {
     ],
     premium: [
       'AI-powered prompt enhancement',
-      'Advanced optimization suggestions',
+      'Deeper AI enhancement options',
       'Priority model recommendations',
       'Prompt history & saving',
       'Enhanced usage limits',
-      'Premium AI models'
+      'Access to more model options (availability may vary)'
     ]
   }
 
@@ -88,10 +88,11 @@ const PricingSection = () => {
                 <p className="text-gray-600 mt-1">Professional AI optimization</p>
               </div>
               <div className="text-right">
-                <div className="flex items-baseline space-x-1">
-                  <div className="text-3xl font-bold text-gray-900">Pricing TBA</div>
+                <div className="flex items-baseline space-x-2">
+                  <span className="text-lg text-gray-500 line-through">€10</span>
+                  <div className="text-3xl font-bold text-gray-900">€3</div>
                 </div>
-                <div className="text-sm text-gray-500">currently in development</div>
+                <div className="text-sm text-gray-500">/ month (coming soon)</div>
               </div>
             </div>
 
