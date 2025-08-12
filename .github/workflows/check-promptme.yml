@@ -1,0 +1,35 @@
+name: Check promptme.md freshness
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'promptme.md'
+      - 'src/**'
+      - 'backend/**'
+      - 'package.json'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install deps (root)
+        run: npm ci
+
+      - name: Install deps (backend)
+        run: |
+          cd backend
+          npm ci
+
+      - name: Run promptme check
+        run: npm run --silent check:promptme

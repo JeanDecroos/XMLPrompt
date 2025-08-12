@@ -24,7 +24,8 @@
     "apply-full-db-improvements": "node scripts/applyFullDatabaseImprovements.js",
     "enhance-api-security": "node scripts/enhanceApiSecurity.js",
     "test-performance": "node scripts/testPerformanceImprovements.js",
-    "verify-improvements": "node scripts/verifyDatabaseImprovements.js"
+    "verify-improvements": "node scripts/verifyDatabaseImprovements.js",
+    "check:promptme": "node scripts/checkPromptmeUpToDate.js"
   },
   "dependencies": {
     "@supabase/auth-ui-react": "^0.4.7",
