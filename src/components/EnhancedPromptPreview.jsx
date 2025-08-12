@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Copy, Check, Eye, Code, AlertCircle, ArrowRight, Sparkles, FileText, Settings, Zap, Save, Clock, Share2 } from 'lucide-react'
 import { getModelById, PROMPT_FORMATS } from '../data/aiModels'
 import { downloadString } from '../utils/download'
+import { userPrefs } from '../state/userPrefs'
 import { PromptService } from '../services/promptService'
 import SharePromptModal from './SharePromptModal'
 import SharingService from '../services/sharingService'
@@ -26,7 +27,9 @@ const EnhancedPromptPreview = ({
 }) => {
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState(hasEnrichment ? 'enriched' : 'raw')
-  const [exportFormat, setExportFormat] = useState('txt')
+  const [exportFormat, setExportFormat] = useState(userPrefs.getExportFormat())
+  const [exportLang, setExportLang] = useState(userPrefs.getCodeLanguage())
+  const [isExportOpen, setIsExportOpen] = useState(false)
   
   // Auto-switch to enhanced tab when enrichment completes
   React.useEffect(() => {
@@ -168,7 +171,7 @@ const EnhancedPromptPreview = ({
         
         {prompt && (
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 ml-auto">
               <button
                 onClick={() => handleCopy(prompt)}
                 className="btn btn-secondary btn-sm"
@@ -186,50 +189,11 @@ const EnhancedPromptPreview = ({
                 )}
               </button>
               
-              {/* Export controls */}
-              <label htmlFor="export-format" className="sr-only">Choose export format</label>
-              <select
-                id="export-format"
-                aria-label="Export format"
-                value={exportFormat}
-                onChange={(e) => setExportFormat(e.target.value)}
-                className="border border-gray-300 rounded-md text-sm px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="txt">.txt</option>
-                <option value="json">.json</option>
-                <option value="xml">.xml</option>
-                <option value="yaml">.yaml</option>
-                <option value="md">.md</option>
-              </select>
               <button
-                onClick={() => {
-                  const map = {
-                    txt: { ext: 'txt', mime: 'text/plain;charset=utf-8' },
-                    json: { ext: 'json', mime: 'application/json;charset=utf-8' },
-                    xml: { ext: 'xml', mime: 'application/xml;charset=utf-8' },
-                    yaml: { ext: 'yaml', mime: 'text/yaml;charset=utf-8' },
-                    md: { ext: 'md', mime: 'text/markdown;charset=utf-8' },
-                  }
-                  const preferred = (enrichedPrompt || rawPrompt || '')
-                  let payload
-                  if (exportFormat === 'json') {
-                    if (typeof preferred === 'string') {
-                      payload = JSON.stringify({ prompt: preferred }, null, 2)
-                    } else {
-                      try { payload = JSON.stringify(preferred, null, 2) } catch { payload = JSON.stringify({ prompt: String(preferred) }, null, 2) }
-                    }
-                  } else {
-                    payload = (typeof preferred === 'string') ? preferred : String(preferred)
-                  }
-                  const metaTitle = (typeof promptMetadata?.title === 'string' && promptMetadata.title.trim()) ? promptMetadata.title.trim() : 'prompt'
-                  const { ext, mime } = map[exportFormat] || map.txt
-                  // Ensure filename has safe characters
-                  const safe = metaTitle.replace(/[^a-z0-9-_\.]+/gi, '_')
-                  downloadString(payload, `${safe}.${ext}`, mime)
-                }}
+                onClick={() => setIsExportOpen(true)}
                 aria-label="Export prompt"
                 className="btn btn-secondary btn-sm"
-                title="Download the current prompt"
+                title="Export the current prompt"
               >
                 <Save className="w-4 h-4 mr-1" />
                 Export
@@ -449,7 +413,90 @@ const EnhancedPromptPreview = ({
         </div>
       )}
 
-
+      {/* Export Modal */}
+      {isExportOpen && (
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm border border-gray-200">
+            <div className="px-4 py-3 border-b border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-900">Export Prompt</h4>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label htmlFor="exp-format" className="block text-sm font-medium text-gray-700 mb-1">Format</label>
+                <select
+                  id="exp-format"
+                  value={exportFormat}
+                  onChange={(e) => setExportFormat(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md text-sm px-2 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="txt">Plain text (.txt)</option>
+                  <option value="json">JSON (.json)</option>
+                  <option value="xml">XML (.xml)</option>
+                  <option value="yaml">YAML (.yaml)</option>
+                  <option value="md">Markdown (.md)</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="exp-lang" className="block text-sm font-medium text-gray-700 mb-1">Default programming language</label>
+                <select
+                  id="exp-lang"
+                  value={exportLang}
+                  onChange={(e) => setExportLang(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md text-sm px-2 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">None</option>
+                  <option value="javascript">javascript</option>
+                  <option value="python">python</option>
+                  <option value="json">json</option>
+                  <option value="xml">xml</option>
+                  <option value="yaml">yaml</option>
+                  <option value="markdown">markdown</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">Used for code fences when exporting Markdown/Text.</p>
+              </div>
+            </div>
+            <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-end gap-2">
+              <button className="btn btn-secondary btn-sm" onClick={() => setIsExportOpen(false)} aria-label="Cancel export">Cancel</button>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  // Persist prefs
+                  userPrefs.setExportFormat(exportFormat)
+                  userPrefs.setCodeLanguage(exportLang)
+                  const map = {
+                    txt: { ext: 'txt', mime: 'text/plain;charset=utf-8' },
+                    json: { ext: 'json', mime: 'application/json;charset=utf-8' },
+                    xml: { ext: 'xml', mime: 'application/xml;charset=utf-8' },
+                    yaml: { ext: 'yaml', mime: 'text/yaml;charset=utf-8' },
+                    md: { ext: 'md', mime: 'text/markdown;charset=utf-8' },
+                  }
+                  const preferred = (enrichedPrompt || rawPrompt || '')
+                  let content
+                  if (exportFormat === 'json') {
+                    if (typeof preferred === 'string') content = JSON.stringify({ prompt: preferred }, null, 2)
+                    else { try { content = JSON.stringify(preferred, null, 2) } catch { content = JSON.stringify({ prompt: String(preferred) }, null, 2) } }
+                  } else {
+                    const base = (typeof preferred === 'string') ? preferred : String(preferred)
+                    if ((exportFormat === 'md' || exportFormat === 'txt') && exportLang) {
+                      content = `\u0060\u0060\u0060${exportLang}\n${base}\n\u0060\u0060\u0060\n`
+                    } else {
+                      content = base
+                    }
+                  }
+                  const metaTitle = (typeof promptMetadata?.title === 'string' && promptMetadata.title.trim()) ? promptMetadata.title.trim() : 'prompt'
+                  const safe = metaTitle.replace(/[^a-z0-9-_\.]+/gi, '_')
+                  const { ext, mime } = map[exportFormat] || map.txt
+                  downloadString(content, `${safe}.${ext}`, mime)
+                  setIsExportOpen(false)
+                }}
+                aria-label="Download export"
+              >
+                Download
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Enhancement Results */}
       {hasEnrichment && enrichmentResult && (enrichedPrompt || activeTab === 'enriched') && (
