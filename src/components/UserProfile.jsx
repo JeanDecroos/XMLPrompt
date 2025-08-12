@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { SubscriptionService, SUBSCRIPTION_TIERS } from '../services/subscriptionService'
+import PlanBillingCard from './profile/PlanBillingCard'
+import SecurityCard from './profile/SecurityCard'
+import RecentActivityCard from './profile/RecentActivityCard'
+import QuickActions from './profile/QuickActions'
 import { 
   User, Settings, CreditCard, 
   BarChart3, Shield, Download, Calendar, Zap, Edit3, Camera,
@@ -105,6 +109,8 @@ export default function UserProfile({ stats }) {
     { id: 'settings', label: 'Settings', icon: Settings },
   ]
 
+  // Data now wired via hooks inside child components
+
   const renderOverview = () => (
     <div className="space-y-6">
       {/* Profile Header */}
@@ -204,6 +210,18 @@ export default function UserProfile({ stats }) {
           <div className="text-xs text-gray-600">Models Used</div>
         </div>
       </div>
+
+      {/* Plan & Billing + Security */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <PlanBillingCard />
+        <SecurityCard />
+      </div>
+
+      {/* Recent Activity */}
+      <RecentActivityCard />
+
+      {/* Quick Actions */}
+      <QuickActions isTopTier={isPro} />
     </div>
   )
 
