@@ -171,8 +171,8 @@ const EnhancedPromptPreview = ({
         
         {prompt && (
           <div className="actionSeparator mt-6 pt-3 border-t border-slate-200/70 dark:border-slate-700/60">
-            <div className="actionBar flex items-center justify-between gap-2 flex-wrap">
-              <div className="buttons flex items-center gap-2 ml-auto">
+            <div className="actionBar flex items-center justify-end gap-2 flex-wrap">
+              <div className="buttons flex items-center gap-2">
               <button
                 onClick={() => handleCopy(prompt)}
                 className="btn btn-secondary btn-sm"
@@ -239,9 +239,6 @@ const EnhancedPromptPreview = ({
                   )}
                 </button>
               )}
-              </div>
-              <div className="meta text-sm text-slate-500">
-                {prompt.split('\n').length} lines • {prompt.length} characters
               </div>
             </div>
           </div>
