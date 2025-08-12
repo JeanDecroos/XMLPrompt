@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Invoices, Plan, Profile, Sessions, SharedPrompts, TwoFADisableResp, TwoFAEnable, TwoFAStatus, TwoFAVerifyResp, UploadAvatarResp, Usage, RevokeResp } from '@api/types'
-import api from '@api/client'
+import api from '../../lib/api/client'
 import {
   InvoicesSchema,
   PlanSchema,
@@ -16,7 +15,7 @@ import {
   UploadAvatarRespSchema,
   UsageSchema,
   RevokeRespSchema,
-} from '@api/schemas'
+} from '../../lib/api/schemas'
 
 // Helpers
 const parse = <T>(schema: { parse: (d: unknown) => T }, data: unknown): T => schema.parse(data)
