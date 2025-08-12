@@ -427,7 +427,7 @@ const EnhancedPromptPreview = ({
                   id="exp-format"
                   value={exportFormat}
                   onChange={(e) => setExportFormat(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md text-sm px-2 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-md text-sm px-2 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="txt">Plain text (.txt)</option>
                   <option value="json">JSON (.json)</option>
@@ -442,7 +442,7 @@ const EnhancedPromptPreview = ({
                   id="exp-lang"
                   value={exportLang}
                   onChange={(e) => setExportLang(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md text-sm px-2 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-md text-sm px-2 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">None</option>
                   <option value="javascript">javascript</option>
