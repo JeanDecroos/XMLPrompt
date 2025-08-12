@@ -2,10 +2,10 @@
 
 ## 🎯 Executive Summary
 
-**Promptr** is a comprehensive, enterprise-grade AI prompt engineering platform that transforms basic user input into optimized prompts for 50+ AI models. The platform implements a sophisticated three-step process: prompt building, intelligent model selection, and AI-powered prompt refinement with quality scoring.
+**Promptr** is a comprehensive AI prompt engineering platform that transforms basic user input into optimized prompts for a catalog of 50+ model definitions (runtime availability may vary by provider/API access). The platform implements a three-step process: prompt building, intelligent model selection, and AI-powered prompt refinement with quality scoring.
 
 ### Core Value Proposition
-- **Universal AI Compatibility**: Native support for Claude, GPT, Gemini, DeepSeek, Qwen, and 45+ other models
+- **Universal AI Compatibility**: Catalog covers Claude, GPT, Gemini, DeepSeek, Qwen, and many others (availability varies)
 - **Intelligent Enhancement**: GPT-4/Claude-powered prompt optimization with configurable enhancement levels (1-5 scale)
 - **Format Adaptation**: Automatic prompt conversion to XML, JSON, Markdown, YAML, or structured formats based on target model
 - **Enterprise Features**: Full authentication system, rate limiting, usage analytics, secure sharing, and subscription management
@@ -21,7 +21,7 @@ Frontend Stack:
 ├── TailwindCSS 3.3.3 (Styling Framework)
 ├── React Router DOM 7.6.3 (Client-side Routing)
 ├── Lucide React 0.263.1 (Icon Library)
-├── Supabase JS 2.50.0 (Database Client)
+├── Supabase JS 2.50.0 (Auth/DB Client)
 └── PostCSS + Autoprefixer (CSS Processing)
 
 Component Architecture:
@@ -523,7 +523,7 @@ POST /api/v1/api-keys            # API key management
 
 ### Core Components
 - **SimplifiedPromptGenerator**: Main prompt creation interface
-- **EnhancedPromptPreview**: Side-by-side comparison of original vs enhanced
+- **EnhancedPromptPreview**: Side-by-side comparison of original vs enhanced; actions: Copy, Export, Save. Export supports .txt/.json/.xml/.yaml/.md and optional fenced code blocks (default language persisted).
 - **ModelSelector**: AI model selection with recommendations
 - **ImprovedRoleSelector**: Professional role selection with categories
 - **EnrichmentOptions**: Enhancement level and options configuration
@@ -573,28 +573,23 @@ const ENHANCEMENT_LEVELS = {
 ```javascript
 const SUBSCRIPTION_TIERS = {
   free: {
-    monthly_prompts: 50,
-    enhancement_level: 2,
-    models: ["gpt-4o-mini", "claude-3-haiku"],
-    sharing: false
+    price_eur: 0,
+    features: [
+      "Universal prompt generation",
+      "Multi‑format support (XML, JSON, Markdown, YAML, structured, plain)",
+      "Examples and starter prompts",
+      "Copy & export (.txt/.json/.xml/.yaml/.md)"
+    ]
   },
-  pro: {
-    monthly_prompts: 1000,
-    enhancement_level: 4,
-    models: "all",
-    sharing: true,
-    priority_support: true
-  },
-  enterprise: {
-    monthly_prompts: "unlimited",
-    enhancement_level: 5,
-    models: "all",
-    sharing: true,
-    api_access: true,
-    custom_models: true
+  premium: {
+    status: "coming_soon",
+    launch_pricing_eur: { from: 10, to: 3 },
+    notes: "Deeper AI enhancement, priority model recommendations, history/saving, enhanced limits, broader model access"
   }
 }
 ```
+
+> Pricing: Free Plan €0 forever. Premium Plan coming soon (launch pricing from €10 → €3 per month).
 
 ## 🛠️ Development Setup
 
@@ -623,13 +618,16 @@ JWT_SECRET=your-jwt-secret
 ```bash
 # Frontend
 npm install
-npm run dev  # Runs on http://localhost:3001
+npm run dev  # Runs on http://localhost:3000 (Vite)
 
 # Backend
 cd backend
 npm install
 npm run dev  # Runs on http://localhost:3002
 ```
+
+Notes
+- During development, MSW (Mock Service Worker) is enabled by default to provide mock API responses for profile/billing/security flows. Ensure `public/mockServiceWorker.js` exists (run `npx msw init public --save` once).
 
 ## 📈 Analytics & Monitoring
 
