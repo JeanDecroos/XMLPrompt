@@ -180,14 +180,14 @@ export default function UserProfile({ stats }) {
                 </p>
                 <div className="flex items-center space-x-2 text-xs text-purple-200">
                   <Sparkles className="w-3 h-3" />
-                  <span>Save 70% - Limited time offer</span>
+                  <span>Premium — coming soon</span>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold">3 EUR</div>
-                <div className="text-xs text-purple-200">/ month</div>
+                <div className="text-2xl font-bold">Pricing TBA</div>
+                <div className="text-xs text-purple-200">in development</div>
                 <button className="mt-2 px-4 py-2 bg-white text-purple-600 rounded-lg text-sm font-medium hover:bg-purple-50 transition-colors">
-                  Upgrade Now
+                  Join Waitlist
                 </button>
               </div>
             </div>

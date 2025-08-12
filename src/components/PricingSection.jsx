@@ -75,7 +75,7 @@ const PricingSection = () => {
             <div className="absolute left-1/2 -top-3 -translate-x-1/2 z-10">
               <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center space-x-1 shadow-lg">
                 <Sparkles className="w-4 h-4" />
-                <span>Save 70% – Limited-time launch pricing</span>
+                <span>Premium plan — coming soon</span>
               </div>
             </div>
 
@@ -89,10 +89,9 @@ const PricingSection = () => {
               </div>
               <div className="text-right">
                 <div className="flex items-baseline space-x-1">
-                  <span className="text-lg text-gray-500 line-through">10 EUR</span>
-                  <div className="text-3xl font-bold text-gray-900">3 EUR</div>
+                  <div className="text-3xl font-bold text-gray-900">Pricing TBA</div>
                 </div>
-                <div className="text-sm text-gray-500">/ month</div>
+                <div className="text-sm text-gray-500">currently in development</div>
               </div>
             </div>
 
@@ -119,16 +118,14 @@ const PricingSection = () => {
               </p>
             </div>
 
-            <button className="btn btn-premium btn-lg w-full group mb-4">
+            <button className="btn btn-premium btn-lg w-full group mb-4" onClick={() => window.location.href = '/pricing'}>
               <Crown className="w-5 h-5 mr-2" />
-              <span>Start 7-Day Free Trial</span>
+              <span>Join Waitlist</span>
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </button>
 
             <div className="text-center space-y-1">
-              <p className="text-sm text-gray-600">
-                ✓ No credit card required • ✓ Cancel anytime
-              </p>
+              <p className="text-sm text-gray-600">We’ll notify you when Premium is available.</p>
             </div>
           </div>
         </div>
