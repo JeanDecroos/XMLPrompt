@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Copy, Check, Eye, Code, AlertCircle, ArrowRight, Sparkles, FileText, Settings, Zap, Save, Clock, Share2 } from 'lucide-react'
 import { getModelById, PROMPT_FORMATS } from '../data/aiModels'
+import { downloadString } from '../utils/download'
 import { PromptService } from '../services/promptService'
 import SharePromptModal from './SharePromptModal'
 import SharingService from '../services/sharingService'
@@ -133,6 +134,42 @@ const EnhancedPromptPreview = ({
   }
 
   const renderPromptContent = (prompt, isEnhanced = false) => {
+    const [exportFormat, setExportFormat] = useState('txt')
+
+    const resolveExportPayload = (format) => {
+      // Prefer enriched prompt when present
+      const preferred = (enrichedPrompt || rawPrompt || '')
+
+      // Some generators may return objects; current code passes strings.
+      // If we ever receive an object, preserve it for JSON; otherwise wrap.
+      if (format === 'json') {
+        if (typeof preferred === 'string') {
+          return JSON.stringify({ prompt: preferred }, null, 2)
+        }
+        try {
+          return JSON.stringify(preferred, null, 2)
+        } catch {
+          return JSON.stringify({ prompt: String(preferred) }, null, 2)
+        }
+      }
+      // Non-JSON: export the visible text content
+      return typeof preferred === 'string' ? preferred : String(preferred)
+    }
+
+    const handleExport = () => {
+      const map = {
+        txt: { ext: 'txt', mime: 'text/plain;charset=utf-8' },
+        json: { ext: 'json', mime: 'application/json;charset=utf-8' },
+        xml: { ext: 'xml', mime: 'application/xml;charset=utf-8' },
+        yaml: { ext: 'yaml', mime: 'text/yaml;charset=utf-8' },
+        md: { ext: 'md', mime: 'text/markdown;charset=utf-8' },
+      }
+      const metaTitle = (typeof promptMetadata?.title === 'string' && promptMetadata.title.trim()) ? promptMetadata.title.trim() : 'prompt'
+      const { ext, mime } = map[exportFormat] || map.txt
+      const payload = resolveExportPayload(exportFormat)
+      downloadString(payload, `${metaTitle}.${ext}`, mime)
+    }
+
     return (
       <div className="space-y-3">
         <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 min-h-[320px]">
@@ -184,6 +221,31 @@ const EnhancedPromptPreview = ({
                 )}
               </button>
               
+              {/* Export controls */}
+              <label htmlFor="export-format" className="sr-only">Choose export format</label>
+              <select
+                id="export-format"
+                aria-label="Export format"
+                value={exportFormat}
+                onChange={(e) => setExportFormat(e.target.value)}
+                className="border border-gray-300 rounded-md text-sm px-2 py-1 bg-white"
+              >
+                <option value="txt">.txt</option>
+                <option value="json">.json</option>
+                <option value="xml">.xml</option>
+                <option value="yaml">.yaml</option>
+                <option value="md">.md</option>
+              </select>
+              <button
+                onClick={handleExport}
+                aria-label="Export prompt"
+                className="btn btn-secondary btn-sm"
+                title="Download the current prompt"
+              >
+                <Save className="w-4 h-4 mr-1" />
+                Export
+              </button>
+
               <button
                 onClick={handleSave}
                 disabled={saving || !validation.isValid}
