@@ -29,23 +29,23 @@ This guide walks through setting up a production-ready Supabase project for Prom
 ## 🔧 **Step 2: Environment Configuration**
 
 ### 2.1 Create Environment Files
-Create `.env.local` in your project root:
+Create `frontend/.env` and `backend/.env`:
 
 ```env
-# Supabase Configuration - UPDATED WITH NEW PROJECT
-VITE_SUPABASE_URL=https://nxwflnxspsokscfhuaqr.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54d2ZsbnhzcHNva3NjZmh1YXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3Njk5MzQsImV4cCI6MjA2NjM0NTkzNH0.jMWf2BEfI_4gAtMO9yzv3Nw5QWiIhyPanANP5px51gA
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54d2ZsbnhzcHNva3NjZmh1YXFyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDc2OTkzNCwiZXhwIjoyMDY2MzQ1OTM0fQ.CbT3iYiaghBJ_lJPSAXFVMKyJtTVJoFL-61x4HHMxi0
+# Frontend (.env)
+VITE_SUPABASE_URL=https://<your-project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<your-anon-key>
 
 # JWT Secret
 JWT_SECRET=FKqIjknWVw736dGhQokNzTANr8LCScfnUSRyXmpBP1aAClyiOpj5YUvrSsXeVK2H1dTlDqaso9ghTj3AqBKI2A==
 
-# API Configuration
-VITE_API_URL=https://nxwflnxspsokscfhuaqr.supabase.co/functions/v1
-NODE_ENV=production
+VITE_API_URL=http://localhost:3001
+NODE_ENV=development
 
-# OpenAI Configuration (for enrichment)
-OPENAI_API_KEY=your-openai-api-key
+# Backend (.env)
+SUPABASE_URL=https://<your-project-ref>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+OPENAI_API_KEY=<your-openai-api-key>
 OPENAI_MODEL=gpt-4o-nano
 
 # Analytics & Monitoring
@@ -59,7 +59,7 @@ STRIPE_WEBHOOK_SECRET=your-stripe-webhook-secret
 ```
 
 ### 2.2 Update Frontend Configuration
-Update `src/lib/supabase.js`:
+Update `frontend/src/lib/supabase.js`:
 
 ```javascript
 import { createClient } from '@supabase/supabase-js'

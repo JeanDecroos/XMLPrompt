@@ -23,18 +23,18 @@ NODE_ENV=development
 PORT=3001
 CORS_ORIGIN=http://localhost:3000
 
-# Supabase (already configured)
-SUPABASE_URL=https://nxwflnxspsokscfhuaqr.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54d2ZsbnhzcHNva3NjZmh1YXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY0MzIwNzIsImV4cCI6MjA1MjAwODA3Mn0.DKFhJODMBfzpgfpnWI0zKXNmWVLNsJAyO7UE5LUhGNg
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54d2ZsbnhzcHNva3NjZmh1YXFyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNjQzMjA3MiwiZXhwIjoyMDUyMDA4MDcyfQ.1LlKUy8Qr6aBTbGBrKOdyZNLgJMPM8eFUXf8wXNIJzw
+# Supabase (fill with your project refs/keys)
+SUPABASE_URL=https://<your-project-ref>.supabase.co
+SUPABASE_ANON_KEY=<your-anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
 
-# AI Configuration - PASTE YOUR OPENAI KEY HERE
-OPENAI_API_KEY=sk-your-openai-api-key-here
+# AI Configuration
+OPENAI_API_KEY=<your-openai-api-key>
 OPENAI_MODEL=gpt-4o-nano
 
-# Security (generate random keys)
-JWT_SECRET=$(openssl rand -base64 32)
-API_KEY_SECRET=$(openssl rand -base64 32)
+# Security (generate random keys locally if desired)
+JWT_SECRET=<random-32B-base64>
+API_KEY_SECRET=<random-32B-base64>
 
 # Features
 FEATURE_PROMPT_ENRICHMENT=true
@@ -101,7 +101,7 @@ curl http://localhost:3001/health
 
 ### **#1 IMMEDIATE: Test Your Core Feature** 🚨
 1. **Start backend**: `cd backend && npm run dev`
-2. **Start frontend**: `npm run dev` (in main directory)
+2. **Start frontend**: `npm run dev` (at repo root) or `cd frontend && npm run dev`
 3. **Test prompt enhancement** with a real user account
 4. **Verify AI enhancement** is working vs mock
 
