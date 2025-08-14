@@ -1,8 +1,8 @@
 import express from 'express'
 import MFAService from '../services/mfaService.js'
-import { authenticateUser } from '../middleware/auth.js'
-import { rateLimit } from '../middleware/rateLimit.js'
-import { validateRequest } from '../middleware/validation.js'
+import { authMiddleware } from '../middleware/auth.js'
+import { rateLimitMiddleware } from '../middleware/rateLimit.js'
+import { validationMiddleware } from '../middleware/validation.js'
 import logger from '../utils/logger.js'
 
 const router = express.Router()
@@ -13,8 +13,8 @@ const router = express.Router()
  * @access Private
  */
 router.post('/generate-secret', 
-  authenticateUser,
-  rateLimit({ windowMs: 5 * 60 * 1000, max: 5 }), // 5 requests per 5 minutes
+  authMiddleware,
+  rateLimitMiddleware,
   async (req, res) => {
     try {
       const { user } = req
@@ -52,9 +52,9 @@ router.post('/generate-secret',
  * @access Private
  */
 router.post('/verify-code',
-  authenticateUser,
-  rateLimit({ windowMs: 60 * 1000, max: 10 }), // 10 requests per minute
-  validateRequest({
+  authMiddleware,
+  rateLimitMiddleware,
+  validationMiddleware({
     body: {
       code: { type: 'string', required: true, pattern: /^\d{6}$/ },
       secret: { type: 'string', required: true }
@@ -94,9 +94,9 @@ router.post('/verify-code',
  * @access Private
  */
 router.post('/enable',
-  authenticateUser,
-  rateLimit({ windowMs: 5 * 60 * 1000, max: 3 }), // 3 requests per 5 minutes
-  validateRequest({
+  authMiddleware,
+  rateLimitMiddleware,
+  validationMiddleware({
     body: {
       secret: { type: 'string', required: true },
       backupCodes: { type: 'array', required: true }
@@ -134,8 +134,8 @@ router.post('/enable',
  * @access Private
  */
 router.post('/disable',
-  authenticateUser,
-  rateLimit({ windowMs: 5 * 60 * 1000, max: 3 }), // 3 requests per 5 minutes
+  authMiddleware,
+  rateLimitMiddleware,
   async (req, res) => {
     try {
       const { user } = req
@@ -167,9 +167,9 @@ router.post('/disable',
  * @access Private
  */
 router.post('/verify-backup-code',
-  authenticateUser,
-  rateLimit({ windowMs: 60 * 1000, max: 5 }), // 5 requests per minute
-  validateRequest({
+  authMiddleware,
+  rateLimitMiddleware,
+  validationMiddleware({
     body: {
       backupCode: { type: 'string', required: true, pattern: /^[A-F0-9]{8}$/ }
     }
@@ -209,8 +209,8 @@ router.post('/verify-backup-code',
  * @access Private
  */
 router.post('/generate-backup-codes',
-  authenticateUser,
-  rateLimit({ windowMs: 5 * 60 * 1000, max: 3 }), // 3 requests per 5 minutes
+  authMiddleware,
+  rateLimitMiddleware,
   async (req, res) => {
     try {
       const { user } = req
@@ -241,7 +241,7 @@ router.post('/generate-backup-codes',
  * @access Private
  */
 router.get('/status',
-  authenticateUser,
+  authMiddleware,
   async (req, res) => {
     try {
       const { user } = req
@@ -269,8 +269,8 @@ router.get('/status',
  * @access Public (but requires valid session)
  */
 router.post('/login',
-  rateLimit({ windowMs: 60 * 1000, max: 10 }), // 10 requests per minute
-  validateRequest({
+  rateLimitMiddleware,
+  validationMiddleware({
     body: {
       userId: { type: 'string', required: true },
       code: { type: 'string', required: true },
@@ -287,7 +287,8 @@ router.post('/login',
       
       if (method === 'totp') {
         // Get user's TOTP secret
-        const { data: user } = await supabase
+      const { database } = await import('../config/database.js')
+      const { data: user } = await database.supabase
           .from('profiles')
           .select('security_two_factor_secret')
           .eq('id', userId)
@@ -339,13 +340,14 @@ router.post('/login',
  * @access Private
  */
 router.get('/login-history',
-  authenticateUser,
+  authMiddleware,
   async (req, res) => {
     try {
       const { user } = req
       
       // Get login history from user's profile
-      const { data, error } = await supabase
+      const { database } = await import('../config/database.js')
+      const { data, error } = await database.supabase
         .from('profiles')
         .select('security_login_history')
         .eq('id', user.id)

@@ -34,6 +34,7 @@ import userRoutes from './routes/users.js'
 import apiKeyRoutes from './routes/apiKeys.js'
 import adminRoutes from './routes/admin.js'
 import webhookRoutes from './routes/webhooks.js'
+import stripeRoutes from './routes/stripe.js'
 import quotaRoutes from './routes/quota.js'
 import mfaRoutes from './routes/mfa.js'
 
@@ -95,6 +96,7 @@ app.use(cors({
 // Body parsing
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
+// (no request id middleware)
 
 // Compression
 app.use(compression())
@@ -165,6 +167,7 @@ const apiRouter = express.Router()
 // Public routes (no auth required)
 apiRouter.use('/auth', authRoutes)
 apiRouter.use('/webhooks', webhookRoutes)
+apiRouter.use('/stripe', stripeRoutes)
 
 // Protected routes (auth required)
 apiRouter.use('/prompts', authMiddleware, promptRoutes)
@@ -175,7 +178,10 @@ apiRouter.use('/users', authMiddleware, userRoutes)
 apiRouter.use('/api-keys', authMiddleware, apiKeyRoutes)
 apiRouter.use('/quota', quotaRoutes) // Quota routes with auth middleware applied internally
 apiRouter.use('/admin', authMiddleware, adminRoutes)
-apiRouter.use('/mfa', mfaRoutes) // MFA routes with auth middleware applied internally
+// Temporarily disable MFA routes in dev to stabilize server
+if (config.env !== 'development') {
+  apiRouter.use('/mfa', mfaRoutes)
+}
 
 // Mount API routes
 app.use(`/api/${config.app.apiVersion}`, apiRouter)
@@ -313,9 +319,7 @@ async function startServer() {
   }
 }
 
-// Start the server if this file is run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  startServer()
-}
+// Always start the server in this runtime (nodemon may affect argv detection)
+startServer()
 
 export { app, startServer } 

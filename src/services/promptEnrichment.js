@@ -4,8 +4,16 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002'
 
 export class PromptEnrichmentService {
   static async enrichPrompt(promptData, userToken = null, userTier = 'free') {
+    // Use proxy (relative URL) in dev to avoid CORS confusion; fall back to base URL if provided
+    const usingProxy = import.meta.env.DEV && !import.meta.env.VITE_API_URL
+    const apiBase = usingProxy ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:3001')
+    const mswEnabled = Boolean(window.__MSW_ENABLED__)
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/enrichment/enhance`, {
+      const finalUrl = `${apiBase}/api/v1/enrichment/enhance`
+      if (import.meta.env.DEV) {
+        console.debug('[enrichment] url:', finalUrl, 'mswEnabled:', !!window.__MSW_ENABLED__)
+      }
+      const response = await fetch(finalUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -23,17 +31,48 @@ export class PromptEnrichmentService {
         })
       })
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+      // Parse JSON regardless of status
+      let result
+      try {
+        result = await response.json()
+      } catch {
+        result = null
       }
 
-      const result = await response.json()
-      
-      // Backend returns {success: true, data: {enhancedPrompt: "...", ...}}
-      // We want to return {success: true, data: {enhancedPrompt: "...", ...}}
+      if (!response.ok) {
+        return {
+          success: false,
+          status: response.status,
+          error: result?.error || `HTTP error! status: ${response.status}`,
+          errorDetail: result
+        }
+      }
+
+      // Backend returns {success: true, data: {...}}
+      const templateHeader = response.headers.get('x-enrichment-template') || null
+      if (import.meta.env.DEV && templateHeader) {
+        console.debug('[enrichment] template:', templateHeader)
+      }
+      // Diagnostics
+      if (import.meta.env.DEV) {
+        console.log(JSON.stringify({
+          env: { mswEnabled, apiBase, usingProxy },
+          endpoint: { reachable: true, status: response.status, path: '/api/v1/enrichment/enhance' },
+          template: { header: templateHeader, metadataId: result?.data?.metadata?.templateId || null },
+          enhancementLevel: { sent: promptData.enrichmentLevel, clamped: promptData.enrichmentLevel },
+          tier: { userTier, gated: userTier === 'free' },
+          usage: { lastTotalTokens: result?.data?.metadata?.tokensUsed || null }
+        }))
+      }
       return {
         success: true,
-        data: result.data  // Extract the data field from backend response
+        data: {
+          ...result.data,
+          metadata: {
+            ...(result.data?.metadata || {}),
+            templateId: templateHeader || (result.data?.metadata?.templateId ?? null)
+          }
+        }
       }
     } catch (error) {
       console.error('Prompt enrichment failed:', error)

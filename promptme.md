@@ -2,14 +2,27 @@
 
 ## 🎯 Executive Summary
 
-**Promptr** is a comprehensive AI prompt engineering platform that transforms basic user input into optimized prompts for a catalog of 50+ model definitions (runtime availability may vary by provider/API access). The platform implements a three-step process: prompt building, intelligent model selection, and AI-powered prompt refinement with quality scoring.
+**Promptr** is a comprehensive AI prompt engineering platform that transforms basic user input into optimized prompts for a catalog of 50+ model definitions (runtime availability may vary by provider/API access). The platform implements a three-step process: prompt building, intelligent model selection, and AI-powered prompt refinement with quality scoring. All users can access all supported models in the selector.
 
 ### Core Value Proposition
 - **Universal AI Compatibility**: Catalog covers Claude, GPT, Gemini, DeepSeek, Qwen, and many others (availability varies)
+- **Full Model Access for Everyone**: All users can choose from all supported models; Premium focuses on power features and higher limits—not model access
 - **Intelligent Enhancement**: GPT-4/Claude-powered prompt optimization with configurable enhancement levels (1-5 scale)
 - **Format Adaptation**: Automatic prompt conversion to XML, JSON, Markdown, YAML, or structured formats based on target model
 - **Enterprise Features**: Full authentication system, rate limiting, usage analytics, secure sharing, and subscription management
 - **Production-Ready**: Complete backend API with comprehensive middleware, error handling, logging, and monitoring
+
+## 🎯 Product Goal & Process
+
+### Product Goal
+- Help professionals produce high‑quality prompts in minutes instead of hours
+- Reduce iteration time and context switching; save 2+ hours per week on prompt creation
+- Ensure results are portable across models and providers
+
+### Process (Three Clear Steps)
+1. Prompt Builder: Capture role, task, context, and requirements with high‑signal guidance
+2. Model Selector: Pick from all supported models with data‑backed recommendations
+3. Enhancement: Apply AI‑powered optimization with controllable enhancement levels and quality scoring
 
 ## 🏗️ Complete Architecture Overview
 
@@ -276,7 +289,7 @@ const ENHANCEMENT_LEVELS = {
 ```javascript
 const AI_PROVIDERS = {
   openai: {
-    models: ['gpt-4o', 'gpt-4-turbo', 'gpt-4o-mini'],
+    models: ['gpt-4o', 'gpt-4-turbo', 'gpt-4o-nano'],
     systemPrompt: "You are an expert prompt engineer specializing in creating optimized XML prompts for Claude AI. Your job is to enhance and refine prompts for maximum effectiveness while maintaining clarity and structure.",
     temperature: 0.7,
     maxTokens: { free: 800, pro: 2000, enterprise: 4000 },
@@ -387,7 +400,7 @@ const TASK_RECOMMENDATIONS = {
   },
   costEffective: {
     primary: 'o4-mini',
-    alternatives: ['gemini-2.5-flash', 'claude-3-haiku', 'gpt-4o-mini'],
+    alternatives: ['gemini-2.5-flash', 'claude-3-haiku', 'gpt-4o-nano'],
     reasoning: 'o4-mini delivers exceptional reasoning and math performance at cost-effective pricing'
   }
 }
@@ -578,18 +591,19 @@ const SUBSCRIPTION_TIERS = {
       "Universal prompt generation",
       "Multi‑format support (XML, JSON, Markdown, YAML, structured, plain)",
       "Examples and starter prompts",
-      "Copy & export (.txt/.json/.xml/.yaml/.md)"
+      "Copy & export (.txt/.json/.xml/.yaml/.md)",
+      "Access to all models"
     ]
   },
   premium: {
-    status: "coming_soon",
-    launch_pricing_eur: { from: 10, to: 3 },
-    notes: "Deeper AI enhancement, priority model recommendations, history/saving, enhanced limits, broader model access"
+    status: "available",
+    price_eur: 3,
+    notes: "Deeper AI enhancement options, priority recommendations, prompt history/saving, enhanced usage limits, priority support"
   }
 }
 ```
 
-> Pricing: Free Plan €0 forever. Premium Plan coming soon (launch pricing from €10 → €3 per month).
+> Pricing: Free Plan €0 forever. Premium Plan €3/month (introductory pricing from €10 → €3).
 
 ## 🛠️ Development Setup
 

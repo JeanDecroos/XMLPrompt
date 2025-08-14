@@ -5,9 +5,10 @@ import PlanBillingCard from './profile/PlanBillingCard'
 import SecurityCard from './profile/SecurityCard'
 import RecentActivityCard from './profile/RecentActivityCard'
 import QuickActions from './profile/QuickActions'
+import QuotaDisplay from './QuotaDisplay'
 import { 
   User, Settings, CreditCard, 
-  BarChart3, Shield, Download, Calendar, Zap, Edit3, Camera,
+  BarChart3, Shield, Download, Zap, Edit3, Camera,
   CheckCircle, AlertCircle, RefreshCw, LogOut, Bell, Globe, ChevronRight, Crown, Sparkles
 } from 'lucide-react'
 
@@ -16,7 +17,7 @@ import NotificationsModal from './settings/NotificationsModal'
 import PrivacyModal from './settings/PrivacyModal'
 import ExportDataModal from './settings/ExportDataModal'
 import TwoFactorModal from './settings/TwoFactorModal'
-import LoginHistoryModal from './settings/LoginHistoryModal'
+// Removed Login History modal per request
 import PaymentMethodsModal from './settings/PaymentMethodsModal'
 import BillingHistoryModal from './settings/BillingHistoryModal'
 
@@ -35,7 +36,7 @@ export default function UserProfile({ stats }) {
   const [privacyModal, setPrivacyModal] = useState(false)
   const [exportDataModal, setExportDataModal] = useState(false)
   const [twoFactorModal, setTwoFactorModal] = useState(false)
-  const [loginHistoryModal, setLoginHistoryModal] = useState(false)
+  // Removed login history state
   const [paymentMethodsModal, setPaymentMethodsModal] = useState(false)
   const [billingHistoryModal, setBillingHistoryModal] = useState(false)
 
@@ -180,7 +181,7 @@ export default function UserProfile({ stats }) {
                 </p>
                 <div className="flex items-center space-x-2 text-xs text-purple-200">
                   <Sparkles className="w-3 h-3" />
-                  <span>Premium — coming soon</span>
+                  <span>Access to all models for everyone</span>
                 </div>
               </div>
               <div className="text-right">
@@ -188,9 +189,12 @@ export default function UserProfile({ stats }) {
                   <span className="text-sm text-purple-200 line-through">€10</span>
                   <div className="text-2xl font-bold">€3</div>
                 </div>
-                <div className="text-xs text-purple-200">/ month (coming soon)</div>
-                <button className="mt-2 px-4 py-2 bg-white text-purple-600 rounded-lg text-sm font-medium hover:bg-purple-50 transition-colors">
-                  Join Waitlist
+                <div className="text-xs text-purple-200">/ month</div>
+                <button 
+                  onClick={() => window.location.href = '/billing/upgrade'}
+                  className="mt-2 px-4 py-2 bg-white text-purple-600 rounded-lg text-sm font-medium hover:bg-purple-50 transition-colors"
+                >
+                  Upgrade to Premium
                 </button>
               </div>
             </div>
@@ -262,27 +266,8 @@ export default function UserProfile({ stats }) {
         </div>
       </div>
 
-      {/* Usage Limits */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <h3 className="font-semibold text-gray-900 mb-3">Usage Limits</h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Token Usage</span>
-            <span className="text-sm font-medium">{s.tokensUsed.toLocaleString()} / 4,000</span>
-          </div>
-          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div 
-              className="h-2 bg-blue-500 rounded-full"
-              style={{ width: `${Math.min((s.tokensUsed / 4000) * 100, 100)}%` }}
-            />
-          </div>
-          {!isPro && (
-            <div className="text-xs text-gray-500 text-center">
-              Upgrade to Premium for unlimited tokens
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Quotas & limits (dynamic from backend) */}
+      <QuotaDisplay className="bg-white rounded-lg border border-gray-200 p-4" showUpgradePrompt={false} />
     </div>
   )
 
@@ -342,16 +327,7 @@ export default function UserProfile({ stats }) {
               <ChevronRight className="w-4 h-4 text-gray-400" />
             </div>
           </button>
-          <button 
-            onClick={() => setLoginHistoryModal(true)}
-            className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
-          >
-            <div className="flex items-center space-x-3">
-              <Calendar className="w-5 h-5 text-gray-600" />
-              <span className="text-sm text-gray-700">Login History</span>
-            </div>
-            <ChevronRight className="w-4 h-4 text-gray-400" />
-          </button>
+          {/* Login History removed */}
         </div>
       </div>
 
@@ -440,10 +416,7 @@ export default function UserProfile({ stats }) {
         isOpen={twoFactorModal} 
         onClose={() => setTwoFactorModal(false)} 
       />
-      <LoginHistoryModal 
-        isOpen={loginHistoryModal} 
-        onClose={() => setLoginHistoryModal(false)} 
-      />
+      {/* Login History modal removed */}
       <PaymentMethodsModal 
         isOpen={paymentMethodsModal} 
         onClose={() => setPaymentMethodsModal(false)} 

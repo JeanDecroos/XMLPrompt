@@ -46,7 +46,7 @@ NODE_ENV=production
 
 # OpenAI Configuration (for enrichment)
 OPENAI_API_KEY=your-openai-api-key
-OPENAI_MODEL=gpt-4o-mini
+OPENAI_MODEL=gpt-4o-nano
 
 # Analytics & Monitoring
 SENTRY_DSN=your-sentry-dsn

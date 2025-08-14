@@ -1,5 +1,6 @@
 import React from 'react'
 import { Check, Crown, Zap, ArrowRight, Sparkles } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 
 const PricingSection = () => {
   const features = {
@@ -7,7 +8,8 @@ const PricingSection = () => {
       'Universal prompt generation',
       'Multi-model format support',
       'Basic templates and examples',
-      'Copy & export functionality'
+      'Copy & export functionality',
+      'Access to all models'
     ],
     premium: [
       'AI-powered prompt enhancement',
@@ -15,9 +17,11 @@ const PricingSection = () => {
       'Priority model recommendations',
       'Prompt history & saving',
       'Enhanced usage limits',
-      'Access to more model options (availability may vary)'
+      'Priority support'
     ]
   }
+
+  const { isPro } = useAuth()
 
   return (
     <section id="pricing" className="py-16 bg-transparent">
@@ -60,24 +64,39 @@ const PricingSection = () => {
 
             {/* Spacer to match Premium Plan height */}
             <div className="flex-grow"></div>
-            
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-6">
-              <div className="flex items-center justify-center space-x-2">
-                <Check className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-semibold text-green-800">Current Plan Active</span>
+
+            {!isPro && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-6">
+                <div className="flex items-center justify-center space-x-2">
+                  <Check className="w-4 h-4 text-green-600" />
+                  <span className="text-sm font-semibold text-green-800">Current Plan Active</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Premium Plan */}
-          <div className="card-premium p-8 pt-12 relative h-full flex flex-col overflow-visible" style={{contain: 'none'}}>
-            {/* Popular Badge - floating on top of card */}
-            <div className="absolute left-1/2 -top-3 -translate-x-1/2 z-10">
-              <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center space-x-1 shadow-lg">
-                <Sparkles className="w-4 h-4" />
-                <span>Premium plan — coming soon</span>
-              </div>
+          <div className="relative group h-full rounded-2xl p-[2px] bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 animate-gradient-pan shadow-xl overflow-visible">
+            {/* Soft animated glow halo behind the gradient frame */}
+            <div aria-hidden className="absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-r from-purple-400/25 via-fuchsia-400/20 to-blue-400/25 blur-3xl opacity-70 group-hover:opacity-90 transition-opacity"></div>
+            {/* Dynamic pixelated shadow under card (subtle and non-themed) */}
+            <div
+              aria-hidden
+              className="absolute z-0 left-8 right-8 -bottom-8 h-10 rounded-2xl opacity-85 animate-float-slow pointer-events-none mix-blend-multiply"
+              style={{
+                imageRendering: 'pixelated',
+                background:
+                  'repeating-linear-gradient(0deg, rgba(17,24,39,0.22) 0 2px, transparent 2px 4px), repeating-linear-gradient(90deg, rgba(17,24,39,0.22) 0 2px, transparent 2px 4px), radial-gradient(60% 70% at 50% 40%, rgba(17,24,39,0.25), rgba(59,130,246,0.18) 55%, transparent 75%)',
+                filter: 'blur(14px) saturate(115%)',
+                backgroundSize: 'auto, auto, 100% 100%',
+                boxShadow: '0 35px 60px rgba(17,24,39,0.18)'
+              }}
+            >
+              <div className="w-full h-full rounded-2xl opacity-85 animate-pixel-shift" />
             </div>
+            <div className="card-premium p-8 pt-12 relative z-10 h-full flex flex-col overflow-visible rounded-[0.95rem] transition-transform duration-300 ease-out group-hover:scale-[1.01]" style={{contain: 'none'}}>
+              {/* Shimmer accent across the title area */}
+              <div aria-hidden className="pointer-events-none absolute -top-4 left-8 right-8 h-8 rounded-xl bg-gradient-to-r from-white/20 via-white/40 to-white/20 blur-md opacity-40 group-hover:opacity-70"></div>
 
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -92,7 +111,7 @@ const PricingSection = () => {
                   <span className="text-lg text-gray-500 line-through">€10</span>
                   <div className="text-3xl font-bold text-gray-900">€3</div>
                 </div>
-                <div className="text-sm text-gray-500">/ month (coming soon)</div>
+                <div className="text-sm text-gray-500">/ month</div>
               </div>
             </div>
 
@@ -107,26 +126,21 @@ const PricingSection = () => {
               ))}
             </div>
 
-            {/* Value Highlight */}
-            <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4 mb-6">
-              <div className="flex items-center space-x-2 mb-2">
-                <Zap className="w-4 h-4 text-purple-600" />
-                <span className="text-sm font-semibold text-purple-800">Instant Value</span>
+            {/* Removed value highlight per request */}
+
+            {isPro ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4 text-center">
+                <span className="text-sm font-semibold text-green-800">You're on Premium</span>
               </div>
-              <p className="text-sm text-purple-700">
-                Save 2+ hours per week on prompt creation.<br />
-                Most users see ROI within the first week.
-              </p>
-            </div>
-
-            <button className="btn btn-premium btn-lg w-full group mb-4" onClick={() => window.location.href = '/pricing'}>
-              <Crown className="w-5 h-5 mr-2" />
-              <span>Join Waitlist</span>
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </button>
-
-            <div className="text-center space-y-1">
-              <p className="text-sm text-gray-600">We’ll notify you when Premium is available.</p>
+            ) : (
+              <button className="btn btn-premium btn-lg w-full group mb-4 animate-pulse-glow" onClick={() => window.location.href = '/billing/upgrade'}>
+                <Crown className="w-5 h-5 mr-2" />
+                <span>Upgrade to Premium</span>
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </button>
+            )}
+            {/* Hover sheen */}
+            <div aria-hidden className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 bg-white/30 blur-md opacity-0 skew-x-12 rounded-2xl group-hover:opacity-60 group-hover:animate-sheen" />
             </div>
           </div>
         </div>

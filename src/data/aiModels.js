@@ -129,8 +129,8 @@ export const AI_MODELS = {
     }
   },
 
-  'gpt-4o-mini': {
-    id: 'gpt-4o-mini',
+  'gpt-4o-nano': {
+    id: 'gpt-4o-nano',
     name: 'GPT-4o Mini',
     provider: 'OpenAI',
     category: AI_MODEL_CATEGORIES.OPENAI,
@@ -1425,7 +1425,7 @@ export const MODEL_RECOMMENDATIONS = {
     },
     'cost-effective': {
       primary: 'o4-mini',
-      alternatives: ['gemini-2.5-flash', 'claude-3-haiku', 'gpt-4o-mini', 'claude-4-sonnet'],
+      alternatives: ['gemini-2.5-flash', 'claude-3-haiku', 'gpt-4o-nano', 'claude-4-sonnet'],
       reasoning: 'o4-mini delivers exceptional reasoning and math performance at cost-effective pricing'
     },
     'image-generation': {
@@ -1473,7 +1473,7 @@ export const MODEL_RECOMMENDATIONS = {
       useCase: 'General tasks, business applications, content creation'
     },
     efficient: {
-      models: ['deepseek-v3', 'gpt-4o-mini', 'gemini-1.5-flash', 'claude-3-haiku', 'gemma-2-27b', 'velvet-14b'],
+      models: ['deepseek-v3', 'gpt-4o-nano', 'gemini-1.5-flash', 'claude-3-haiku', 'gemma-2-27b', 'velvet-14b'],
       description: 'Fast and cost-effective for simpler tasks',
       useCase: 'Simple queries, chatbots, basic content generation'
     },
@@ -1510,7 +1510,7 @@ export const MODEL_RECOMMENDATIONS = {
       bestFor: 'Complex reasoning and mathematical problems',
       score: 9.0
     },
-    'gpt-4o-mini': {
+    'gpt-4o-nano': {
       strengths: ['Cost-effective', 'Speed', 'Versatility'],
       weaknesses: ['Complex reasoning', 'Advanced coding'],
       bestFor: 'General tasks requiring good performance at low cost',

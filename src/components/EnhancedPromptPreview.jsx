@@ -285,7 +285,7 @@ const EnhancedPromptPreview = ({
                   Enhanced
                 </span>
               )}
-              {!hasEnrichment && (
+              {!hasEnrichment && isPro && (
                 <button
                   onClick={onEnrichNow}
                   disabled={!onEnrichNow || hasEnhancedCurrentInputs}
@@ -304,6 +304,9 @@ const EnhancedPromptPreview = ({
                     </>
                   )}
                 </button>
+              )}
+              {!hasEnrichment && !isPro && (
+                <span className="text-xs text-gray-500" title="Upgrade to enable prompt enrichment">Enrichment is a premium feature</span>
               )}
             </div>
           )}

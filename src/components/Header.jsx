@@ -81,11 +81,10 @@ const Header = () => {
 
               {isAuthEnabled && isAuthenticated ? (
                 <>
-                  {/* Pro Badge */}
+                  {/* Premium indicator (subtle) */}
                   {isPro && (
-                    <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-full border border-purple-200">
-                      <Crown className="w-4 h-4 text-purple-600" />
-                      <span className="text-sm text-purple-700 font-medium">Pro</span>
+                    <div className="hidden sm:flex items-center">
+                      <Crown className="w-4 h-4 text-gray-400" title="Premium" aria-label="Premium" />
                     </div>
                   )}
 
@@ -105,7 +104,7 @@ const Header = () => {
                           {user?.email?.split('@')[0] || 'User'}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {isPro ? 'Pro Member' : 'Free User'}
+                          {isPro ? 'Premium' : 'Free User'}
                         </div>
                       </div>
                       <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
@@ -116,7 +115,7 @@ const Header = () => {
                         <div className="px-3 py-2 border-b border-gray-100/60">
                           <p className="text-sm font-semibold text-gray-900 truncate">{user?.email}</p>
                           <p className="text-xs text-gray-500">
-                            {isPro ? 'Pro Member' : 'Free Plan'}
+                            {isPro ? 'Premium' : 'Free Plan'}
                           </p>
                         </div>
                         
@@ -215,7 +214,7 @@ const Header = () => {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-700">{user?.email}</p>
-                        <p className="text-xs text-gray-500">{isPro ? 'Pro Member' : 'Free User'}</p>
+                        <p className="text-xs text-gray-500">{isPro ? 'Premium' : 'Free User'}</p>
                       </div>
                     </div>
                     <Link 

@@ -3,11 +3,12 @@ import { Target, Wand2, Sparkles, Settings, FileText, Eye, Check, RefreshCw, Che
 import { useAuth } from '../contexts/AuthContext'
 import { isAuthEnabled } from '../lib/supabase'
 import RotatingPromptExamples from './RotatingPromptExamples'
+import UpgradeModal from './UpgradeModal'
 import EnhancedPromptPreview from './EnhancedPromptPreview'
 import ModelSelector from './ModelSelector'
 import EnrichmentOptions from './EnrichmentOptions'
 import ImprovedRoleSelector from './ImprovedRoleSelector'
-import { promptEnrichmentService } from '../services/promptEnrichment'
+import { promptEnrichmentService, PromptEnrichmentService } from '../services/promptEnrichment'
 import { UniversalPromptGenerator } from '../utils/universalPromptGenerator'
 
 const DEFAULT_MODEL = 'gpt-4o'
@@ -24,6 +25,7 @@ const SimplifiedPromptGenerator = () => {
   
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
   const [enrichmentLevel, setEnrichmentLevel] = useState(3) // Default to Balanced
+  const clampLevel = (n) => Math.max(1, Math.min(5, Number(n) || 1))
   const [rawPrompt, setRawPrompt] = useState('')
   const [enrichedPrompt, setEnrichedPrompt] = useState('')
   const [enrichmentResult, setEnrichmentResult] = useState(null)
@@ -34,6 +36,8 @@ const SimplifiedPromptGenerator = () => {
   const [scrollOffset, setScrollOffset] = useState(0)
   const [showAdvanced, setShowAdvanced] = useState(true)
   const [errorNotification, setErrorNotification] = useState(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [lastTotalTokens, setLastTotalTokens] = useState(null)
   const [hasEnhancedCurrentInputs, setHasEnhancedCurrentInputs] = useState(false)
 
   // Generate model recommendation based on user context
@@ -214,15 +218,23 @@ const SimplifiedPromptGenerator = () => {
 
   const generatePrompt = async () => {
     if (!validation.isValid) return
+    if (!isPro) {
+      setShowUpgradeModal(true)
+      return
+    }
 
     setIsGenerating(true)
     setErrorNotification(null) // Clear any existing errors
     
     try {
       // Prepare prompt data for the enrichment service
-      const promptData = {
+        const clamped = clampLevel(enrichmentLevel)
+        if (import.meta.env.DEV && clamped !== enrichmentLevel) {
+          console.debug('[enrichment] clamped level', { sent: enrichmentLevel, clamped })
+        }
+        const promptData = {
         ...formData,
-        enrichmentLevel: enrichmentLevel
+          enrichmentLevel: clamped
       }
       
       // Get user token if available
@@ -240,6 +252,9 @@ const SimplifiedPromptGenerator = () => {
       if (result.success) {
         setEnrichedPrompt(result.data.enhancedPrompt)
         setEnrichmentResult(result.data)
+        const usage = result.data?.usage || result.data?.metadata?.usage
+        const total = usage?.total_tokens || result.data?.metadata?.tokensUsed || null
+        if (typeof total === 'number') setLastTotalTokens(total)
         setHasEnhancedCurrentInputs(true) // Mark that current inputs have been enhanced
         
         // Force scroll to ensure the result is visible
@@ -252,19 +267,38 @@ const SimplifiedPromptGenerator = () => {
           }
         }, 100)
       } else {
-        throw new Error(result.error || 'Enhancement failed')
+        // Structured fallback when backend returns error
+        const fallback = PromptEnrichmentService.generateBasicPrompt(promptData)
+        setEnrichedPrompt(fallback.enrichedPrompt)
+        setEnrichmentResult(fallback)
+        setErrorNotification({
+          title: 'Backend unavailable',
+          message: 'Showing structured prompt fallback while the enhancement service is unreachable.',
+          type: 'warning'
+        })
+        setTimeout(() => setErrorNotification(null), 8000)
+        return
       }
     } catch (error) {
       console.error('Error enriching prompt:', error)
-      setEnrichedPrompt(rawPrompt)
-      setEnrichmentResult(null)
-      
-      // Show user-friendly error notification
-      setErrorNotification({
-        title: 'Enhancement Failed',
-        message: 'We encountered an issue while enhancing your prompt. The basic version is still available to copy.',
-        type: 'error'
-      })
+      // Structured fallback on network failure
+      const fallback = PromptEnrichmentService.generateBasicPrompt({ ...formData, enrichmentLevel })
+      setEnrichedPrompt(fallback.enrichedPrompt)
+      setEnrichmentResult(fallback)
+      const msg = String(error?.message || '')
+      if (msg.includes('HTTP error! status: 400')) {
+        setErrorNotification({
+          title: 'Per-call token limit exceeded',
+          message: 'This request exceeded the 5,000-token per-call limit. Try shortening context or lowering enhancement level.',
+          type: 'warning'
+        })
+      } else {
+        setErrorNotification({
+          title: 'Enhancement service unavailable',
+          message: 'Using structured prompt fallback. Check that the backend is running on http://localhost:3001.',
+          type: 'error'
+        })
+      }
       
       // Auto-hide error after 8 seconds
       setTimeout(() => setErrorNotification(null), 8000)
@@ -724,6 +758,9 @@ const SimplifiedPromptGenerator = () => {
                             </>
                           )}
                         </button>
+                        {isPro && (
+                          <p className="mt-2 text-xs text-gray-500">Up to 5,000 tokens per call.</p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -764,6 +801,7 @@ const SimplifiedPromptGenerator = () => {
                       isPro={isPro}
                       formData={formData}
                       hasEnhancedCurrentInputs={hasEnhancedCurrentInputs}
+                      lastTotalTokens={lastTotalTokens}
                     />
                   </div>
                 </div>

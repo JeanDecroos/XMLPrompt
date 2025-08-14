@@ -37,7 +37,7 @@ const configSchema = Joi.object({
 
   // AI Services Configuration
   OPENAI_API_KEY: Joi.string().required(),
-  OPENAI_MODEL: Joi.string().default('gpt-4o-mini'),
+  OPENAI_MODEL: Joi.string().default('gpt-4o-nano'),
   OPENAI_MAX_TOKENS: Joi.number().default(2000),
   OPENAI_TEMPERATURE: Joi.number().min(0).max(2).default(0.7),
 
@@ -228,7 +228,11 @@ export const config = {
     requestTimeout: envVars.REQUEST_TIMEOUT
   },
   cors: {
-    origin: envVars.CORS_ORIGIN,
+    origin: (() => {
+      const raw = envVars.CORS_ORIGIN || ''
+      const parts = raw.split(',').map(s => s.trim()).filter(Boolean)
+      return parts.length > 1 ? parts : (parts[0] || 'http://localhost:3000')
+    })(),
     credentials: envVars.CORS_CREDENTIALS
   },
   database: {
@@ -345,6 +349,9 @@ export const config = {
       enabled: envVars.ANALYTICS_ENABLED,
       sampleRate: envVars.ANALYTICS_SAMPLE_RATE
     }
+  },
+  TOKEN_LIMITS: {
+    premium_enrichment_per_call: 5000
   },
   logging: {
     level: envVars.LOG_LEVEL,

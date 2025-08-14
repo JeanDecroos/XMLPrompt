@@ -30,7 +30,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 
 # AI Configuration - PASTE YOUR OPENAI KEY HERE
 OPENAI_API_KEY=sk-your-openai-api-key-here
-OPENAI_MODEL=gpt-4o-mini
+OPENAI_MODEL=gpt-4o-nano
 
 # Security (generate random keys)
 JWT_SECRET=$(openssl rand -base64 32)
@@ -67,7 +67,7 @@ curl http://localhost:3001/health
 ## 🎯 **What's Now Working**
 
 ### ✅ **Real AI-Powered Prompt Enhancement**
-- **OpenAI GPT-4o-mini** integration for prompt optimization
+- **OpenAI gpt-4o-nano** integration for prompt optimization
 - **Tiered enhancement** (Free vs Pro users)
 - **Fallback handling** when AI service is unavailable
 - **Usage tracking** and analytics

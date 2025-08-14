@@ -7,6 +7,7 @@ import { config } from '../config/index.js'
 import { logger } from '../utils/logger.js'
 import { database } from '../config/database.js'
 import { AppError } from './errorHandler.js'
+import { countChatPayloadTokens } from '../utils/tokenCounter.js'
 
 export class QuotaExceededError extends AppError {
   constructor(message, quotaInfo) {
@@ -317,6 +318,71 @@ export const quotaMiddleware = (actionType = 'prompt_generation', options = {}) 
         }
 
         throw new QuotaExceededError(quotaCheck.reason, quotaInfo)
+      }
+
+      // Enrichment-specific gating and per-call token cap
+      if (actionType === 'enhancement') {
+        // 2) Free plan restriction: block enrichment for free tier
+        if (userTier === 'free') {
+          const payloadInfo = {
+            user_id: userId,
+            subscription_tier: userTier,
+            tokens_used: 0,
+            request_timestamp: new Date().toISOString()
+          }
+          logger.warn('Blocked enrichment for free tier user', payloadInfo)
+          return res.status(403).json({
+            error: 'Enrichment is a premium feature. Please upgrade your plan.'
+          })
+        }
+
+        // 3) Free trial placeholder (non-blocking)
+        // if (req.user?.trial) {
+        //   const { trial_calls_used = 0, trial_expires_at } = req.user.trial
+        //   const TRIAL_CALL_LIMIT = config?.TOKEN_LIMITS?.trial_enrichment_calls ?? 5
+        //   if (trial_expires_at && new Date(trial_expires_at) > new Date() && trial_calls_used < TRIAL_CALL_LIMIT) {
+        //     // allow as trial
+        //   }
+        // }
+
+        // 1) Premium per-call cap: combined input+output tokens must not exceed limit
+        const limit = config?.TOKEN_LIMITS?.premium_enrichment_per_call ?? 5000
+        try {
+          // Build a rough message array from incoming request for preflight token estimation
+          const systemMsg = { role: 'system', content: 'enrichment precheck' }
+          const userContent = `task:${req.body?.task || ''}\nrole:${req.body?.role || ''}\ncontext:${req.body?.context || ''}\nrequirements:${req.body?.requirements || ''}\nstyle:${req.body?.style || ''}\noutput:${req.body?.output || ''}`
+          const userMsg = { role: 'user', content: userContent }
+          const estimatedInputTokens = countChatPayloadTokens([systemMsg, userMsg])
+
+          // Store for later auditing
+          req.enrichmentPreflight = { estimatedInputTokens, perCallLimit: limit }
+        } catch {
+          // ignore preflight failure
+        }
+
+        // Attach a response hook to enforce post-call cap using actual usage
+        const originalJson = res.json.bind(res)
+        res.json = (body) => {
+          try {
+            const tokensUsed = body?.data?.metadata?.tokensUsed || body?.tokensUsed || req?.tokensUsed || 0
+            if (typeof tokensUsed === 'number' && tokensUsed > limit) {
+              const payloadInfo = {
+                user_id: userId,
+                subscription_tier: userTier,
+                tokens_used: tokensUsed,
+                request_timestamp: new Date().toISOString()
+              }
+              logger.warn('Blocked enrichment exceeding per-call token cap', payloadInfo)
+              res.status(400)
+              return originalJson({
+                error: 'Token limit exceeded. Premium plan allows up to 5,000 tokens per enrichment.'
+              })
+            }
+          } catch {
+            // Fall through
+          }
+          return originalJson(body)
+        }
       }
 
       // Add quota info to request for use in response headers

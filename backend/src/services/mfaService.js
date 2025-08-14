@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 import QRCode from 'qrcode'
-import { supabase } from '../config/database.js'
+import { database } from '../config/database.js'
 import logger from '../utils/logger.js'
 
 class MFAService {
@@ -148,7 +148,7 @@ class MFAService {
    */
   static async enable2FA(userId, secret, backupCodes) {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await database.supabase
         .from('profiles')
         .update({
           security_two_factor_enabled: true,
@@ -176,7 +176,7 @@ class MFAService {
    */
   static async disable2FA(userId) {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await database.supabase
         .from('profiles')
         .update({
           security_two_factor_enabled: false,
@@ -204,7 +204,7 @@ class MFAService {
    */
   static async verifyBackupCode(userId, backupCode) {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await database.supabase
         .from('profiles')
         .select('security_backup_codes')
         .eq('id', userId)
@@ -221,7 +221,7 @@ class MFAService {
       if (isValid) {
         // Remove used backup code
         const updatedCodes = backupCodes.filter(code => code !== backupCode)
-        await supabase
+        await database.supabase
           .from('profiles')
           .update({
             security_backup_codes: updatedCodes,
@@ -244,7 +244,7 @@ class MFAService {
     try {
       const newBackupCodes = this.generateBackupCodes()
       
-      const { data, error } = await supabase
+      const { data, error } = await database.supabase
         .from('profiles')
         .update({
           security_backup_codes: newBackupCodes,
@@ -297,7 +297,7 @@ class MFAService {
    */
   static async updateLastLogin(userId) {
     try {
-      const { error } = await supabase
+      const { error } = await database.supabase
         .from('profiles')
         .update({
           security_last_login_at: new Date().toISOString()
@@ -342,7 +342,7 @@ class MFAService {
         timestamp: new Date().toISOString()
       }
 
-      const { error } = await supabase
+      const { error } = await database.supabase
         .from('profiles')
         .update({
           security_login_history: supabase.sql`COALESCE(security_login_history, '[]'::jsonb) || ${JSON.stringify(loginEntry)}::jsonb`

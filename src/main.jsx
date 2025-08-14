@@ -4,9 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App.jsx'
 import './index.css'
 
-if (import.meta.env.DEV) {
+// Disable MSW by default; enable only with VITE_ENABLE_MSW=true
+if (import.meta.env.DEV && import.meta.env.VITE_ENABLE_MSW === 'true') {
   const { worker } = await import('./mocks/browser')
   await worker.start({ onUnhandledRequest: 'bypass' })
+  window.__MSW_ENABLED__ = true
+} else {
+  window.__MSW_ENABLED__ = false
 }
 
 const queryClient = new QueryClient({
