@@ -56,38 +56,27 @@ router.post('/enhance',
         quotaRemaining: req.quotaInfo?.remaining
       })
 
-      // Calculate containment level early for bypass check
-      const containmentLevel = Math.round(enrichmentLevel / 5) * 5
-      
-      // Anti-hallucination bypass for minimal inputs at low enrichment levels
+      // Calculate 2% step-based containment level
+      const step = toTwoPercentStep(enrichmentLevel)
+
+      // Anti-hallucination bypass only for minimal inputs at <= 2%
       let enhancedPrompt
       let tokensUsed = 0
       const startTime = Date.now()
-      
-      // ENFORCE RESTRICTIONS: For minimal inputs at 5% or below, bypass AI entirely
+
       const isMinimalInput = task.length < 10 || (context && context.length < 10)
-      const isLowEnrichment = containmentLevel <= 5
-      
+
       logger.info('Enrichment analysis', {
-        containmentLevel,
+        step,
         taskLength: task.length,
         contextLength: context?.length || 0,
         enrichmentLevel,
-        isMinimalInput,
-        isLowEnrichment
+        isMinimalInput
       })
       
       console.log('DEBUG: About to check bypass condition')
-      if (true) { // FORCE BYPASS FOR TESTING
-        console.log('DEBUG: Bypass condition is TRUE - entering bypass logic')
-        // FORCE BYPASS: For minimal inputs at 5% or below, bypass AI entirely
-        logger.info('ENFORCING RESTRICTIONS - Bypassing AI for minimal input', {
-          containmentLevel,
-          taskLength: task.length,
-          contextLength: context?.length || 0,
-          enrichmentLevel
-        })
-        
+      if (isMinimalInput && step <= 2) {
+        console.log('DEBUG: Minimal input & <=2% step - entering bypass logic')
         // Create minimal output with NO expansion
         enhancedPrompt = `<task>${task}</task>`
         if (context && context.trim()) {
@@ -112,7 +101,6 @@ router.post('/enhance',
           tokensUsed
         })
         
-        // Skip all AI processing and go directly to response
         const processingTime = Date.now() - startTime
         
         // Parse the response to extract structured data
@@ -144,12 +132,16 @@ router.post('/enhance',
               tokensUsed,
               processingTime: `${((processingTime) / 1000).toFixed(1)}s`,
               modelUsed: 'bypass',
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
+              containment: {
+                requestedPercent: enrichmentLevel,
+                appliedStep: step,
+                mode: 'bypass-minimal'
+              }
             }
           }
         }
 
-        // Add quota info for authenticated users
         if (req.quotaInfo) {
           response.quota = {
             remaining: req.quotaInfo.remaining,
@@ -158,118 +150,112 @@ router.post('/enhance',
           }
         }
 
-        console.log('DEBUG: About to return bypass response')
+        console.log('DEBUG: Returning bypass response')
         return res.json(response)
       } else {
         logger.info('USING AI - Normal processing', {
-          containmentLevel,
+          step,
           taskLength: task.length,
           contextLength: context?.length || 0,
           enrichmentLevel
         })
-        // Build the enrichment prompt for GPT
-        const enrichmentPrompt = buildEnrichmentPrompt({
-          task,
-          context,
-          requirements,
-          role,
-          style,
-          output,
-          isPro,
-          isAuthenticated,
-          enrichmentLevel
-        })
+        const originalChars = (task + (context || '') + (requirements || '') + (style || '') + (output || '')).length
+        const policy = computePolicy(step, originalChars, isPro)
 
-        // Call OpenAI API for normal processing
+        const systemMessage = buildSystemMessage(policy)
+        const userMessage = buildUserMessage({ task, context, requirements, role, style, output }, policy)
+
         const completion = await openai.chat.completions.create({
-        model: config.ai.openai.model || 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'CRITICAL: You are an expert prompt engineer with ZERO tolerance for hallucination. You MUST follow the containment level instructions EXACTLY. If the input is minimal (like "test"), you MUST NOT expand it. If told to stay at 5% or below, you MUST output nearly identical content with only basic formatting. ANY expansion beyond the original input is a FAILURE. Read the hallucination control instructions CAREFULLY and follow them PRECISELY. For minimal inputs (under 10 characters), output should be nearly identical with only basic XML tags.'
-          },
-          {
-            role: 'user',
-            content: enrichmentPrompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: isPro ? 2000 : 800,
-        presence_penalty: 0.1,
-        frequency_penalty: 0.1
-      })
+          model: config.ai.openai.model || 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemMessage },
+            { role: 'user', content: userMessage }
+          ],
+          temperature: policy.temperature,
+          max_tokens: policy.maxTokens,
+          presence_penalty: 0.1,
+          frequency_penalty: 0.1
+        })
 
         const processingTime = Date.now() - startTime
         tokensUsed = completion.usage?.total_tokens || 0
 
-        // Extract the enhanced prompt from the response
-        enhancedPrompt = completion.choices[0]?.message?.content
-
-        if (!enhancedPrompt) {
+        let modelResponse = completion.choices[0]?.message?.content
+        if (!modelResponse) {
           throw new Error('No enhanced prompt received from AI service')
         }
-      }
 
-      const processingTime = Date.now() - startTime
-
-      // Parse the response to extract structured data
-      const enhancementResult = parseEnhancementResponse(enhancedPrompt, isPro)
-
-      // Log successful usage
-      if (userId) {
-        await logUsage(userId, 'enhancement', {
-          resourceType: 'prompt',
-          tokensUsed,
-          processingTime,
-          modelUsed: config.ai.openai.model,
-          success: true,
-          ipAddress: req.ip,
-          userAgent: req.get('User-Agent')
+        // Validate and enforce preservation; compute compliance
+        const { ensuredResponse, compliance } = validateAndEnforcePreservation({
+          response: modelResponse,
+          original: { task, context, requirements, role, style, output },
+          policy
         })
-      }
 
-      // Add quota information to response
-      const response = {
-        success: true,
-        data: {
-          enhancedPrompt: enhancementResult.enhancedPrompt,
-          suggestions: enhancementResult.suggestions,
-          explanation: enhancementResult.explanation,
-          metadata: {
-            tier,
-            isPro,
+        modelResponse = ensuredResponse
+
+        // Parse the response to extract structured data
+        const enhancementResult = parseEnhancementResponse(modelResponse, isPro)
+
+        // Log successful usage
+        if (userId) {
+          await logUsage(userId, 'enhancement', {
+            resourceType: 'prompt',
             tokensUsed,
-            processingTime: `${((processingTime) / 1000).toFixed(1)}s`,
+            processingTime,
             modelUsed: config.ai.openai.model,
-            timestamp: new Date().toISOString()
+            success: true,
+            ipAddress: req.ip,
+            userAgent: req.get('User-Agent')
+          })
+        }
+
+        const response = {
+          success: true,
+          data: {
+            enhancedPrompt: enhancementResult.enhancedPrompt,
+            suggestions: enhancementResult.suggestions,
+            explanation: enhancementResult.explanation,
+            metadata: {
+              tier,
+              isPro,
+              tokensUsed,
+              processingTime: `${((processingTime) / 1000).toFixed(1)}s`,
+              modelUsed: config.ai.openai.model,
+              timestamp: new Date().toISOString(),
+              containment: {
+                requestedPercent: enrichmentLevel,
+                appliedStep: step,
+                policy,
+                compliance
+              }
+            }
           }
         }
-      }
 
-      // Add quota info for authenticated users
-      if (req.quotaInfo) {
-        response.quota = {
-          tier: req.quotaInfo.tier,
-          remaining: req.quotaInfo.remaining,
-          resetDates: {
-            monthly: getNextMonthReset().toISOString()
+        if (req.quotaInfo) {
+          response.quota = {
+            tier: req.quotaInfo.tier,
+            remaining: req.quotaInfo.remaining,
+            resetDates: {
+              monthly: getNextMonthReset().toISOString()
+            }
           }
         }
+
+        logger.info('Prompt enhancement completed', {
+          userId,
+          tier,
+          tokensUsed,
+          processingTime: `${processingTime}ms`,
+          success: true
+        })
+
+        return res.json(response)
       }
-
-      logger.info('Prompt enhancement completed', {
-        userId,
-        tier,
-        tokensUsed,
-        processingTime: `${processingTime}ms`,
-        success: true
-      })
-
-      res.json(response)
     } catch (error) {
       const processingTime = Date.now() - startTime
 
-      // Log failed usage
       if (userId) {
         await logUsage(userId, 'enhancement', {
           resourceType: 'prompt',
@@ -419,6 +405,161 @@ router.get('/stats', async (req, res) => {
     })
   }
 })
+
+// Helper: quantize to 2% step
+function toTwoPercentStep(level) {
+  return Math.max(0, Math.min(100, Math.round(level / 2) * 2))
+}
+
+// Helper: compute containment policy
+function computePolicy(step, originalChars, isPro) {
+  const allowedExpansionRatio = 1 + (step * 0.007) // up to +70%
+  const maxNewSections = Math.floor(step / 10) // 0..10
+  const suggestionsCount = Math.min(5, Math.floor(step / 20) + 1) // 1..5
+  const temperature = 0.5 + (step / 100) * 0.2 // 0.5..0.7
+  const maxTokens = Math.round((isPro ? 1200 : 700) + step * (isPro ? 10 : 6))
+
+  return {
+    step,
+    allowedExpansionRatio,
+    maxNewSections,
+    suggestionsCount,
+    temperature,
+    maxTokens,
+    features: {
+      allowRephrase: step >= 2,
+      allowTighten: step >= 2,
+      allowAddConstraints: step >= 6,
+      allowAddStructure: step >= 10,
+      allowExamples: step >= 14,
+      allowClarifyingQuestions: step >= 20,
+      allowGuidanceSections: step >= 30
+    },
+    maxChars: Math.round(originalChars * allowedExpansionRatio)
+  }
+}
+
+// Helper: build strict system message (no deletion, 0% grammar/structure-only)
+function buildSystemMessage(policy) {
+  return [
+    'You are an expert prompt engineer with STRICT hallucination containment and preservation guarantees.',
+    `Containment step: ${policy.step}% (increments of 2%).`,
+    'Immutable rules:',
+    '- NEVER delete or omit original user content. Preserve all original fields verbatim in a <source_preservation> block.',
+    '- All enrichment must add content in new sections. Original <task>, <context>, <requirements>, <role>, <style>, <output_format> must remain semantically faithful.',
+    '- At 0–2%: only grammatical and structural improvements are permitted; no new facts or requirements.',
+    `- Character budget for <prompt>: <= ${policy.maxChars}.`,
+    `- New sections allowed: <= ${policy.maxNewSections}.`,
+    `- Suggestions to output: exactly ${policy.suggestionsCount}.`,
+    'Output requirements:',
+    '- Return XML with this outer structure: <enhanced_prompt> ... </enhanced_prompt>.',
+    '- Inside it include: <source_preservation> (verbatim copies of original fields), <prompt> (the final enriched prompt content), <suggestions>, <explanation>, <compliance>.',
+    '- Place any new content in additional tags like <refinements>, <structure>, <guidance>, etc., not by rewriting original meanings.',
+    'Compliance checks you must fill: step, original_chars, enhanced_chars, expansion_ratio, deletion_check (PASS/FAIL), hallucination_respected (PASS/FAIL).',
+    'Never fabricate facts. When uncertain, prefer omission or a clarifying question IF allowed by the policy.'
+  ].join('\n')
+}
+
+// Helper: build user message containing originals and gates
+function buildUserMessage(fields, policy) {
+  const { task, context = '', requirements = '', role, style = '', output = '' } = fields
+  return [
+    '<input>',
+    '  <task>', task, '</task>',
+    '  <role>', role, '</role>',
+    context ? `  <context>\n${context}\n  </context>` : '',
+    requirements ? `  <requirements>\n${requirements}\n  </requirements>` : '',
+    style ? `  <style>\n${style}\n  </style>` : '',
+    output ? `  <output_format>\n${output}\n  </output_format>` : '',
+    '</input>',
+    '',
+    '<policy>',
+    `  <step>${policy.step}</step>`,
+    `  <max_chars>${policy.maxChars}</max_chars>`,
+    `  <max_new_sections>${policy.maxNewSections}</max_new_sections>`,
+    `  <suggestions_count>${policy.suggestionsCount}</suggestions_count>`,
+    `  <allow_rephrase>${policy.features.allowRephrase}</allow_rephrase>`,
+    `  <allow_tighten>${policy.features.allowTighten}</allow_tighten>`,
+    `  <allow_add_constraints>${policy.features.allowAddConstraints}</allow_add_constraints>`,
+    `  <allow_add_structure>${policy.features.allowAddStructure}</allow_add_structure>`,
+    `  <allow_examples>${policy.features.allowExamples}</allow_examples>`,
+    `  <allow_clarifying_questions>${policy.features.allowClarifyingQuestions}</allow_clarifying_questions>`,
+    `  <allow_guidance_sections>${policy.features.allowGuidanceSections}</allow_guidance_sections>`,
+    '</policy>',
+    '',
+    '<instructions>',
+    '  - Copy the original fields verbatim into <source_preservation>.',
+    '  - Build the final enriched content inside <prompt>.',
+    '  - Do not remove any original information. At 0–2%: only grammar/structure changes.',
+    '  - Keep total characters within <max_chars>.',
+    '  - Provide exactly <suggestions_count> suggestions.',
+    '  - Include a <compliance> section with checks filled in truthfully.',
+    '</instructions>'
+  ].filter(Boolean).join('\n')
+}
+
+// Helper: validate/enforce preservation on the server and compute compliance
+function validateAndEnforcePreservation({ response, original, policy }) {
+  const originals = [
+    ['task', original.task],
+    ['context', original.context || ''],
+    ['requirements', original.requirements || ''],
+    ['role', original.role || ''],
+    ['style', original.style || ''],
+    ['output_format', original.output || '']
+  ]
+
+  let ensuredResponse = response
+
+  // Basic lexical deletion check (words >= 4 chars)
+  const originalText = [original.task, original.context, original.requirements, original.style, original.output]
+    .filter(Boolean)
+    .join(' ')
+  const tokens = originalText.split(/\s+/).map(t => t.trim()).filter(t => t.length >= 4)
+  let missing = 0
+  const lowerResponse = response.toLowerCase()
+  for (const tok of tokens) {
+    if (!lowerResponse.includes(tok.toLowerCase())) {
+      missing++
+    }
+  }
+  const deletionRate = tokens.length ? missing / tokens.length : 0
+
+  // Ensure a <source_preservation> block exists with verbatim originals
+  const hasPreservation = /<source_preservation>[\s\S]*?<\/source_preservation>/.test(response)
+  if (!hasPreservation) {
+    const preservationBlock = [
+      '<source_preservation>',
+      ...originals
+        .filter(([, val]) => !!(val && String(val).trim()))
+        .map(([k, v]) => `  <${k}_original>${String(v)}</${k}_original>`),
+      '</source_preservation>'
+    ].join('\n')
+
+    // Insert preservation before closing </enhanced_prompt> if present, else prepend
+    if (/<enhanced_prompt>[\s\S]*<\/enhanced_prompt>/.test(ensuredResponse)) {
+      ensuredResponse = ensuredResponse.replace(/<\/enhanced_prompt>\s*$/m, `${preservationBlock}\n</enhanced_prompt>`)
+    } else {
+      ensuredResponse = `<enhanced_prompt>\n${preservationBlock}\n${ensuredResponse}\n</enhanced_prompt>`
+    }
+  }
+
+  // Compute expansion ratio based on inner <prompt> if present, else on whole
+  const innerPromptMatch = ensuredResponse.match(/<prompt>([\s\S]*?)<\/prompt>/)
+  const promptChars = innerPromptMatch ? innerPromptMatch[1].length : ensuredResponse.length
+  const expansionRatio = policy.maxChars > 0 ? Math.min(promptChars / policy.maxChars, 10) : 1
+
+  const compliance = {
+    stepApplied: policy.step,
+    deletionRate: Number(deletionRate.toFixed(3)),
+    expansionRatio: Number(expansionRatio.toFixed(3)),
+    deletionCheck: deletionRate <= 0.15 ? 'PASS' : 'WARN',
+    // 0–2%: enforce non-expansion beyond cap
+    expansionCheck: policy.step <= 2 ? (promptChars <= policy.maxChars ? 'PASS' : 'WARN') : 'N/A'
+  }
+
+  return { ensuredResponse, compliance }
+}
 
 // Helper function to build layered enrichment prompt with specific 5% intervals
 function buildEnrichmentPrompt({ task, context, requirements, role, style, output, isPro, isAuthenticated, enrichmentLevel = 50 }) {
@@ -623,31 +764,49 @@ ${innerPromptContent}
 // Helper function to parse AI response
 function parseEnhancementResponse(response, isPro) {
   try {
-    // Check if this is a bypass response (simple XML without enhanced_prompt tags)
     const hasEnhancedPromptTags = response.includes('<enhanced_prompt>')
-    
+
     if (!hasEnhancedPromptTags) {
-      // This is a bypass response - return it as-is
       return {
         enhancedPrompt: response,
         suggestions: ['Minimal formatting applied'],
         explanation: 'Prompt preserved with minimal formatting (bypass mode)'
       }
     }
-    
-    // This is an AI response - parse it normally
+
+    // Prefer inner <prompt> content as the enhanced prompt
+    const promptInnerMatch = response.match(/<prompt>([\s\S]*?)<\/prompt>/)
     const enhancedPromptMatch = response.match(/<enhanced_prompt>([\s\S]*?)<\/enhanced_prompt>/)
     const suggestionsMatch = response.match(/<suggestions>([\s\S]*?)<\/suggestions>/)
     const explanationMatch = response.match(/<explanation>([\s\S]*?)<\/explanation>/)
+    const complianceMatch = response.match(/<compliance>([\s\S]*?)<\/compliance>/)
+
+    const compliance = {}
+    if (complianceMatch) {
+      const block = complianceMatch[1]
+      const get = (tag) => {
+        const m = block.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`))
+        return m ? m[1].trim() : undefined
+      }
+      compliance.step = get('step')
+      compliance.original_chars = Number(get('original_chars')) || undefined
+      compliance.enhanced_chars = Number(get('enhanced_chars')) || undefined
+      compliance.expansion_ratio = get('expansion_ratio')
+      compliance.deletion_check = get('deletion_check')
+      compliance.hallucination_respected = get('hallucination_respected')
+    }
+
+    const enhancedText = promptInnerMatch ? promptInnerMatch[1].trim() : (enhancedPromptMatch ? enhancedPromptMatch[1].trim() : response)
 
     return {
-      enhancedPrompt: enhancedPromptMatch ? enhancedPromptMatch[1].trim() : response,
+      enhancedPrompt: enhancedText,
       suggestions: suggestionsMatch ? 
         suggestionsMatch[1].trim().split('\n').filter(s => s.trim()).map(s => s.replace(/^[-*]\s*/, '')) :
         ['Enhanced prompt structure', 'Improved clarity', 'Better task specification'],
       explanation: explanationMatch ? 
         explanationMatch[1].trim() : 
-        `Enhanced prompt with ${isPro ? 'professional' : 'standard'} optimization techniques`
+        `Enhanced prompt with ${isPro ? 'professional' : 'standard'} optimization techniques`,
+      compliance
     }
   } catch (error) {
     logger.error('Error parsing enhancement response:', error)
