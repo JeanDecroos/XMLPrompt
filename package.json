@@ -1,0 +1,22 @@
+{
+  "name": "promptr-monorepo",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "test:mcp": "cd scripts/tests && node testMCPConnection.js",
+    "test:supabase": "cd scripts/tests && node testSupabaseConnection.js",
+    "db:apply-improvements": "cd scripts/db && node applyFullDatabaseImprovements.js",
+    "db:verify": "cd scripts/db && node verifyDatabaseImprovements.js"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}

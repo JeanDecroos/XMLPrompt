@@ -45,23 +45,31 @@ cd Promptr
 
 2. Install dependencies:
 ```bash
-npm install
+# frontend
+cd frontend && npm install
+
+# backend (optional for API features)
+cd ../backend && npm install
 ```
 
-3. Start the development server:
+3. Start development:
 ```bash
-npm run dev
+# one terminal - frontend
+cd frontend && npm run dev  # http://localhost:3000
+
+# optional second terminal - backend
+cd backend && npm run dev   # http://localhost:3002
 ```
 
-4. Open your browser and navigate to `http://localhost:3000`
+4. Open your browser at `http://localhost:3000`
 
 ### Building for Production
 
 ```bash
-npm run build
+cd frontend && npm run build
 ```
 
-The built files will be in the `dist` directory.
+The built files will be in `frontend/dist`.
 
 ## Usage
 
@@ -87,20 +95,31 @@ The built files will be in the `dist` directory.
 ## Project Structure
 
 ```
-src/
-├── components/          # React components
-│   ├── Header.jsx      # Application header
-│   ├── Footer.jsx      # Application footer
-│   ├── PromptGenerator.jsx  # Main generator component
-│   ├── PromptForm.jsx  # Form for input fields
-│   └── PromptPreview.jsx    # Preview and copy functionality
-├── data/
-│   └── roles.js        # Predefined roles data
-├── utils/
-│   └── promptGenerator.js   # Prompt generation logic
-├── App.jsx             # Main application component
-├── main.jsx           # Application entry point
-└── index.css          # Global styles with Tailwind
+frontend/
+├── src/                  # React app
+│  ├── components/        # UI components
+│  ├── services/          # API/app services
+│  ├── data/              # model/role constants
+│  ├── utils/             # prompt utils
+│  ├── lib/               # API client + supabase
+│  └── ...
+├── public/
+└── vite.config.js
+
+backend/
+├── src/                  # Express API
+│  ├── routes/ middleware/ services/ utils/
+│  └── ...
+└── package.json
+
+scripts/
+├── db/                   # migrations, improvements
+├── tests/                # integration checks
+└── ops/                  # ops/monitoring helpers
+
+docs/
+├── architecture/ backend/ mcp/ product/
+└── ...
 ```
 
 ## Technologies Used

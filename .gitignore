@@ -1,3 +1,24 @@
+# Node
+node_modules/
+
+# Builds
+frontend/dist/
+backend/dist/
+.vite/
+
+# Logs
+*.log
+logs/
+backend/logs/
+
+# Env
+.env
+.env.local
+frontend/.env*
+backend/.env*
+
+# Misc
+*.DS_Store
 # Logs
 logs
 *.log
