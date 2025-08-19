@@ -46,7 +46,7 @@ const Home = () => {
               <Link
                 to="/builder"
                 onClick={() => trackEvent('start_building_click', { source: 'home_bottom_bar' })}
-                className="btn btn-cta btn-cta-xl"
+                className="btn btn-cta btn-cta-xl btn-cta-attention"
               >
                 Start Building
                 <span className="cta-arrow ml-2">→</span>
