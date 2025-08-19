@@ -305,12 +305,27 @@ const HelpPage = () => {
                       </li>
                     ))}
                   </ol>
-                  <div className="mt-4 flex gap-3">
+                  <div className="mt-4 flex gap-3 items-center">
                     <Link to="/builder" className="btn btn-primary btn-sm">Open Builder</Link>
                     {activeGuide.title === 'Prompt Enrichment' && (
                       <Link to="/pricing" className="btn btn-secondary btn-sm">Enrichment is Pro</Link>
                     )}
-                    <a href="#" onClick={(e) => { e.preventDefault(); window.history.replaceState(null, '', '/help'); }} className="text-gray-500 text-sm ml-auto">Close</a>
+                    {/* Next guide pointer */}
+                    {(() => {
+                      const order = quickStartGuides.map(g => toSlug(g.title))
+                      const idx = order.indexOf(activeSlug)
+                      const nextSlug = order[(idx + 1) % order.length]
+                      const next = guideBySlug[nextSlug]
+                      return (
+                        <Link
+                          to={{ pathname: '/help', hash: `#${nextSlug}` }}
+                          className="ml-auto text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                        >
+                          Next: {next.title}
+                          <span className="ml-1">→</span>
+                        </Link>
+                      )
+                    })()}
                   </div>
                 </div>
               </div>
