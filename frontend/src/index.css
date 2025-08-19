@@ -417,6 +417,30 @@ input[placeholder*="Task"]::placeholder {
   .btn-lg { @apply px-8 py-4 text-base; }
   .btn-xl { @apply px-10 py-5 text-lg; }
   
+  /* High-visibility CTA variant used on Home page */
+  .btn-cta {
+    @apply btn-lg;
+    background: linear-gradient(135deg, var(--premium-start), var(--premium-end));
+    color: #fff;
+    box-shadow: 0 10px 20px rgba(99,102,241,0.25), 0 2px 6px rgba(0,0,0,0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .btn-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(99,102,241,0.35), 0 6px 12px rgba(0,0,0,0.08);
+  }
+  .btn-cta::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.6) inset, 0 0 24px rgba(139,92,246,0.35);
+    opacity: 0.0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+  .btn-cta:hover::after { opacity: 1; }
+  
   /* Enhanced Card System - Optimized for Performance */
   
   /* Base card foundation with shared properties */

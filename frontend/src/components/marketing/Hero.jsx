@@ -16,7 +16,7 @@ const Hero = React.forwardRef((props, ref) => {
         Transform your ideas into structured prompts that deliver exceptional results from any AI model.
       </p>
       <div className="flex items-center justify-center gap-3">
-        <Link to="/builder" onClick={() => trackEvent('start_building_click', { source: 'home_hero' })} className="btn btn-primary">Start Building</Link>
+        <Link to="/builder" onClick={() => trackEvent('start_building_click', { source: 'home_hero' })} className="btn btn-cta">Start Building</Link>
         <Link to="/pricing" className="btn btn-secondary">View Pricing</Link>
       </div>
     </div>

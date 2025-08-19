@@ -36,7 +36,7 @@ const Home = () => {
       </section>
 
       <section className="py-12 md:py-16 text-center">
-        <Link to="/builder" onClick={() => trackEvent('start_building_click', { source: 'home_bottom' })} className="btn btn-primary">Start Building</Link>
+        <Link to="/builder" onClick={() => trackEvent('start_building_click', { source: 'home_bottom' })} className="btn btn-cta">Start Building</Link>
       </section>
     </main>
   )
