@@ -1,26 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  BookOpen, 
-  Code, 
-  ArrowLeft, 
-  Search, 
-  ChevronRight,
-  ChevronDown,
-  Copy,
-  CheckCircle,
-  AlertCircle,
-  Info,
-  Zap,
-  Settings,
-  Globe,
-  Database,
-  Key,
-  Shield,
-  Cpu,
-  Target,
-  Lightbulb
-} from 'lucide-react'
+import { ArrowLeft, Search, ChevronRight, ChevronDown, BookOpen, Info, Zap, Target, Lightbulb } from 'lucide-react'
 
 const DocsPage = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -28,6 +8,7 @@ const DocsPage = () => {
   const [copiedCode, setCopiedCode] = useState(null)
   const [expandedSections, setExpandedSections] = useState(['getting-started'])
 
+  // Reworked user-focused sections
   const docSections = [
     {
       id: 'getting-started',
@@ -35,117 +16,71 @@ const DocsPage = () => {
       icon: Lightbulb,
       color: 'blue',
       subsections: [
-        { id: 'introduction', title: 'Introduction' },
-        { id: 'quick-start', title: 'Quick Start Guide' },
-        { id: 'basic-concepts', title: 'Basic Concepts' }
+        { id: 'quick-overview', title: 'Quick Start Overview' },
+        { id: 'first-prompt', title: 'Creating Your First Prompt' },
+        { id: 'model-routing', title: 'Using AI Model Routing' }
       ]
     },
     {
-      id: 'prompt-engineering',
-      title: 'Prompt Engineering',
+      id: 'building-prompts',
+      title: 'Building Prompts (Best Practices)',
       icon: Target,
       color: 'purple',
       subsections: [
-        { id: 'prompt-structure', title: 'Prompt Structure' },
-        { id: 'best-practices', title: 'Best Practices' },
-        { id: 'advanced-techniques', title: 'Advanced Techniques' },
-        { id: 'examples', title: 'Examples & Templates' }
+        { id: 'anatomy', title: 'Anatomy of a Great Prompt' },
+        { id: 'templates', title: 'Copyable Templates' },
+        { id: 'tips', title: 'Tips & Pitfalls' },
+        { id: 'formats', title: 'Output Formatting Options' }
       ]
     },
     {
-      id: 'ai-models',
-      title: 'AI Models',
-      icon: Cpu,
+      id: 'models',
+      title: 'Models & Recommendations',
+      icon: Zap,
       color: 'green',
       subsections: [
-        { id: 'model-overview', title: 'Model Overview' },
-        { id: 'model-routing', title: 'Smart Model Routing' },
-        { id: 'model-comparison', title: 'Model Comparison' },
-        { id: 'custom-models', title: 'Custom Models' }
+        { id: 'choose-model', title: 'Choosing a model' },
+        { id: 'recommendations', title: 'Recommendations Explained' },
+        { id: 'limitations', title: 'Current Limitations' }
       ]
     },
     {
-      id: 'features',
-      title: 'Features',
+      id: 'enrichment',
+      title: 'Enrichment (Pro)',
       icon: Zap,
       color: 'orange',
       subsections: [
-        { id: 'enrichment', title: 'Prompt Enrichment' },
-        { id: 'sharing', title: 'Prompt Sharing' },
-        { id: 'history', title: 'Session History' },
-        { id: 'analytics', title: 'Analytics & Insights' }
+        { id: 'what-it-does', title: 'What enrichment does' },
+        { id: 'levels', title: 'Enhancement Levels' },
+        { id: 'limits-errors', title: 'Limits & Errors' },
+        { id: 'free-vs-pro', title: 'Free vs Pro' }
       ]
     },
     {
-      id: 'api',
-      title: 'API Reference',
-      icon: Code,
-      color: 'red',
-      subsections: [
-        { id: 'authentication', title: 'Authentication' },
-        { id: 'endpoints', title: 'API Endpoints' },
-        { id: 'rate-limits', title: 'Rate Limits' },
-        { id: 'webhooks', title: 'Webhooks' }
-      ]
-    },
-    {
-      id: 'integration',
-      title: 'Integration',
-      icon: Globe,
+      id: 'saving-sharing',
+      title: 'Saving & Sharing',
+      icon: BookOpen,
       color: 'indigo',
       subsections: [
-        { id: 'javascript-sdk', title: 'JavaScript SDK' },
-        { id: 'python-sdk', title: 'Python SDK' },
-        { id: 'rest-api', title: 'REST API' },
-        { id: 'webhooks-setup', title: 'Webhooks Setup' }
+        { id: 'saving', title: 'Save Prompts' },
+        { id: 'export', title: 'Export & Copy' },
+        { id: 'share', title: 'Share Prompts' }
+      ]
+    },
+    {
+      id: 'troubleshooting',
+      title: 'Troubleshooting',
+      icon: Info,
+      color: 'red',
+      subsections: [
+        { id: 'common', title: 'Common Issues' },
+        { id: 'quick-fixes', title: 'Quick Fixes' },
+        { id: 'support', title: 'Support' }
       ]
     }
   ]
 
-  const codeExamples = {
-    'javascript-basic': `// Basic prompt generation
-import { PromptCraft } from '@promptcraft/sdk';
-
-const client = new PromptCraft({
-  apiKey: 'your-api-key'
-});
-
-const result = await client.generatePrompt({
-  role: 'Marketing Manager',
-  task: 'Create a product launch campaign',
-  context: 'SaaS productivity tool for teams',
-  requirements: 'Focus on benefits, include CTA'
-});
-
-console.log(result.prompt);`,
-
-    'python-basic': `# Basic prompt generation
-from promptcraft import PromptCraft
-
-client = PromptCraft(api_key="your-api-key")
-
-result = client.generate_prompt(
-    role="Marketing Manager",
-    task="Create a product launch campaign",
-    context="SaaS productivity tool for teams",
-    requirements="Focus on benefits, include CTA"
-)
-
-print(result.prompt)`,
-
-    'api-curl': `# Generate a prompt via REST API
-curl -X POST https://api.promptcraft.ai/v1/prompts/generate \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "role": "Marketing Manager",
-    "task": "Create a product launch campaign",
-    "context": "SaaS productivity tool for teams",
-    "requirements": "Focus on benefits, include CTA",
-    "model": "gpt-4",
-    "enrichment": true
-  }'`
-  }
+  const codeExamples = {}
 
   const copyToClipboard = (code, id) => {
     navigator.clipboard.writeText(code)
