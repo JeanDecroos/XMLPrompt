@@ -5,6 +5,11 @@
 
 @layer components {
   .actionSeparator { @apply mt-6 pt-3 border-t border-slate-200/70 dark:border-slate-700/60; }
+  /* Marketing helpers */
+  .card { @apply rounded-2xl border border-slate-200/70 bg-white/90 shadow-sm; }
+  .card-body { @apply p-6 md:p-8; }
+  .btn { @apply inline-flex items-center gap-2 rounded-full px-4 py-2 font-medium; }
+  .btn-primary { @apply btn bg-indigo-600 text-white hover:bg-indigo-500; }
 }
 
 /* Phase 2: Enhanced Animations */

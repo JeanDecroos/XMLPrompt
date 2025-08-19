@@ -183,9 +183,11 @@ const Header = () => {
               
               {/* Primary CTA */}
               <div className="hidden md:block">
-                <Link to="/builder" className="btn btn-primary btn-sm">
-                  Start Building
-                </Link>
+                {location.pathname === '/' ? (
+                  <Link to="/builder" className="btn btn-secondary btn-sm">Start Building</Link>
+                ) : (
+                  <Link to="/builder" className="btn btn-primary btn-sm">Start Building</Link>
+                )}
               </div>
 
               {/* Mobile Menu Button */}
