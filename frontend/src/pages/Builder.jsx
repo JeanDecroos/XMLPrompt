@@ -14,7 +14,9 @@ const Builder = () => {
       <Meta title="Promptr — Prompt Builder" description="Build and enhance prompts with model‑aware formatting." />
       {/* Invisible heading for focus management */}
       <h1 ref={headingRef} tabIndex="-1" className="sr-only">Prompt Builder</h1>
-      <SimplifiedPromptGenerator showHero={false} />
+      <div className="max-w-7xl mx-auto w-full px-6">
+        <SimplifiedPromptGenerator showHero={false} />
+      </div>
     </div>
   )
 }

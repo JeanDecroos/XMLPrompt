@@ -287,6 +287,7 @@ input[placeholder*="Task"]::placeholder {
     /* Link the animation to the scroll timeline */
     animation: scroll-background linear;
     animation-timeline: scroll(root);
+    overflow-x: hidden;
   }
 
   body, #root {
@@ -294,6 +295,7 @@ input[placeholder*="Task"]::placeholder {
     margin: 0;
     padding: 0;
     background: transparent !important;
+    overflow-x: hidden;
   }
   
   body {
