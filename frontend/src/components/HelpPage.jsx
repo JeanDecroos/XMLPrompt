@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { 
   HelpCircle, 
   BookOpen, 
@@ -22,6 +22,7 @@ const HelpPage = () => {
   const [expandedFaq, setExpandedFaq] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState('getting-started')
   const location = useLocation()
+  const navigate = useNavigate()
   const detailRef = useRef(null)
 
   const faqData = [
@@ -317,13 +318,20 @@ const HelpPage = () => {
                       const nextSlug = order[(idx + 1) % order.length]
                       const next = guideBySlug[nextSlug]
                       return (
-                        <Link
-                          to={{ pathname: '/help', hash: `#${nextSlug}` }}
+                        <a
+                          href={`#${nextSlug}`}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            navigate({ pathname: '/help', hash: `#${nextSlug}` })
+                            if (detailRef.current) {
+                              detailRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                            }
+                          }}
                           className="ml-auto text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
                         >
                           Next: {next.title}
                           <span className="ml-1">→</span>
-                        </Link>
+                        </a>
                       )
                     })()}
                   </div>
