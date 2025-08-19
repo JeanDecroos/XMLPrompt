@@ -204,10 +204,9 @@ const HelpPage = () => {
     ]
   }
 
+  // Keep viewport position unchanged when switching guides via hash
   useEffect(() => {
-    if (activeGuide && detailRef.current) {
-      detailRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    // No-op: intentionally not scrolling on hash change
   }, [activeSlug])
 
   const filteredFaqs = faqData.filter(faq => 
@@ -323,9 +322,7 @@ const HelpPage = () => {
                           onClick={(e) => {
                             e.preventDefault()
                             navigate({ pathname: '/help', hash: `#${nextSlug}` })
-                            if (detailRef.current) {
-                              detailRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                            }
+                            // Keep current scroll position (no auto-scroll)
                           }}
                           className="ml-auto text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
                         >
