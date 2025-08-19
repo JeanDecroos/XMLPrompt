@@ -42,14 +42,15 @@ const Home = () => {
               <p className="text-gray-900 text-lg font-semibold text-center sm:text-left">Ready to transform your prompts?</p>
               <p className="cta-subtext text-center sm:text-left">No sign-up required on free tier</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 cta-spotlight">
               <span className="cta-badge">⚡ Instant preview</span>
               <Link
                 to="/builder"
                 onClick={() => trackEvent('start_building_click', { source: 'home_bottom_bar' })}
-                className="btn btn-cta"
+                className="btn btn-cta btn-cta-xl"
               >
                 Start Building
+                <span className="cta-arrow ml-2">→</span>
               </Link>
             </div>
           </div>
