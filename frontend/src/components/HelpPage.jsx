@@ -127,6 +127,82 @@ const HelpPage = () => {
   const activeSlug = (location.hash || '').replace('#', '')
   const activeGuide = guideBySlug[activeSlug]
 
+  // Rich details for each step per guide (shown in the inline detail section)
+  const detailsBySlug = {
+    [toSlug('Creating Your First Prompt')]: [
+      {
+        title: 'Choose a role',
+        desc: 'Pick a role that matches your context (e.g., Marketing Specialist, Software Developer). The role sets tone, terminology, and default structure for better results.'
+      },
+      {
+        title: 'Describe your task',
+        desc: 'Explain what you want to achieve in one or two sentences. Be specific about the deliverable (e.g., “Write a 150‑word product description highlighting benefits”).'
+      },
+      {
+        title: 'Add context',
+        desc: 'Optional but recommended. Include background, audience, brand voice, constraints, examples, and any do/don’t guidelines to reduce ambiguity.'
+      },
+      {
+        title: 'Generate prompt',
+        desc: 'We assemble your inputs into an effective structured prompt that you can copy or enhance. You can always iterate by editing inputs and regenerating.'
+      }
+    ],
+    [toSlug('Using AI Model Routing')]: [
+      {
+        title: 'Enter your task',
+        desc: 'Provide the core objective and any key hints. The router uses this to infer complexity and required capabilities (reasoning, coding, creativity).'
+      },
+      {
+        title: 'Review suggestions',
+        desc: 'We suggest a primary model and alternatives (e.g., GPT‑4o, Claude). Each recommendation includes reasoning so you understand the trade‑offs.'
+      },
+      {
+        title: 'Accept or override',
+        desc: 'Accept the recommended model or manually pick another one if you have a preference or cost/latency constraint.'
+      },
+      {
+        title: 'Generate',
+        desc: 'Generate a prompt tailored to the selected model’s strengths. You can switch the model at any time and regenerate.'
+      }
+    ],
+    [toSlug('Prompt Enrichment')]: [
+      {
+        title: 'Create basic prompt',
+        desc: 'Start with your structured prompt (free for everyone). Ensure the role, task, and context are clear.'
+      },
+      {
+        title: 'Enable enrichment (Pro)',
+        desc: 'Pro members can enhance prompts with AI to add missing context, examples, and optimization patterns (clarifying assumptions, constraints, and output structure).'
+      },
+      {
+        title: 'Review improvements',
+        desc: 'See what changed—added context, risk checks, evaluation criteria, or formatting. Keep what you like and iterate as needed.'
+      },
+      {
+        title: 'Use enhanced prompt',
+        desc: 'Copy the enriched prompt or export it. Enhanced prompts are designed for higher reliability and consistency across runs.'
+      }
+    ],
+    [toSlug('Sharing Prompts')]: [
+      {
+        title: 'Generate prompt',
+        desc: 'Save or generate a prompt you want to share with teammates or the community.'
+      },
+      {
+        title: 'Click share',
+        desc: 'Open the Share dialog from the prompt preview. Pick a title and short description to help others understand the use case.'
+      },
+      {
+        title: 'Set permissions',
+        desc: 'Choose public or private, add a password or expiry if needed (Pro), and decide whether downloads are allowed.'
+      },
+      {
+        title: 'Copy link',
+        desc: 'Share the generated link anywhere. View analytics on engagement later from your account (if enabled).'
+      }
+    ]
+  }
+
   useEffect(() => {
     if (activeGuide && detailRef.current) {
       detailRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -218,11 +294,14 @@ const HelpPage = () => {
                       ? 'Enhancement with AI is a Pro feature. Structured prompting is available for everyone.'
                       : activeGuide.description}
                   </p>
-                  <ol className="text-sm text-gray-700 space-y-2">
-                    {activeGuide.steps.map((s, i) => (
+                  <ol className="space-y-3">
+                    {(detailsBySlug[toSlug(activeGuide.title)] || activeGuide.steps.map(t => ({ title: t, desc: '' }))).map((item, i) => (
                       <li key={i} className="flex items-start">
-                        <span className="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-semibold mr-2">{i+1}</span>
-                        {s}
+                        <span className="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-semibold mr-3">{i+1}</span>
+                        <div>
+                          <div className="font-medium text-gray-900">{item.title}</div>
+                          {item.desc && <div className="text-sm text-gray-600">{item.desc}</div>}
+                        </div>
                       </li>
                     ))}
                   </ol>
