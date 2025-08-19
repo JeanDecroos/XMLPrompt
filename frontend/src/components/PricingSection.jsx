@@ -24,7 +24,7 @@ const PricingSection = () => {
   const { isPro } = useAuth()
 
   return (
-    <section id="pricing" className="py-16 bg-transparent">
+    <section id="pricing" className="min-h-[calc(100vh-200px)] flex items-center py-16 bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">
@@ -37,7 +37,7 @@ const PricingSection = () => {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto pt-12" style={{overflow: 'visible'}}>
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto pt-4 md:pt-12" style={{overflow: 'visible'}}>
           {/* Free Plan */}
           <div className="card-secondary p-8 relative h-full flex flex-col">
             <div className="flex items-center justify-between mb-6">

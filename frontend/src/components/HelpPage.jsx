@@ -308,7 +308,7 @@ const HelpPage = () => {
                   <div className="mt-4 flex gap-3 items-center">
                     <Link to="/builder" className="btn btn-primary btn-sm">Open Builder</Link>
                     {activeGuide.title === 'Prompt Enrichment' && (
-                      <Link to="/pricing" className="btn btn-secondary btn-sm">Enrichment is Pro</Link>
+                      <Link to="/pricing" className="btn btn-secondary btn-sm">Unlock AI Enrichment</Link>
                     )}
                     {/* Next guide pointer */}
                     {(() => {
