@@ -98,211 +98,225 @@ const DocsPage = () => {
 
   const renderContent = () => {
     switch (selectedSection) {
-      case 'getting-started':
+      /* Getting Started */
+      case 'quick-overview':
         return (
-          <div className="space-y-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Getting Started</h1>
-              <p className="text-lg text-gray-600 mb-6">
-                Welcome to Promptr! This guide will help you create effective AI prompts and get the most out of our platform.
-              </p>
-            </div>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <div className="flex items-center mb-3">
-                <Info className="w-5 h-5 text-blue-600 mr-2" />
-                <h3 className="text-lg font-semibold text-blue-900">What is Promptr?</h3>
-              </div>
-              <p className="text-blue-800">
-                Promptr is a professional prompt engineering platform that helps you create, optimize, and manage AI prompts for various use cases. Our smart routing system automatically selects the best AI model for your specific task.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Quick Start</h2>
-              <div className="space-y-4">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">1</div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Choose Your Role</h3>
-                    <p className="text-gray-600">Select a role that matches your use case or create a custom role.</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">2</div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Describe Your Task</h3>
-                    <p className="text-gray-600">Clearly describe what you want the AI to accomplish.</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">3</div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Add Context & Requirements</h3>
-                    <p className="text-gray-600">Provide additional context and specify any requirements or constraints.</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">4</div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Generate & Refine</h3>
-                    <p className="text-gray-600">Generate your prompt and use our enrichment features to optimize it.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Quick Start Overview</h1>
+            <p className="text-gray-700">Promptr helps you go from a simple idea to a high‑quality prompt in three steps: Build → Choose Model → Enhance.</p>
+            <img src="/images/builder-overview.svg" alt="Builder Overview" className="w-full rounded-xl border border-gray-200"/>
+            <ol className="list-decimal pl-6 text-gray-700 space-y-2">
+              <li><b>Build</b>: Set your role, describe the task in 2–4 sentences, add concise context and any must‑have requirements.</li>
+              <li><b>Choose Model</b>: We suggest a balanced model; you can override anytime and regenerate.</li>
+              <li><b>Enhance (Pro)</b>: Improve structure, tone and clarity. Review changes in the preview, then copy/export/share.</li>
+            </ol>
+          </div>
+        )
+      case 'first-prompt':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Creating Your First Prompt</h1>
+            <h3 className="font-semibold">1) Choose a role</h3>
+            <p className="text-gray-700">The role guides tone and vocabulary. Examples: <i>Marketing Specialist</i>, <i>Software Developer</i>, <i>Data Analyst</i>.</p>
+            <h3 className="font-semibold">2) Describe your task</h3>
+            <p className="text-gray-700">Aim for 2–4 sentences. Be specific about the deliverable and constraints. Bad: “Write about our app.” Good: “Write a 150‑word product description highlighting benefits for managers.”</p>
+            <h3 className="font-semibold">3) Add context & requirements</h3>
+            <p className="text-gray-700">Include audience, brand voice, key points, do/don'ts. Keep it concise; trim long background.</p>
+            <h3 className="font-semibold">4) Generate & review</h3>
+            <p className="text-gray-700">View the preview on the right. Copy/export immediately or use Pro enrichment to refine.</p>
+          </div>
+        )
+      case 'model-routing':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Using AI Model Routing</h1>
+            <p className="text-gray-700">The suggestion you see next to the selector is based on your role and task. It’s a starting point—not a rule.</p>
+            <ul className="list-disc pl-6 text-gray-700 space-y-1">
+              <li><b>Where to see it:</b> under the Model selector, with a short reason.</li>
+              <li><b>Why this model?</b> Balanced choice for your task (e.g., writing vs analysis vs code).</li>
+              <li><b>Override:</b> pick another model for speed/cost or personal preference and regenerate.</li>
+            </ul>
           </div>
         )
 
-      case 'prompt-structure':
+      /* Building Prompts */
+      case 'anatomy':
         return (
-          <div className="space-y-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Prompt Structure</h1>
-              <p className="text-lg text-gray-600 mb-6">
-                Learn how to structure effective prompts for maximum AI performance.
-              </p>
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Anatomy of a Great Prompt</h1>
+            <ul className="list-disc pl-6 text-gray-700 space-y-2">
+              <li><b>Role</b>: who the AI should be</li>
+              <li><b>Task</b>: clear objective (2–4 sentences)</li>
+              <li><b>Context</b>: background, audience, examples (optional)</li>
+              <li><b>Requirements</b>: must‑haves, constraints, output style</li>
+              <li><b>Output format</b>: plain, JSON, Markdown etc.</li>
+            </ul>
+          </div>
+        )
+      case 'templates':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Copyable Templates</h1>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <h3 className="font-semibold mb-1">Marketing Email</h3>
+              <pre className="text-sm bg-white border border-gray-200 rounded p-3 overflow-auto">{`Role: Marketing Specialist\nTask: Write a 120–150 word product launch email introducing [Product].\nContext: Audience = busy team leads. Include 1 benefit and a single CTA.\nRequirements: Friendly, crisp tone. Avoid jargon.`}</pre>
             </div>
-
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Anatomy of a Good Prompt</h3>
-              <div className="space-y-4">
-                <div className="border-l-4 border-blue-500 pl-4">
-                  <h4 className="font-semibold text-gray-900">Role Definition</h4>
-                  <p className="text-gray-600">Clearly define who the AI should act as.</p>
-                  <code className="text-sm bg-gray-100 px-2 py-1 rounded mt-1 block">
-                    "You are an experienced marketing manager..."
-                  </code>
-                </div>
-                <div className="border-l-4 border-green-500 pl-4">
-                  <h4 className="font-semibold text-gray-900">Task Description</h4>
-                  <p className="text-gray-600">Specify exactly what you want the AI to do.</p>
-                  <code className="text-sm bg-gray-100 px-2 py-1 rounded mt-1 block">
-                    "Create a product launch email campaign..."
-                  </code>
-                </div>
-                <div className="border-l-4 border-purple-500 pl-4">
-                  <h4 className="font-semibold text-gray-900">Context & Background</h4>
-                  <p className="text-gray-600">Provide relevant background information.</p>
-                  <code className="text-sm bg-gray-100 px-2 py-1 rounded mt-1 block">
-                    "The product is a SaaS tool for project management..."
-                  </code>
-                </div>
-                <div className="border-l-4 border-orange-500 pl-4">
-                  <h4 className="font-semibold text-gray-900">Requirements & Constraints</h4>
-                  <p className="text-gray-600">Specify format, length, style, and other requirements.</p>
-                  <code className="text-sm bg-gray-100 px-2 py-1 rounded mt-1 block">
-                    "Keep it under 200 words, include a clear CTA..."
-                  </code>
-                </div>
-              </div>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <h3 className="font-semibold mb-1">Product Description</h3>
+              <pre className="text-sm bg-white border border-gray-200 rounded p-3 overflow-auto">{`Role: Content Writer\nTask: Create a 120‑word description for [Product] highlighting 3 benefits.\nContext: Website product page; B2B audience.\nRequirements: Use bullet points; end with value summary.`}</pre>
+            </div>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <h3 className="font-semibold mb-1">Bug Report</h3>
+              <pre className="text-sm bg-white border border-gray-200 rounded p-3 overflow-auto">{`Role: Software Developer\nTask: Draft a reproducible bug report for [Issue].\nContext: Provide steps, expected vs actual, logs if any.\nRequirements: Clear headings; neutral tone.`}</pre>
             </div>
           </div>
         )
-
-      case 'api':
+      case 'tips':
         return (
-          <div className="space-y-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">API Reference</h1>
-              <p className="text-lg text-gray-600 mb-6">
-                Complete reference for the Promptr REST API.
-              </p>
-            </div>
-
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-              <div className="flex items-center mb-3">
-                <Key className="w-5 h-5 text-yellow-600 mr-2" />
-                <h3 className="text-lg font-semibold text-yellow-900">Authentication</h3>
-              </div>
-              <p className="text-yellow-800 mb-4">
-                All API requests require authentication using your API key in the Authorization header.
-              </p>
-              <div className="relative">
-                <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
-                  <code>{`Authorization: Bearer YOUR_API_KEY`}</code>
-                </pre>
-                <button
-                  onClick={() => copyToClipboard('Authorization: Bearer YOUR_API_KEY', 'auth-header')}
-                  className="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-200 transition-colors"
-                >
-                  {copiedCode === 'auth-header' ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Core Endpoints</h2>
-              <div className="space-y-6">
-                <div className="border border-gray-200 rounded-lg p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Generate Prompt</h3>
-                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">POST</span>
-                  </div>
-                  <p className="text-gray-600 mb-4">Generate an optimized prompt based on your inputs.</p>
-                  <code className="text-sm bg-gray-100 px-2 py-1 rounded">
-                    POST /v1/prompts/generate
-                  </code>
-                  
-                  <div className="mt-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Example Request</h4>
-                    <div className="relative">
-                      <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
-                        <code>{codeExamples['api-curl']}</code>
-                      </pre>
-                      <button
-                        onClick={() => copyToClipboard(codeExamples['api-curl'], 'api-curl')}
-                        className="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-200 transition-colors"
-                      >
-                        {copiedCode === 'api-curl' ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Tips & Pitfalls</h1>
+            <ul className="list-disc pl-6 text-gray-700 space-y-1">
+              <li>Be specific; avoid ambiguity.</li>
+              <li>Aim for 2–4 sentences for the task.</li>
+              <li>Trim long context; keep only what’s necessary.</li>
+              <li>Use lists for requirements; avoid dense paragraphs.</li>
+              <li>Review and iterate—small edits often help more than long context.</li>
+            </ul>
+          </div>
+        )
+      case 'formats':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Output Formatting Options</h1>
+            <ul className="list-disc pl-6 text-gray-700 space-y-1">
+              <li><b>Plain</b>: general use; fastest to iterate.</li>
+              <li><b>JSON</b>: when you want fields to parse programmatically.</li>
+              <li><b>Markdown</b>: nicely formatted text; use fenced code for snippets.</li>
+            </ul>
           </div>
         )
 
-      case 'javascript-sdk':
+      /* Models & Recommendations */
+      case 'choose-model':
         return (
-          <div className="space-y-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">JavaScript SDK</h1>
-              <p className="text-lg text-gray-600 mb-6">
-                Official JavaScript/TypeScript SDK for Promptr.
-              </p>
-            </div>
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Choosing a Model</h1>
+            <ul className="list-disc pl-6 text-gray-700 space-y-1">
+              <li>Writing: GPT‑4o or Claude 3.5 Sonnet</li>
+              <li>Analysis: Claude 3.5 Sonnet</li>
+              <li>Technical/Code: Claude 3.5 Sonnet or GPT‑4o</li>
+              <li>Cost/Speed: try a lighter option</li>
+            </ul>
+          </div>
+        )
+      case 'recommendations':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Recommendations Explained</h1>
+            <p className="text-gray-700">We look at visible inputs (role and task) to suggest a balanced model. It’s a nudge, not a rule. You can switch anytime and regenerate.</p>
+          </div>
+        )
+      case 'limitations':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Current Limitations</h1>
+            <ul className="list-disc pl-6 text-gray-700 space-y-1">
+              <li>Model availability can change.</li>
+              <li>Recommendations are suggestions; pick what works best for you.</li>
+              <li>Very long inputs may exceed token limits—shorten context.</li>
+            </ul>
+          </div>
+        )
 
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Installation</h2>
-              <div className="relative">
-                <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
-                  <code>{`npm install @promptcraft/sdk`}</code>
-                </pre>
-                <button
-                  onClick={() => copyToClipboard('npm install @promptcraft/sdk', 'npm-install')}
-                  className="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-200 transition-colors"
-                >
-                  {copiedCode === 'npm-install' ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
+      /* Enrichment (Pro) */
+      case 'what-it-does':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">What Enrichment Does</h1>
+            <p className="text-gray-700">Enhancement adds missing context, clarifies requirements, and improves structure/tone. You see a refined prompt ready to copy or export.</p>
+          </div>
+        )
+      case 'levels':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Enhancement Levels</h1>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="bg-white border border-gray-200 rounded-lg p-4"><h3 className="font-semibold mb-1">Minimal</h3><p className="text-sm text-gray-700">Basic structure and clarity fixes.</p></div>
+              <div className="bg-white border border-gray-200 rounded-lg p-4"><h3 className="font-semibold mb-1">Balanced</h3><p className="text-sm text-gray-700">Comprehensive improvement (default).</p></div>
+              <div className="bg-white border border-gray-200 rounded-lg p-4"><h3 className="font-semibold mb-1">Advanced</h3><p className="text-sm text-gray-700">Professional optimization for important outputs.</p></div>
             </div>
+          </div>
+        )
+      case 'limits-errors':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Limits & Errors</h1>
+            <ul className="list-disc pl-6 text-gray-700 space-y-1">
+              <li>Token/length: reduce context or lower level if you hit limits.</li>
+              <li>Network errors: retry; ensure the backend is running.</li>
+            </ul>
+          </div>
+        )
+      case 'free-vs-pro':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Free vs Pro</h1>
+            <p className="text-gray-700">Free = structure‑only generation; Pro = AI‑enhanced refinement with levels and higher limits.</p>
+          </div>
+        )
 
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Basic Usage</h2>
-              <div className="relative">
-                <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
-                  <code>{codeExamples['javascript-basic']}</code>
-                </pre>
-                <button
-                  onClick={() => copyToClipboard(codeExamples['javascript-basic'], 'js-basic')}
-                  className="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-200 transition-colors"
-                >
-                  {copiedCode === 'js-basic' ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
+      /* Saving & Sharing */
+      case 'saving':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Save Prompts</h1>
+            <p className="text-gray-700">Use the Save action in the preview. Saved prompts appear in your account (if enabled). Rename or duplicate from there.</p>
+          </div>
+        )
+      case 'export':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Export & Copy</h1>
+            <p className="text-gray-700">Export to .txt/.json/.xml/.yaml/.md. For Markdown, surround with fenced code (```lang). Choose JSON when you need structured fields.</p>
+          </div>
+        )
+      case 'share':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Share Prompts</h1>
+            <p className="text-gray-700">Create a link to share. Public links are viewable by anyone with the URL; for private sharing, only share with trusted contacts.</p>
+          </div>
+        )
+
+      /* Troubleshooting */
+      case 'common':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Common Issues</h1>
+            <ul className="list-disc pl-6 text-gray-700 space-y-1">
+              <li>No output in preview</li>
+              <li>Enhancement button disabled</li>
+              <li>Model unavailable</li>
+            </ul>
+          </div>
+        )
+      case 'quick-fixes':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Quick Fixes</h1>
+            <ul className="list-disc pl-6 text-gray-700 space-y-1">
+              <li>Complete required fields</li>
+              <li>Reduce length or split the task</li>
+              <li>Try a different model</li>
+              <li>Check your network/back‑end status</li>
+            </ul>
+          </div>
+        )
+      case 'support':
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Support</h1>
+            <p className="text-gray-700">Email: support@promptr.com</p>
           </div>
         )
 
