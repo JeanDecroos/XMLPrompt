@@ -24,20 +24,16 @@ const PricingSection = () => {
   const { isPro } = useAuth()
 
   return (
-    <section id="pricing" className="min-h-[calc(100vh-200px)] flex items-center py-16 bg-transparent">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Choose Your AI Advantage
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Join thousands of professionals getting better results with AI
-          </p>
+    <section id="pricing" className="min-h-screen flex items-center bg-transparent">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        {/* Section Header (compact) */}
+        <div className="text-center mb-6">
+          <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Choose Your AI Advantage</h2>
+          <p className="text-base text-gray-600 max-w-2xl mx-auto">Join thousands of professionals getting better results with AI</p>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto pt-4 md:pt-12" style={{overflow: 'visible'}}>
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto" style={{overflow: 'visible'}}>
           {/* Free Plan */}
           <div className="card-secondary p-8 relative h-full flex flex-col">
             <div className="flex items-center justify-between mb-6">
@@ -76,7 +72,7 @@ const PricingSection = () => {
           </div>
 
           {/* Premium Plan */}
-          <div className="relative group h-full rounded-2xl p-[2px] bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 animate-gradient-pan shadow-xl overflow-visible">
+          <div className="relative group h-full rounded-2xl p-[2px] bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 shadow-xl overflow-visible">
             {/* Soft animated glow halo behind the gradient frame */}
             <div aria-hidden className="absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-r from-purple-400/25 via-fuchsia-400/20 to-blue-400/25 blur-3xl opacity-70 group-hover:opacity-90 transition-opacity"></div>
             {/* Dynamic pixelated shadow under card (subtle and non-themed) */}
