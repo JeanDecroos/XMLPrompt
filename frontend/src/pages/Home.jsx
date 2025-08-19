@@ -35,8 +35,21 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-8 md:py-12 text-center">
-        <Link to="/builder" onClick={() => trackEvent('start_building_click', { source: 'home_bottom' })} className="btn btn-cta">Start Building</Link>
+      <section className="py-10 md:py-14">
+        <div className="max-w-6xl mx-auto px-4 md:px-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200 shadow-md px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-gray-900 text-lg font-semibold text-center sm:text-left">Ready to transform your prompts?</p>
+            <div className="flex items-center justify-center">
+              <Link
+                to="/builder"
+                onClick={() => trackEvent('start_building_click', { source: 'home_bottom_bar' })}
+                className="btn btn-cta"
+              >
+                Start Building
+              </Link>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   )
