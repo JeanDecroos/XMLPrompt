@@ -1,7 +1,7 @@
 import React from 'react'
 import { FileText, Wand2, Sparkles } from 'lucide-react'
 
-const StepCard = ({ icon: Icon, step, title, subtitle, children, accent }) => (
+const StepCard = ({ icon: Icon, step, title, subtitle, children, accent, panelClasses = '' }) => (
   <div className="rounded-2xl border border-slate-200 shadow-sm bg-white">
     <div className="card-body">
       <div className="flex items-center justify-between mb-3">
@@ -18,8 +18,8 @@ const StepCard = ({ icon: Icon, step, title, subtitle, children, accent }) => (
           {step}
         </div>
       </div>
-      <div className="bg-white rounded-xl border border-slate-200 p-5 min-h-[220px] flex items-center">
-        <div className="text-slate-600 text-sm leading-relaxed">
+      <div className={`rounded-xl p-5 min-h-[220px] flex items-center border ${panelClasses}`}>
+        <div className="text-slate-700 text-sm leading-relaxed">
           {children}
         </div>
       </div>
@@ -45,6 +45,7 @@ const TransformationDeck = () => {
               title="Basic Input"
               subtitle="What you start with"
               accent="bg-slate-400"
+              panelClasses="bg-slate-50 border-slate-200"
             >
               “Describe this product”
             </StepCard>
@@ -55,6 +56,7 @@ const TransformationDeck = () => {
               title="Structured Prompt"
               subtitle="After initial processing"
               accent="bg-blue-500"
+              panelClasses="bg-blue-50 border-blue-200"
             >
               “Write a product description for our project management software that highlights key features, benefits, and target audience pain points”
             </StepCard>
@@ -65,6 +67,7 @@ const TransformationDeck = () => {
               title="AI‑Enhanced Result"
               subtitle="Professional optimization"
               accent="bg-purple-600"
+              panelClasses="bg-purple-50 border-purple-200"
             >
               “Write a conversion‑optimized product description for our project management software that addresses busy team leads’ specific pain points (missed deadlines, poor communication), highlights unique collaborative features with specific time‑saving metrics, includes social proof from similar companies, incorporates SEO keywords naturally, and features risk‑free trial offers with compelling urgency elements”
             </StepCard>
