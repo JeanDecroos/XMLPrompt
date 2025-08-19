@@ -8,7 +8,7 @@ const Hero = React.forwardRef((props, ref) => {
       <h1
         ref={ref}
         tabIndex="-1"
-        className="text-5xl md:text-6xl font-bold text-slate-900 tracking-tight mb-6 drop-shadow-sm"
+        className="text-5xl md:text-6xl font-bold text-slate-900 tracking-tight mb-6 drop-shadow-sm focus:outline-none focus-visible:outline-none focus:ring-0"
       >
         Build Better AI Prompts
       </h1>
