@@ -14,6 +14,23 @@ const Home = () => {
     if (headingRef.current) headingRef.current.focus()
   }, [])
 
+  // Sticky CTA visibility handler
+  useEffect(() => {
+    const onScroll = () => {
+      const doc = document.documentElement
+      const scrolled = doc.scrollTop || document.body.scrollTop || 0
+      const height = doc.scrollHeight - doc.clientHeight
+      const progress = height > 0 ? scrolled / height : 0
+      const el = document.querySelector('.sticky-cta-enter')
+      if (!el) return
+      if (progress > 0.8) el.classList.add('visible')
+      else el.classList.remove('visible')
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   const handleStartBuilding = (e) => {
     trackEvent('start_building_click', { source: 'home_hero' })
   }
@@ -55,6 +72,25 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Sticky CTA shown in last 20% of page */}
+      <div className="sticky-cta-container">
+        <div className="sticky-cta-inner max-w-6xl mx-auto px-4">
+          <div className="sticky-cta-enter">
+            <div className="cta-bar px-6 py-4 flex items-center justify-between gap-4">
+              <p className="text-gray-900 font-semibold">Ready to transform your prompts?</p>
+              <Link
+                to="/builder"
+                onClick={() => trackEvent('start_building_click', { source: 'home_sticky_bar' })}
+                className="btn btn-cta btn-cta-xl btn-cta-attention"
+              >
+                Start Building
+                <span className="cta-arrow ml-2">→</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   )
 }
