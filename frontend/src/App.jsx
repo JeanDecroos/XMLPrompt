@@ -51,7 +51,6 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/builder" element={<Builder />} />
               <Route path="/help" element={<HelpPage />} />
-              <Route path="/help/:slug" element={<HelpPage />} />
               <Route path="/docs" element={<DocsPage />} />
               <Route path="/pricing" element={<PricingSection />} />
               <Route path="/profile" element={<UserProfile />} />

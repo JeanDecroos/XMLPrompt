@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Link, useParams, useNavigate } from 'react-router-dom'
+import React, { useEffect, useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { 
   HelpCircle, 
   BookOpen, 
@@ -21,8 +21,8 @@ const HelpPage = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedFaq, setExpandedFaq] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState('getting-started')
-  const { slug } = useParams()
-  const navigate = useNavigate()
+  const location = useLocation()
+  const detailRef = useRef(null)
 
   const faqData = [
     {
@@ -124,6 +124,14 @@ const HelpPage = () => {
 
   const toSlug = (title) => title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
   const guideBySlug = Object.fromEntries(quickStartGuides.map(g => [toSlug(g.title), g]))
+  const activeSlug = (location.hash || '').replace('#', '')
+  const activeGuide = guideBySlug[activeSlug]
+
+  useEffect(() => {
+    if (activeGuide && detailRef.current) {
+      detailRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [activeSlug])
 
   const filteredFaqs = faqData.filter(faq => 
     (selectedCategory === 'all' || faq.category === selectedCategory) &&
@@ -134,45 +142,6 @@ const HelpPage = () => {
 
   const toggleFaq = (faqId) => {
     setExpandedFaq(expandedFaq === faqId ? null : faqId)
-  }
-
-  // Detail view for a specific quick start card
-  if (slug && guideBySlug[slug]) {
-    const guide = guideBySlug[slug]
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <button onClick={() => navigate(-1)} className="flex items-center text-white/90 hover:text-white mb-3">
-              <ArrowLeft className="w-5 h-5 mr-1" /> Back
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="text-3xl">{guide.icon}</div>
-              <h1 className="text-3xl font-bold">{guide.title}</h1>
-            </div>
-            <p className="text-blue-100 mt-2">
-              {guide.title === 'Prompt Enrichment' ? 'Enrichment with AI is a Pro feature. Structured prompting is available for everyone.' : guide.description}
-            </p>
-          </div>
-        </div>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <ol className="space-y-3">
-            {guide.steps.map((step, i) => (
-              <li key={i} className="flex items-start gap-3 bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <span className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">{i+1}</span>
-                <div className="pt-1 text-gray-800">{step}</div>
-              </li>
-            ))}
-          </ol>
-          <div className="mt-6 flex gap-3">
-            <Link to="/builder" className="btn btn-primary">Open Builder</Link>
-            {guide.title === 'Prompt Enrichment' && (
-              <Link to="/pricing" className="btn btn-secondary">Enrichment is Pro</Link>
-            )}
-          </div>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -203,7 +172,7 @@ const HelpPage = () => {
               {quickStartGuides.map((guide, index) => (
                 <Link
                   key={index}
-                  to={`/help/${encodeURIComponent(guide.title.toLowerCase().replace(/\s+/g, '-'))}`}
+                  to={{ pathname: '/help', hash: `#${toSlug(guide.title)}` }}
                   className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all border border-gray-100 group focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <div className="text-3xl mb-4">{guide.icon}</div>
@@ -232,6 +201,41 @@ const HelpPage = () => {
                 </Link>
               ))}
             </div>
+
+            {/* Inline detail section */}
+            {activeGuide && (
+              <div ref={detailRef} id="guide-detail" className="mt-10">
+                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="text-2xl">{activeGuide.icon}</div>
+                    <h3 className="text-xl font-semibold text-gray-900">{activeGuide.title}</h3>
+                    {activeGuide.title === 'Prompt Enrichment' && (
+                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200">Pro</span>
+                    )}
+                  </div>
+                  <p className="text-gray-600 mb-4">
+                    {activeGuide.title === 'Prompt Enrichment'
+                      ? 'Enhancement with AI is a Pro feature. Structured prompting is available for everyone.'
+                      : activeGuide.description}
+                  </p>
+                  <ol className="text-sm text-gray-700 space-y-2">
+                    {activeGuide.steps.map((s, i) => (
+                      <li key={i} className="flex items-start">
+                        <span className="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-semibold mr-2">{i+1}</span>
+                        {s}
+                      </li>
+                    ))}
+                  </ol>
+                  <div className="mt-4 flex gap-3">
+                    <Link to="/builder" className="btn btn-primary btn-sm">Open Builder</Link>
+                    {activeGuide.title === 'Prompt Enrichment' && (
+                      <Link to="/pricing" className="btn btn-secondary btn-sm">Enrichment is Pro</Link>
+                    )}
+                    <a href="#" onClick={(e) => { e.preventDefault(); window.history.replaceState(null, '', '/help'); }} className="text-gray-500 text-sm ml-auto">Close</a>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* FAQ Section */}
