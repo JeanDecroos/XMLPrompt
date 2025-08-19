@@ -618,7 +618,7 @@ const SUBSCRIPTION_TIERS = {
 # Frontend (.env)
 VITE_SUPABASE_URL=your-supabase-url
 VITE_SUPABASE_ANON_KEY=your-anon-key
-VITE_API_URL=http://localhost:3002
+VITE_API_URL=http://localhost:3001
 
 # Backend (.env)
 SUPABASE_URL=your-supabase-url
@@ -637,7 +637,19 @@ npm run dev  # Runs on http://localhost:3000 (Vite)
 # Backend
 cd backend
 npm install
-npm run dev  # Runs on http://localhost:3002
+npm run dev  # Runs on http://localhost:3001
+
+# Or using Bun (if npm is not available)
+# Frontend
+# from project root
+cd frontend
+bun install
+bun run dev
+
+# Backend
+cd ../backend
+bun install
+bun run dev
 ```
 
 Notes
