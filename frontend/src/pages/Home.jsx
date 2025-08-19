@@ -43,7 +43,6 @@ const Home = () => {
               <p className="cta-subtext text-center sm:text-left">No sign-up required on free tier</p>
             </div>
             <div className="flex items-center gap-3 cta-spotlight">
-              <span className="cta-badge">⚡ Instant preview</span>
               <Link
                 to="/builder"
                 onClick={() => trackEvent('start_building_click', { source: 'home_bottom_bar' })}
