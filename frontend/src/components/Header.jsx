@@ -56,20 +56,27 @@ const Header = () => {
             </Link>
             </div>
 
-            {/* Simplified Desktop Navigation */}
+            {/* Primary Navigation */}
             <nav className="hidden md:flex items-center space-x-2">
               <div className="flex items-center space-x-1">
-                {/* Help */}
+                <Link
+                  to="/"
+                  className={`px-4 py-2 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50 ${location.pathname === '/' ? 'text-gray-900' : 'text-gray-700 hover:text-gray-900'}`}
+                >
+                  Home
+                </Link>
+                <Link
+                  to="/builder"
+                  className={`px-4 py-2 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50 ${location.pathname.startsWith('/builder') ? 'text-gray-900' : 'text-gray-700 hover:text-gray-900'}`}
+                >
+                  Builder
+                </Link>
                 <Link to="/help" className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50">
                   Help
                 </Link>
-
-                {/* Documentation */}
                 <Link to="/docs" className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50">
                   Docs
                 </Link>
-
-                {/* Pricing */}
                 <Link to="/pricing" className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-50">
                   Pricing
                 </Link>
@@ -174,6 +181,13 @@ const Header = () => {
                 </div>
               )}
               
+              {/* Primary CTA */}
+              <div className="hidden md:block">
+                <Link to="/builder" className="btn btn-primary btn-sm">
+                  Start Building
+                </Link>
+              </div>
+
               {/* Mobile Menu Button */}
               <button 
                 onClick={() => setIsMenuOpen(!isMenuOpen)} 
@@ -189,11 +203,20 @@ const Header = () => {
           {isMenuOpen && (
             <div className="md:hidden border-t border-white/20 py-4 space-y-3">
               <div className="space-y-2">
+                <Link to="/" className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-all duration-200 font-medium">
+                  🏠 Home
+                </Link>
+                <Link to="/builder" className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-all duration-200 font-medium">
+                  🛠️ Builder
+                </Link>
                 <Link to="/docs" className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-all duration-200 font-medium">
                   📖 Documentation
                 </Link>
                 <Link to="/pricing" className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-all duration-200 font-medium">
                   💰 Pricing
+                </Link>
+                <Link to="/builder" className="btn btn-primary btn-sm mx-3">
+                  Start Building
                 </Link>
                 <button 
                   onClick={() => setShowQuickHelp(!showQuickHelp)}

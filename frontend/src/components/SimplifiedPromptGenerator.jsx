@@ -13,7 +13,7 @@ import { UniversalPromptGenerator } from '../utils/universalPromptGenerator'
 
 const DEFAULT_MODEL = 'gpt-4o'
 
-const SimplifiedPromptGenerator = () => {
+const SimplifiedPromptGenerator = ({ showHero = true }) => {
   const { user, session, isAuthenticated, isPro } = useAuth()
   const [formData, setFormData] = useState({
     role: '',
@@ -336,18 +336,18 @@ const SimplifiedPromptGenerator = () => {
       {/* Content */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
         
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent mb-6 leading-tight">
-            Build Better AI Prompts
-          </h1>
-          <p className="text-xl text-gray-700 max-w-2xl mx-auto leading-relaxed">
-            Transform your ideas into structured prompts that deliver exceptional results from any AI model
-          </p>
-        </div>
+        {showHero && (
+          <div className="text-center mb-16">
+            <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent mb-6 leading-tight">
+              Build Better AI Prompts
+            </h1>
+            <p className="text-xl text-gray-700 max-w-2xl mx-auto leading-relaxed">
+              Transform your ideas into structured prompts that deliver exceptional results from any AI model
+            </p>
+          </div>
+        )}
 
-        {/* Rotating Examples */}
-        <RotatingPromptExamples />
+        {showHero && <RotatingPromptExamples />}
 
         {/* Error Notification */}
         {errorNotification && (
