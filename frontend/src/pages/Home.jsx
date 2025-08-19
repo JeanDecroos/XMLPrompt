@@ -7,6 +7,7 @@ import RotatingPromptExamples from '../components/RotatingPromptExamples'
 
 const Home = () => {
   const headingRef = useRef(null)
+  const bottomCtaRef = useRef(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -14,16 +15,19 @@ const Home = () => {
     if (headingRef.current) headingRef.current.focus()
   }, [])
 
-  // Sticky CTA visibility handler
+  // Sticky CTA: show while user has NOT reached the inline CTA bar; hide once it's in view or passed
   useEffect(() => {
     const onScroll = () => {
-      const doc = document.documentElement
-      const scrolled = doc.scrollTop || document.body.scrollTop || 0
-      const height = doc.scrollHeight - doc.clientHeight
-      const progress = height > 0 ? scrolled / height : 0
-      const el = document.querySelector('.sticky-cta-enter')
-      if (!el) return
-      if (progress > 0.8) el.classList.add('visible')
+      const el = document.querySelector('.sticky-cta-enter') as HTMLElement | null
+      const anchor = bottomCtaRef.current
+      if (!el || !anchor) return
+
+      const ctaRect = anchor.getBoundingClientRect()
+      const viewportBottom = window.innerHeight
+
+      // If the inline CTA's top is below the viewport bottom, user hasn't reached it yet → show sticky
+      const shouldShow = ctaRect.top > viewportBottom
+      if (shouldShow) el.classList.add('visible')
       else el.classList.remove('visible')
     }
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -54,7 +58,7 @@ const Home = () => {
 
       <section className="py-10 md:py-14">
         <div className="max-w-6xl mx-auto px-4 md:px-6">
-          <div className="cta-bar px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div ref={bottomCtaRef} className="cta-bar px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <p className="text-gray-900 text-lg font-semibold text-center sm:text-left">Ready to transform your prompts?</p>
               <p className="cta-subtext text-center sm:text-left">No sign-up required on free tier</p>
