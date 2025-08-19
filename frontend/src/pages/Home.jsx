@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import Meta from '../seo/Meta'
 import { trackEvent } from '../lib/analytics'
 import Hero from '../components/marketing/Hero'
-import TransformationDeck from '../components/marketing/TransformationDeck'
-import ValueProps from '../components/marketing/ValueProps'
+import RotatingPromptExamples from '../components/RotatingPromptExamples'
 
 const Home = () => {
   const headingRef = useRef(null)
@@ -20,7 +19,7 @@ const Home = () => {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#7A5AF8] via-[#8E8CF8] to-[#F5F7FB] text-slate-900">
+    <main className="min-h-screen text-slate-900">
       <Meta 
         title="Promptr — AI Prompt Builder" 
         description="Transform simple ideas into structured, optimized prompts for any AI model."
@@ -31,11 +30,9 @@ const Home = () => {
       </section>
 
       <section className="py-10 md:py-14">
-        <TransformationDeck />
-      </section>
-
-      <section id="why" className="py-12 md:py-16">
-        <ValueProps />
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <RotatingPromptExamples />
+        </div>
       </section>
 
       <section className="py-12 md:py-16 text-center">
