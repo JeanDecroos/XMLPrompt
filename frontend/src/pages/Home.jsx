@@ -18,7 +18,7 @@ const Home = () => {
   // Sticky CTA: show while user has NOT reached the inline CTA bar; hide once it's in view or passed
   useEffect(() => {
     const onScroll = () => {
-      const el = document.querySelector('.sticky-cta-enter') as HTMLElement | null
+      const el = document.querySelector('.sticky-cta-enter')
       const anchor = bottomCtaRef.current
       if (!el || !anchor) return
 
