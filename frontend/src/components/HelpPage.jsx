@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { 
   HelpCircle, 
   BookOpen, 
@@ -21,6 +21,8 @@ const HelpPage = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedFaq, setExpandedFaq] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState('getting-started')
+  const { slug } = useParams()
+  const navigate = useNavigate()
 
   const faqData = [
     {
@@ -120,6 +122,9 @@ const HelpPage = () => {
     }
   ]
 
+  const toSlug = (title) => title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+  const guideBySlug = Object.fromEntries(quickStartGuides.map(g => [toSlug(g.title), g]))
+
   const filteredFaqs = faqData.filter(faq => 
     (selectedCategory === 'all' || faq.category === selectedCategory) &&
     (searchTerm === '' || 
@@ -129,6 +134,45 @@ const HelpPage = () => {
 
   const toggleFaq = (faqId) => {
     setExpandedFaq(expandedFaq === faqId ? null : faqId)
+  }
+
+  // Detail view for a specific quick start card
+  if (slug && guideBySlug[slug]) {
+    const guide = guideBySlug[slug]
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <button onClick={() => navigate(-1)} className="flex items-center text-white/90 hover:text-white mb-3">
+              <ArrowLeft className="w-5 h-5 mr-1" /> Back
+            </button>
+            <div className="flex items-center gap-3">
+              <div className="text-3xl">{guide.icon}</div>
+              <h1 className="text-3xl font-bold">{guide.title}</h1>
+            </div>
+            <p className="text-blue-100 mt-2">
+              {guide.title === 'Prompt Enrichment' ? 'Enrichment with AI is a Pro feature. Structured prompting is available for everyone.' : guide.description}
+            </p>
+          </div>
+        </div>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <ol className="space-y-3">
+            {guide.steps.map((step, i) => (
+              <li key={i} className="flex items-start gap-3 bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                <span className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">{i+1}</span>
+                <div className="pt-1 text-gray-800">{step}</div>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-6 flex gap-3">
+            <Link to="/builder" className="btn btn-primary">Open Builder</Link>
+            {guide.title === 'Prompt Enrichment' && (
+              <Link to="/pricing" className="btn btn-secondary">Enrichment is Pro</Link>
+            )}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -157,10 +201,23 @@ const HelpPage = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Quick Start Guides</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {quickStartGuides.map((guide, index) => (
-                <div key={index} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border border-gray-100">
+                <Link
+                  key={index}
+                  to={`/help/${encodeURIComponent(guide.title.toLowerCase().replace(/\s+/g, '-'))}`}
+                  className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all border border-gray-100 group focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
                   <div className="text-3xl mb-4">{guide.icon}</div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{guide.title}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{guide.description}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center">
+                    {guide.title}
+                    {guide.title === 'Prompt Enrichment' && (
+                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200">Pro</span>
+                    )}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    {guide.title === 'Prompt Enrichment'
+                      ? 'Enhance with AI (Pro). Structured prompting is available for everyone.'
+                      : guide.description}
+                  </p>
                   <ol className="text-sm text-gray-500 space-y-1">
                     {guide.steps.map((step, stepIndex) => (
                       <li key={stepIndex} className="flex items-center">
@@ -171,7 +228,8 @@ const HelpPage = () => {
                       </li>
                     ))}
                   </ol>
-                </div>
+                  <div className="mt-4 text-blue-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">Read more →</div>
+                </Link>
               ))}
             </div>
           </div>
