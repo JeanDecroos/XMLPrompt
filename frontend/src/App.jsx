@@ -34,6 +34,8 @@ const RouteEffects = () => {
   useEffect(() => {
     const tier = isPro ? 'pro' : 'free'
     trackPageView({ path: location.pathname, user_tier: tier })
+    // Scroll to top on route change (preserve position for hash-only changes)
+    window.scrollTo(0, 0)
   }, [location.pathname, isPro])
 
   return null
