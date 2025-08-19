@@ -2,8 +2,8 @@ import React from 'react'
 import { LayoutGrid, Brain, Zap } from 'lucide-react'
 
 const Item = ({ icon: Icon, title, children, accent }) => (
-  <div className="card rounded-2xl border border-slate-200/70 bg-white shadow-sm">
-    <div className="card-body">
+  <div className="rounded-2xl border border-slate-200 shadow-sm bg-white">
+    <div className="p-6 md:p-8">
       <div className="flex items-center gap-3 mb-2">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${accent}`}>
           <Icon className="w-5 h-5 text-white" />

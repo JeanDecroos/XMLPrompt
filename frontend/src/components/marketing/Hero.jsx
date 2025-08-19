@@ -4,7 +4,7 @@ import { trackEvent } from '../../lib/analytics'
 
 const Hero = React.forwardRef((props, ref) => {
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-6 text-center">
+    <div className="max-w-6xl mx-auto px-4 md:px-6 text-center text-slate-900">
       <h1
         ref={ref}
         tabIndex="-1"

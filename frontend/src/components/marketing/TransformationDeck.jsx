@@ -2,7 +2,7 @@ import React from 'react'
 import { FileText, Wand2, Sparkles } from 'lucide-react'
 
 const StepCard = ({ icon: Icon, step, title, subtitle, children, accent }) => (
-  <div className="card rounded-2xl border border-slate-200/70 bg-white shadow-sm">
+  <div className="rounded-2xl border border-slate-200 shadow-sm bg-white">
     <div className="card-body">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
@@ -30,7 +30,7 @@ const StepCard = ({ icon: Icon, step, title, subtitle, children, accent }) => (
 const TransformationDeck = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-6">
-      <div className="card rounded-2xl bg-white/90 border border-slate-200/70 shadow-sm">
+      <div className="rounded-2xl bg-white border border-slate-200 shadow-sm">
         <div className="card-body">
           <div className="text-center mb-6">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">See the Transformation</span>
