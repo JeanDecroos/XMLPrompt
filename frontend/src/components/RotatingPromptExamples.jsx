@@ -134,7 +134,7 @@ const RotatingPromptExamples = () => {
   ]
 
   return (
-    <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-200/50 shadow-lg mb-12">
+    <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-200/50 shadow-lg mb-6">
       {/* Header */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full text-sm font-medium text-blue-800 mb-4">
@@ -327,7 +327,7 @@ const RotatingPromptExamples = () => {
       </div>
 
       {/* Call to Action */}
-      <div className="text-center mt-8">
+      <div className="text-center mt-4">
         <p className="text-gray-600 mb-4 text-lg">
           Ready to transform your prompts? Start building below ↓
         </p>
