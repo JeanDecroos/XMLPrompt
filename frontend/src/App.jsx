@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import SimplifiedPromptGenerator from './components/SimplifiedPromptGenerator'
+import PromptPage from './pages/prompt'
 import Header from './components/Header'
 import PricingSection from './components/PricingSection'
 import Footer from './components/Footer'
@@ -18,7 +19,7 @@ function App() {
           <Header />
           <main className="flex-1">
             <Routes>
-              <Route path="/" element={<SimplifiedPromptGenerator />} />
+              <Route path="/" element={<PromptPage />} />
               <Route path="/help" element={<HelpPage />} />
               <Route path="/docs" element={<DocsPage />} />
               <Route path="/pricing" element={<PricingSection />} />

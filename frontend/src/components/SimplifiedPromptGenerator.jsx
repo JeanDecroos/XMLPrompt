@@ -13,7 +13,7 @@ import { UniversalPromptGenerator } from '../utils/universalPromptGenerator'
 
 const DEFAULT_MODEL = 'gpt-4o'
 
-const SimplifiedPromptGenerator = () => {
+const SimplifiedPromptGenerator = ({ layout }) => {
   const { user, session, isAuthenticated, isPro } = useAuth()
   const [formData, setFormData] = useState({
     role: '',
@@ -331,6 +331,135 @@ const SimplifiedPromptGenerator = () => {
     }
   ]
   
+  // When used on /prompt page with layout="two-card", wrap existing content in the requested layout
+  if (layout === 'two-card') {
+    return (
+      <div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left: Prompt Configuration (reuse step 1 + model/enhance controls) */}
+          <div className="rounded-2xl border shadow bg-white overflow-hidden" aria-label="Prompt Configuration">
+            <div className="p-6 sm:p-8">
+              <h2 className="text-lg font-medium mb-4">Prompt Configuration</h2>
+              {/* Render the context/define section and the compact model/enhance controls */}
+              <section className="space-y-8">
+                {/* Reuse role and task UI */}
+                <div>
+                  {/* Role selector */}
+                  <div className={`rounded-2xl border p-6 ${formData.role ? 'border-blue-200 bg-blue-50/30' : 'border-gray-200'}`}>
+                    <ImprovedRoleSelector
+                      selectedRole={formData.role}
+                      onRoleChange={(role) => handleFormChange('role', role)}
+                      onWorkflowComplete={() => {}}
+                    />
+                  </div>
+                  {/* Task */}
+                  <div className="mt-6 rounded-2xl border border-gray-200 p-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Task Description <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      value={formData.task}
+                      onChange={(e) => handleFormChange('task', e.target.value)}
+                      placeholder={formData.role ? `Describe your ${formData.role.toLowerCase()} task or objective...` : 'Describe what you want to accomplish...'}
+                      className="w-full min-h-[104px] px-4 py-3 border rounded-lg resize-y"
+                    />
+                  </div>
+                  {/* Advanced fields */}
+                  <div className="mt-6 grid grid-cols-1 gap-4">
+                    <textarea
+                      value={formData.context}
+                      onChange={(e) => handleFormChange('context', e.target.value)}
+                      placeholder="Context (optional)"
+                      className="w-full min-h-[104px] px-4 py-3 border rounded-lg resize-y"
+                    />
+                    <textarea
+                      value={formData.requirements}
+                      onChange={(e) => handleFormChange('requirements', e.target.value)}
+                      placeholder="Requirements (optional)"
+                      className="w-full min-h-[104px] px-4 py-3 border rounded-lg resize-y"
+                    />
+                    <input
+                      type="text"
+                      value={formData.format}
+                      onChange={(e) => handleFormChange('format', e.target.value)}
+                      placeholder="Output format (e.g. bullet points, step-by-step)"
+                      className="w-full px-4 py-3 border rounded-lg"
+                    />
+                  </div>
+                </div>
+
+                {/* Model + Enhancement controls */}
+                <div>
+                  <div className="rounded-2xl border border-gray-200 p-6">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">AI Model</h3>
+                    <ModelSelector
+                      selectedModel={selectedModel}
+                      onModelChange={setSelectedModel}
+                      modelRecommendation={formData.role || formData.task ? getModelRecommendation() : null}
+                      compact
+                    />
+                    <div className="mt-6">
+                      <EnrichmentOptions
+                        enrichmentData={{ enrichmentLevel }}
+                        onChange={(field, value) => { if (field === 'enrichmentLevel') setEnrichmentLevel(value) }}
+                        isEnriching={isGenerating}
+                      />
+                    </div>
+                    <div className="mt-6 flex gap-3">
+                      <button
+                        onClick={generateRawPrompt}
+                        className="btn btn-secondary"
+                        type="button"
+                        aria-label="Generate Basic"
+                      >
+                        Generate Basic
+                      </button>
+                      <button
+                        onClick={generatePrompt}
+                        disabled={isGenerating || !validation.isValid || hasEnhancedCurrentInputs}
+                        className="btn btn-primary"
+                        type="button"
+                        aria-label="Enhance with AI"
+                      >
+                        Enhance with AI
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          {/* Right: Preview */}
+          <div className="rounded-2xl border shadow bg-white overflow-hidden" aria-label="Generated Prompt">
+            <div className="p-6 sm:p-8">
+              <h2 className="text-lg font-medium mb-4">Generated Prompt</h2>
+              <div className="min-h-[420px]">
+                <EnhancedPromptPreview
+                  rawPrompt={rawPrompt}
+                  enrichedPrompt={enrichedPrompt}
+                  enrichmentResult={enrichmentResult}
+                  isLoading={false}
+                  hasError={!validation.isValid}
+                  validation={validation}
+                  selectedModel={selectedModel}
+                  isEnriching={isGenerating}
+                  hasEnrichment={!!enrichedPrompt}
+                  onEnrichNow={isPro && !hasEnhancedCurrentInputs ? generatePrompt : null}
+                  isAuthenticated={isAuthenticated}
+                  isPro={isPro}
+                  formData={formData}
+                  hasEnhancedCurrentInputs={hasEnhancedCurrentInputs}
+                  lastTotalTokens={lastTotalTokens}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Content */}
