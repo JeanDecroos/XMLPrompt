@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import { 
   HelpCircle, 
   BookOpen, 
@@ -24,6 +25,7 @@ const HelpPage = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const detailRef = useRef(null)
+  const { isPro } = useAuth()
 
   const faqData = [
     {
@@ -308,7 +310,11 @@ const HelpPage = () => {
                   <div className="mt-4 flex gap-3 items-center">
                     <Link to="/builder" className="btn btn-primary btn-sm">Open Builder</Link>
                     {activeGuide.title === 'Prompt Enrichment' && (
-                      <Link to="/pricing" className="btn btn-secondary btn-sm">Unlock AI Enrichment</Link>
+                      isPro ? (
+                        <Link to="/builder" className="btn btn-secondary btn-sm">AI Enrichment Unlocked</Link>
+                      ) : (
+                        <Link to="/pricing" className="btn btn-secondary btn-sm">Unlock AI Enrichment</Link>
+                      )
                     )}
                     {/* Next guide pointer */}
                     {(() => {
