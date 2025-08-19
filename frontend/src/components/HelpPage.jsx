@@ -429,40 +429,16 @@ const HelpPage = () => {
             {/* Contact Support */}
             <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Need More Help?</h3>
-              <div className="space-y-4">
-                <a
-                  href="mailto:support@promptr.com"
-                  className="flex items-center p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                >
-                  <Mail className="w-5 h-5 text-blue-600 mr-3" />
-                  <div>
-                    <div className="font-medium text-blue-900">Email Support</div>
-                    <div className="text-sm text-blue-600">support@promptr.com</div>
-                  </div>
-                </a>
-                
-                <a
-                  href="#"
-                  className="flex items-center p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
-                >
-                  <MessageCircle className="w-5 h-5 text-green-600 mr-3" />
-                  <div>
-                    <div className="font-medium text-green-900">Live Chat</div>
-                    <div className="text-sm text-green-600">Available 9AM-5PM EST</div>
-                  </div>
-                </a>
-
-                <a
-                  href="#"
-                  className="flex items-center p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
-                >
-                  <Users className="w-5 h-5 text-purple-600 mr-3" />
-                  <div>
-                    <div className="font-medium text-purple-900">Community</div>
-                    <div className="text-sm text-purple-600">Join our Discord</div>
-                  </div>
-                </a>
-              </div>
+              <a
+                href="mailto:support@promptr.com"
+                className="flex items-center p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+              >
+                <Mail className="w-5 h-5 text-blue-600 mr-3" />
+                <div>
+                  <div className="font-medium text-blue-900">Email Support</div>
+                  <div className="text-sm text-blue-600">support@promptr.com</div>
+                </div>
+              </a>
             </div>
 
             {/* Quick Links */}
