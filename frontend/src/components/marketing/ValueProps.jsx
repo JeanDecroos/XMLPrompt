@@ -2,10 +2,10 @@ import React from 'react'
 import { LayoutGrid, Brain, Zap } from 'lucide-react'
 
 const Item = ({ icon: Icon, title, children, accent }) => (
-  <div className="rounded-2xl border border-slate-200 shadow-sm bg-white">
+  <div className="rounded-2xl border border-slate-200 shadow-sm bg-white transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
     <div className="p-6 md:p-8">
       <div className="flex items-center gap-3 mb-2">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${accent}`}>
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${accent} shadow-sm ring-2 ring-white/70`}>
           <Icon className="w-5 h-5 text-white" />
         </div>
         <h4 className="text-slate-800 font-semibold">{title}</h4>

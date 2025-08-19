@@ -2,11 +2,11 @@ import React from 'react'
 import { FileText, Wand2, Sparkles } from 'lucide-react'
 
 const StepCard = ({ icon: Icon, step, title, subtitle, children, accent, panelClasses = '' }) => (
-  <div className="rounded-2xl border border-slate-200 shadow-sm bg-white">
+  <div className="rounded-2xl border border-slate-200 shadow-sm bg-white transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
     <div className="card-body">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${accent}`}>
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${accent} shadow-sm ring-2 ring-white/70`}>
             <Icon className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -14,11 +14,11 @@ const StepCard = ({ icon: Icon, step, title, subtitle, children, accent, panelCl
             {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
           </div>
         </div>
-        <div className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold flex items-center justify-center">
+        <div className="w-7 h-7 rounded-full bg-white text-slate-700 text-xs font-semibold flex items-center justify-center shadow-sm ring-1 ring-slate-200">
           {step}
         </div>
       </div>
-      <div className={`rounded-xl p-5 min-h-[220px] flex items-center border ${panelClasses}`}>
+      <div className={`rounded-xl p-5 min-h-[220px] flex items-center border ${panelClasses} shadow-xs transition-all duration-200 hover:shadow-md`}>
         <div className="text-slate-700 text-sm leading-relaxed">
           {children}
         </div>
