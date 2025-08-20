@@ -16,7 +16,9 @@ export default function SecurityCard() {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900">Security</h3>
         {statusQ.isLoading ? (
-          <span className="text-sm text-gray-600">Loading…</span>
+          <div className="animate-pulse">
+            <div className="h-6 w-20 bg-gray-200 rounded"></div>
+          </div>
         ) : statusQ.data?.enabled ? (
           <button
             onClick={async () => { await disable2FA.mutateAsync(); await statusQ.refetch() }}
@@ -37,7 +39,12 @@ export default function SecurityCard() {
       <div className="mt-3 text-sm text-gray-600">2FA Status: <span className={`font-medium ${statusQ.data?.enabled ? 'text-green-700' : 'text-gray-800'}`}>{statusQ.data?.enabled ? 'Enabled' : 'Disabled'}</span></div>
 
       {sessionsQ.isLoading ? (
-        <div className="mt-4 text-sm text-gray-600">Loading sessions…</div>
+        <div className="mt-4">
+          <div className="animate-pulse space-y-3">
+            <div className="h-4 w-32 bg-gray-200 rounded"></div>
+            <div className="h-4 w-48 bg-gray-200 rounded"></div>
+          </div>
+        </div>
       ) : Array.isArray(sessionsQ.data?.sessions) && sessionsQ.data.sessions.length > 0 ? (
         <div className="mt-4">
           <h4 className="text-sm font-semibold text-gray-900 mb-2">Active sessions</h4>

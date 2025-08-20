@@ -9,6 +9,7 @@ import DocsPage from './components/DocsPage'
 import UserProfile from './components/UserProfile'
 import Home from './pages/Home'
 import Builder from './pages/Builder'
+import DataPreloader from './components/DataPreloader'
 import { trackPageView } from './lib/analytics'
 import './index.css'
 
@@ -99,6 +100,7 @@ function App() {
     <AuthProvider>
       <Router>
         <RouteEffects />
+        <DataPreloader />
         <div className="min-h-screen">
           <Header />
           <main className="flex-1">

@@ -163,7 +163,13 @@ export default function UserProfile({ stats }) {
             <span className="text-sm text-gray-800">Active</span>
           </div>
           <div className={`px-3 py-1 rounded-full text-sm font-medium border ${getPlanColor(subscriptionTier)}`}>
-            {loading ? 'Loading...' : getPlanDisplayName(subscriptionTier)} Plan
+            {loading ? (
+          <div className="animate-pulse">
+            <div className="h-4 w-16 bg-gray-200 rounded"></div>
+          </div>
+        ) : (
+          getPlanDisplayName(subscriptionTier)
+        )} Plan
           </div>
         </div>
         

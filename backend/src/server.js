@@ -38,6 +38,8 @@ import stripeRoutes from './routes/stripe.js'
 import quotaRoutes from './routes/quota.js'
 import mfaRoutes from './routes/mfa.js'
 import securityRoutes from './routes/security.js'
+import billingRoutes from './routes/billing.js'
+import accountRoutes from './routes/account.js'
 
 // Job queue imports
 import { initializeJobQueues, stopJobQueues } from './jobs/index.js'
@@ -186,6 +188,12 @@ if (config.env !== 'development') {
 
 // Security routes (2FA, sessions, etc.)
 apiRouter.use('/security', securityRoutes)
+
+// Billing routes
+apiRouter.use('/billing', billingRoutes)
+
+// Account routes
+apiRouter.use('/account', accountRoutes)
 
 // Mount API routes
 app.use(`/api/${config.app.apiVersion}`, apiRouter)
