@@ -37,6 +37,7 @@ import webhookRoutes from './routes/webhooks.js'
 import stripeRoutes from './routes/stripe.js'
 import quotaRoutes from './routes/quota.js'
 import mfaRoutes from './routes/mfa.js'
+import securityRoutes from './routes/security.js'
 
 // Job queue imports
 import { initializeJobQueues, stopJobQueues } from './jobs/index.js'
@@ -182,6 +183,9 @@ apiRouter.use('/admin', authMiddleware, adminRoutes)
 if (config.env !== 'development') {
   apiRouter.use('/mfa', mfaRoutes)
 }
+
+// Security routes (2FA, sessions, etc.)
+apiRouter.use('/security', securityRoutes)
 
 // Mount API routes
 app.use(`/api/${config.app.apiVersion}`, apiRouter)
