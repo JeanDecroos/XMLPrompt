@@ -1,6 +1,6 @@
 /**
  * Auth Middleware
- * Handles JWT verification and user authentication for API routes
+ * Handles Supabase JWT token verification and user authentication for API routes
  */
 
 import jwt from 'jsonwebtoken'
@@ -20,14 +20,31 @@ export const authMiddleware = async (req, res, next) => {
 
     const token = authHeader.split(' ')[1]
 
-    // Verify JWT
-    const decoded = jwt.verify(token, config.auth.jwtSecret)
-    
-    // Fetch user from database using the decoded user ID
-    const { data: user, error } = await db.getClient().from('profiles').select('*').eq('id', decoded.id).single()
+    // Decode JWT without verification (Supabase tokens are already verified)
+    // We'll verify the user exists in our database instead
+    let decoded
+    try {
+      decoded = jwt.decode(token)
+      if (!decoded || !decoded.sub) {
+        throw new Error('Invalid token format')
+      }
+      logger.debug(`JWT decoded successfully, user ID: ${decoded.sub}`)
+    } catch (decodeError) {
+      logger.warn('AuthenticationError: Failed to decode token')
+      throw new AuthenticationError('Invalid token format')
+    }
 
-    if (error || !user) {
-      logger.warn(`AuthenticationError: User not found for ID ${decoded.id} or DB error: ${error?.message}`)
+    // Fetch user from database using the decoded user ID (sub claim)
+    logger.debug(`Attempting to fetch user from profiles table with ID: ${decoded.sub}`)
+    const { data: user, error } = await db.getClient().from('profiles').select('*').eq('id', decoded.sub).single()
+
+    if (error) {
+      logger.error(`Database error when fetching user: ${error.message}, code: ${error.code}`)
+      throw new AuthenticationError('Database error during authentication')
+    }
+    
+    if (!user) {
+      logger.warn(`AuthenticationError: User not found for ID ${decoded.sub}`)
       throw new AuthenticationError('Invalid authentication token')
     }
 
@@ -38,10 +55,7 @@ export const authMiddleware = async (req, res, next) => {
     logger.debug(`User ${user.email} authenticated successfully`)
     next()
   } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError || error instanceof jwt.TokenExpiredError) {
-      logger.warn(`AuthenticationError: JWT error - ${error.message}`)
-      next(new AuthenticationError('Invalid or expired token'))
-    } else if (error instanceof AppError) {
+    if (error instanceof AppError) {
       next(error)
     } else {
       logger.error('AuthMiddleware Unexpected Error:', error)

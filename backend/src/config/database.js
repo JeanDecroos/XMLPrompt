@@ -26,7 +26,7 @@ export const database = {
       // Test the connection with a simple query that doesn't depend on specific tables
       try {
         const { data, error } = await supabaseClient
-          .from('users')
+          .from('profiles')
           .select('count')
           .limit(1)
         

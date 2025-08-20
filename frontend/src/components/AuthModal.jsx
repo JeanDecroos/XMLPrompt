@@ -227,12 +227,12 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
     >
       <div 
         ref={modalRef}
-        className="relative w-full max-w-md m-4 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl p-8 transform transition-all duration-300 ease-in-out scale-95 opacity-0 animate-scale-in"
+        className="AuthModal relative w-full max-w-md m-4 bg-white rounded-2xl shadow-2xl p-8 transform transition-all duration-300 ease-in-out scale-95 opacity-0 animate-scale-in"
         onClick={e => e.stopPropagation()}
       >
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+          className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-full transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -242,7 +242,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
             <img src="/logos/PromptrLogo.png" alt="Promptr Logo" className="w-8 h-8" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-          <p className="text-gray-500 mt-2">{description}</p>
+          <p className="text-gray-600 mt-2">{description}</p>
         </div>
 
         {error && (
@@ -262,7 +262,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {fields.includes('email') && (
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
               <input 
                 type="email"
                 placeholder="Email address"
@@ -280,7 +280,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
           
           {fields.includes('password') && (
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
               <input 
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
@@ -293,7 +293,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -328,7 +328,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
 
           {fields.includes('confirmPassword') && (
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
               <input 
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Confirm password"
@@ -341,7 +341,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600"
                 aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
               >
                 {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -385,7 +385,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin' }) => {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-700">
             {footerText}{' '}
             <button onClick={() => setMode(footerLink)} className="font-medium text-primary-600 hover:underline">
               {footerAction}

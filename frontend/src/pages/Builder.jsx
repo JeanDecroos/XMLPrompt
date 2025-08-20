@@ -10,11 +10,11 @@ const Builder = () => {
   }, [])
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-transparent">
       <Meta title="Promptr — Prompt Builder" description="Build and enhance prompts with model‑aware formatting." />
       {/* Invisible heading for focus management */}
       <h1 ref={headingRef} tabIndex="-1" className="sr-only">Prompt Builder</h1>
-      <div className="max-w-7xl mx-auto w-full px-6">
+      <div className="max-w-7xl mx-auto w-full px-6 bg-transparent">
         <SimplifiedPromptGenerator showHero={false} />
       </div>
     </div>

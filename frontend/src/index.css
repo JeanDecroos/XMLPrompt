@@ -196,12 +196,8 @@ input[placeholder*="Task"]::placeholder {
   --bg-gradient-mid: #f8fafc;
   --bg-gradient-end: #f1f5f9;
   
-  /* Scroll-triggered color transitions - Enhanced visibility */
-  --scroll-bg-0: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
-  --scroll-bg-25: linear-gradient(135deg, #fefefe 0%, #f0f9ff 50%, #f1f5f9 100%);
-  --scroll-bg-50: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 30%, #e0f2fe 100%);
-  --scroll-bg-75: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 20%, #93c5fd 60%, #e0f2fe 100%);
-  --scroll-bg-100: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 40%, #c4b5fd 80%, #ddd6fe 100%);
+  /* Smooth dynamic background color variable */
+  --dynamic-bg-color: #ffffff;
   
   /* Subtle accent gradients */
   --accent-gradient-blue: linear-gradient(135deg, rgba(14, 165, 233, 0.03) 0%, rgba(56, 189, 248, 0.02) 100%);
@@ -230,63 +226,20 @@ input[placeholder*="Task"]::placeholder {
   --radius-2xl: 1.5rem;
 }
 
-/* Register custom properties for smooth gradient animation */
-@property --grad-start {
-  syntax: '<color>';
-  inherits: false;
-  initial-value: #f8fafc;
-}
-@property --grad-mid {
-  syntax: '<color>';
-  inherits: false;
-  initial-value: #f1f5f9;
-}
-@property --grad-end {
-  syntax: '<color>';
-  inherits: false;
-  initial-value: #e0f2fe;
-}
+/* Dynamic background uses CSS custom property for smooth transitions */
 
-/* Keyframes now animate the color variables, not the background itself */
-@keyframes scroll-background {
-  0% {
-    --grad-start: #f8fafc;
-    --grad-mid: #f1f5f9;
-    --grad-end: #e0f2fe;
-  }
-  25% {
-    --grad-start: #e0f2fe;
-    --grad-mid: #dbeafe;
-    --grad-end: #c4b5fd;
-  }
-  50% {
-    --grad-start: #dbeafe;
-    --grad-mid: #c4b5fd;
-    --grad-end: #a78bfa;
-  }
-  75% {
-    --grad-start: #c4b5fd;
-    --grad-mid: #a78bfa;
-    --grad-end: #8b5cf6;
-  }
-  100% {
-    --grad-start: #a78bfa;
-    --grad-mid: #8b5cf6;
-    --grad-end: #7c3aed;
-  }
-}
+/* Dynamic background now uses smooth color interpolation via JavaScript */
 
 @layer base {
   html {
     min-height: 100%;
     margin: 0;
     padding: 0;
-    /* The background now uses the animatable variables */
-    background: linear-gradient(135deg, var(--grad-start), var(--grad-mid), var(--grad-end));
-    background-attachment: fixed;
-    /* Link the animation to the scroll timeline */
-    animation: scroll-background linear;
-    animation-timeline: scroll(root);
+    /* Simplify: remove sitewide gradient to avoid purple banding */
+    background: #ffffff;
+    background-attachment: initial;
+    animation: none;
+    animation-timeline: initial;
     overflow-x: hidden;
   }
 
@@ -302,32 +255,30 @@ input[placeholder*="Task"]::placeholder {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #0f172a; /* Replaces @apply text-gray-900 */
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    /* Dynamic background that changes smoothly with scroll */
+    background: var(--dynamic-bg-color, #ffffff) !important;
+    background-attachment: fixed !important;
+    transition: background 0.1s ease-out !important;
+    position: relative;
   }
-
-  /* Subtle accent overlays that enhance scroll backgrounds */
-  body::before {
+  
+  /* Add a subtle overlay for enhanced depth */
+  body::after {
     content: '';
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: 
-      radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.02) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.02) 0%, transparent 50%),
-      radial-gradient(circle at 40% 80%, rgba(56, 189, 248, 0.01) 0%, transparent 50%);
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at top, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
     pointer-events: none;
     z-index: -1;
-    opacity: 0.6;
-    transition: opacity 0.8s ease-in-out;
   }
 
-  /* Enhanced overlay on scroll */
-  body.scroll-50::before,
-  body.scroll-75::before,
-  body.scroll-100::before {
-    opacity: 0.8;
-  }
+  /* Remove decorative overlay */
+  body::before { content: none; }
+
+  /* Dynamic background now uses CSS custom property for smooth transitions */
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
@@ -722,19 +673,20 @@ input[placeholder*="Task"]::placeholder {
   
   /* Enhanced Form Elements */
   .input-field {
-    @apply w-full px-5 py-4 backdrop-blur-sm border border-gray-200/60 text-gray-900 placeholder-gray-500;
+    @apply w-full px-5 py-4 border border-gray-200 text-gray-900 placeholder-gray-500;
     @apply focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-400;
     @apply transition-all duration-300;
-    background: rgba(255, 255, 255, 0.8);
+    background: #ffffff !important;
     border-radius: var(--radius-lg);
     font-size: 0.875rem;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   }
   
   .input-field:focus {
     @apply bg-white shadow-lg;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-glow);
+    background: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
   
   .select-field {
@@ -749,6 +701,59 @@ input[placeholder*="Task"]::placeholder {
     @apply input-field;
     resize: vertical;
     min-height: 120px;
+  }
+  
+  /* Ensure input fields have white backgrounds - HIGH PRIORITY */
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  .input-field {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #111827 !important;
+    background-color: #ffffff !important;
+  }
+  
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="text"]:focus,
+  .input-field:focus {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+  }
+  
+  /* Override any dark mode or other conflicting styles */
+  .input-field,
+  .input-field:focus,
+  .input-field:hover {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border-color: #e5e7eb !important;
+  }
+  
+  /* AuthModal specific input styling - ULTRA HIGH PRIORITY */
+  .AuthModal input[type="email"],
+  .AuthModal input[type="password"],
+  .AuthModal input[type="text"],
+  .AuthModal .input-field {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  .AuthModal input[type="email"]:focus,
+  .AuthModal input[type="password"]:focus,
+  .AuthModal input[type="text"]:focus,
+  .AuthModal .input-field:focus {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
   }
   
   /* Text Utilities */
@@ -1493,7 +1498,7 @@ input[placeholder*="Task"]::placeholder {
   }
   
   .input-field {
-    @apply bg-gray-800/80 border-gray-700/60 text-gray-100 placeholder-gray-400;
+    @apply bg-white border-gray-200 text-gray-900 placeholder-gray-500;
   }
 }
 
@@ -1962,3 +1967,17 @@ html {
 .scrollbar-track-transparent::-webkit-scrollbar-track {
   background: transparent;
 }
+
+.docs h1,
+.docs h2,
+.docs h3 {
+	background: none !important;
+	-webkit-background-clip: initial !important;
+	-webkit-text-fill-color: initial !important;
+	background-clip: initial !important;
+	color: #0f172a !important; /* slate-900 */
+}
+
+.docs h1 { font-size: 1.875rem; line-height: 2.25rem; }
+.docs h2 { font-size: 1.5rem; line-height: 2rem; }
+.docs h3 { font-size: 1.125rem; line-height: 1.75rem; }

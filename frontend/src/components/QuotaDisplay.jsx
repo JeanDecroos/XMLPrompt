@@ -3,34 +3,71 @@ import { AlertCircle, TrendingUp, Zap, Clock, Shield, Crown, ArrowUpCircle } fro
 import { useAuth } from '../contexts/AuthContext'
 
 const QuotaDisplay = ({ className = '', showUpgradePrompt = true }) => {
-  const { user, isPro } = useAuth()
+  const { user, isPro, accessToken } = useAuth()
   const [quotaInfo, setQuotaInfo] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (user) {
+    if (user && accessToken) {
       fetchQuotaInfo()
     }
-  }, [user])
+  }, [user, accessToken])
 
   const fetchQuotaInfo = async () => {
     try {
       setLoading(true)
+      setError(null)
+      
+      console.log('QuotaDisplay Debug:', {
+        user: user ? { id: user.id, email: user.email } : null,
+        accessToken: accessToken ? `${accessToken.substring(0, 20)}...` : null,
+        hasUser: !!user,
+        hasToken: !!accessToken
+      })
+      
+      if (!accessToken) {
+        throw new Error('No access token available. Please sign in again.')
+      }
+      
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+      console.log('Making request to:', `${backendUrl}/api/v1/quota`)
+      console.log('Headers:', {
+        'Authorization': `Bearer ${accessToken.substring(0, 20)}...`,
+        'Content-Type': 'application/json'
+      })
+      
       const response = await fetch(`${backendUrl}/api/v1/quota`, {
         headers: {
-          'Authorization': `Bearer ${user.accessToken}`
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
         }
       })
 
+      console.log('Response status:', response.status)
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
+
       if (!response.ok) {
-        throw new Error('Failed to fetch quota information')
+        const errorData = await response.json().catch(() => ({}))
+        console.log('Error response data:', errorData)
+        if (response.status === 401) {
+          throw new Error('Authentication failed. Please sign in again.')
+        } else if (response.status === 403) {
+          throw new Error('Access denied. You may not have permission to view quota information.')
+        } else {
+          throw new Error(errorData.message || `HTTP ${response.status}: Failed to fetch quota information`)
+        }
       }
 
       const data = await response.json()
-      setQuotaInfo(data.data)
+      console.log('Success response data:', data)
+      if (data.success && data.data) {
+        setQuotaInfo(data.data)
+      } else {
+        throw new Error(data.message || 'Invalid response format from server')
+      }
     } catch (err) {
+      console.error('Error fetching quota info:', err)
       setError(err.message)
     } finally {
       setLoading(false)

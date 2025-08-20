@@ -38,6 +38,59 @@ const RouteEffects = () => {
     window.scrollTo(0, 0)
   }, [location.pathname, isPro])
 
+  // Dynamic background color based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const windowHeight = window.innerHeight
+      const documentHeight = document.documentElement.scrollHeight
+      const scrollPercentage = (scrollTop / (documentHeight - windowHeight)) * 100
+
+      // Calculate smooth color transitions based on scroll percentage
+      const clampedPercentage = Math.max(0, Math.min(100, scrollPercentage))
+      
+      // Interpolate between color stops for smooth transitions
+      let r, g, b
+      
+      if (clampedPercentage <= 25) {
+        // 0% to 25%: white to light blue
+        const t = clampedPercentage / 25
+        r = Math.round(255 * (1 - t) + 240 * t)
+        g = Math.round(255 * (1 - t) + 249 * t)
+        b = Math.round(255 * (1 - t) + 255 * t)
+      } else if (clampedPercentage <= 50) {
+        // 25% to 50%: light blue to medium blue
+        const t = (clampedPercentage - 25) / 25
+        r = Math.round(240 * (1 - t) + 219 * t)
+        g = Math.round(249 * (1 - t) + 234 * t)
+        b = Math.round(255 * (1 - t) + 254 * t)
+      } else if (clampedPercentage <= 75) {
+        // 50% to 75%: medium blue to deep blue
+        const t = (clampedPercentage - 50) / 25
+        r = Math.round(219 * (1 - t) + 191 * t)
+        g = Math.round(234 * (1 - t) + 219 * t)
+        b = Math.round(254 * (1 - t) + 253 * t)
+      } else {
+        // 75% to 100%: deep blue to purple-blue
+        const t = (clampedPercentage - 75) / 25
+        r = Math.round(191 * (1 - t) + 196 * t)
+        g = Math.round(219 * (1 - t) + 181 * t)
+        b = Math.round(253 * (1 - t) + 254 * t)
+      }
+      
+      // Apply the smooth color transition
+      document.body.style.setProperty('--dynamic-bg-color', `rgb(${r}, ${g}, ${b})`)
+      
+      // Debug logging (remove in production)
+      console.log(`Scroll: ${clampedPercentage.toFixed(1)}%, Color: rgb(${r}, ${g}, ${b})`)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll() // Call once to set initial state
+    
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return null
 }
 

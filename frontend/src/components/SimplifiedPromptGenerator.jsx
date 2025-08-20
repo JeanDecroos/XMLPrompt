@@ -332,9 +332,9 @@ const SimplifiedPromptGenerator = ({ showHero = true }) => {
   ]
   
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden bg-transparent">
       {/* Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
+      <div className="relative z-10 max-w-6xl mx-auto px-6 py-12 bg-transparent">
         
         {showHero && (
           <div className="text-center mb-16">

@@ -17,12 +17,31 @@ const Header = () => {
   const [showSubscriptionStatus, setShowSubscriptionStatus] = useState(false)
   const [showQuickHelp, setShowQuickHelp] = useState(false)
 
+  // Debug logging for authentication status
+  useEffect(() => {
+    console.log('Header Auth Status:', {
+      isAuthEnabled,
+      isAuthenticated,
+      user: user?.email,
+      isPro
+    })
+  }, [isAuthenticated, user, isPro])
+
   const handleSignOut = async () => {
     await signOut()
     setIsUserMenuOpen(false)
   }
 
   const openAuthModal = (mode = 'signin') => {
+    console.log(`Opening auth modal in ${mode} mode`)
+    
+    // For development/testing - show a simple alert if auth modal can't open
+    if (!isAuthEnabled) {
+      alert(`Auth Modal: ${mode === 'signin' ? 'Sign In' : 'Sign Up'} - Authentication system needs to be configured with Supabase credentials. Check the console for details.`)
+      console.log('Authentication system not configured. Please set up VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env.local file')
+      return
+    }
+    
     setAuthModalMode(mode)
     setIsAuthModalOpen(true)
     setIsMenuOpen(false)
@@ -167,13 +186,19 @@ const Header = () => {
               ) : (
                 <div className="hidden md:flex items-center space-x-3">
                   <button 
-                    onClick={() => openAuthModal('signin')} 
+                    onClick={() => {
+                      console.log('Sign In button clicked')
+                      openAuthModal('signin')
+                    }} 
                     className="btn btn-secondary btn-sm"
                   >
                     Sign In
                   </button>
                   <button 
-                    onClick={() => openAuthModal('signup')} 
+                    onClick={() => {
+                      console.log('Get Started button clicked')
+                      openAuthModal('signup')
+                    }} 
                     className="btn btn-premium btn-sm"
                   >
                     Get Started
@@ -184,9 +209,9 @@ const Header = () => {
               {/* Primary CTA */}
               <div className="hidden md:block">
                 {location.pathname === '/' ? (
-                  <Link to="/builder" className="btn btn-secondary btn-sm">Start Building</Link>
+                  <Link to="/builder" className="btn btn-secondary btn-sm" onClick={() => console.log('Start Building clicked - navigating to /builder')}>Start Building</Link>
                 ) : (
-                  <Link to="/builder" className="btn btn-primary btn-sm">Start Building</Link>
+                  <Link to="/builder" className="btn btn-primary btn-sm" onClick={() => console.log('Start Building clicked - navigating to /builder')}>Start Building</Link>
                 )}
               </div>
 
@@ -217,7 +242,7 @@ const Header = () => {
                 <Link to="/pricing" className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-all duration-200 font-medium">
                   💰 Pricing
                 </Link>
-                <Link to="/builder" className="btn btn-primary btn-sm mx-3">
+                <Link to="/builder" className="btn btn-primary btn-sm mx-3" onClick={() => console.log('Mobile Start Building clicked - navigating to /builder')}>
                   Start Building
                 </Link>
                 <button 
@@ -266,13 +291,19 @@ const Header = () => {
                 ) : (
                   <div className="flex flex-col space-y-2">
                     <button 
-                      onClick={() => openAuthModal('signin')} 
+                      onClick={() => {
+                        console.log('Mobile Sign In button clicked')
+                        openAuthModal('signin')
+                      }} 
                       className="btn btn-secondary btn-sm"
                     >
                       Sign In
                     </button>
                     <button 
-                      onClick={() => openAuthModal('signup')} 
+                      onClick={() => {
+                        console.log('Mobile Get Started button clicked')
+                        openAuthModal('signup')
+                      }} 
                       className="btn btn-premium btn-sm flex items-center justify-center"
                     >
                       <Sparkles className="w-4 h-4 mr-1" />

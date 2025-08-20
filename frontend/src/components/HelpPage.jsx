@@ -451,15 +451,6 @@ const HelpPage = () => {
                 <Link to="/pricing" className="block text-blue-600 hover:text-blue-800 transition-colors">
                   💰 Pricing & Plans
                 </Link>
-                <a href="#" className="block text-blue-600 hover:text-blue-800 transition-colors">
-                  🎥 Video Tutorials
-                </a>
-                <a href="#" className="block text-blue-600 hover:text-blue-800 transition-colors">
-                  📝 Best Practices Guide
-                </a>
-                <a href="#" className="block text-blue-600 hover:text-blue-800 transition-colors">
-                  🔄 System Status
-                </a>
               </div>
             </div>
 

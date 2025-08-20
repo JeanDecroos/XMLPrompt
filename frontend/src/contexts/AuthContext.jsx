@@ -147,6 +147,8 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
     isPro,
     subscriptionTier,
+    // Provide access token for API calls
+    accessToken: session?.access_token,
     checkSubscriptionStatus: () => checkSubscriptionStatus(user),
     refreshSubscription: async () => {
       if (user) {
@@ -161,6 +163,18 @@ export const AuthProvider = ({ children }) => {
       return SubscriptionService.getFeatureLimits(subscriptionTier)
     }
   }
+  
+  // Debug logging for authentication state
+  useEffect(() => {
+    console.log('AuthContext Debug:', {
+      hasUser: !!user,
+      hasSession: !!session,
+      userEmail: user?.email,
+      accessToken: session?.access_token ? `${session.access_token.substring(0, 20)}...` : null,
+      sessionExpiresAt: session?.expires_at,
+      isAuthenticated: !!user
+    })
+  }, [user, session])
 
   return (
     <AuthContext.Provider value={value}>
